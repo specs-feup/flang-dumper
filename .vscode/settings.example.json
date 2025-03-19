@@ -1,0 +1,9 @@
+{
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "files.insertFinalNewline": true,
+    "sonarlint.disableTelemetry": true,
+    "sonarlint.focusOnNewCode": false,
+    "editor.tabSize": 4,
+    "gitlens.telemetry.enabled": false
+}

@@ -1,3 +1,7 @@
+# Custom rules
+.vscode/
+build/
+
 # Prerequisites
 *.d
 
