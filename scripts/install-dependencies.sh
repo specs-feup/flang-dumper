@@ -12,8 +12,13 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-apt install -y flang-${LLVM_VERSION} libflang-${LLVM_VERSION}-dev llvm-${LLVM_VERSION}-dev libmlir-${LLVM_VERSION}-dev mlir-${LLVM_VERSION}-tools
-apt install -y cmake clang-${LLVM_VERSION}
+# Required dependencies
+PKG="flang-${LLVM_VERSION} libflang-${LLVM_VERSION}-dev llvm-${LLVM_VERSION}-dev libmlir-${LLVM_VERSION}-dev mlir-${LLVM_VERSION}-tools libclang-${LLVM_VERSION}-dev"
+
+# Development dependencies
+PKG="$PKG cmake clang-${LLVM_VERSION}"
+
+apt install -y $PKG
 
 
 # Check if the installation was successful
