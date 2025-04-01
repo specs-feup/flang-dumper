@@ -13,7 +13,7 @@ if [ $? -ne 0 ]; then
 fi
 
 apt install -y flang-${LLVM_VERSION} libflang-${LLVM_VERSION}-dev llvm-${LLVM_VERSION}-dev libmlir-${LLVM_VERSION}-dev mlir-${LLVM_VERSION}-tools
-apt install -y cmake clang-${LLVM_VERSION} libclang-${LLVM_VERSION}-dev
+apt install -y cmake clang-${LLVM_VERSION}
 
 
 # Check if the installation was successful
