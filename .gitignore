@@ -1,6 +1,7 @@
 # Custom rules
 .vscode/
 build/
+.cache/
 
 # Prerequisites
 *.d

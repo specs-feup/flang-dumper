@@ -1,0 +1,38 @@
+name: nightly
+
+on:
+    push:
+
+    # Daily at midnight
+    schedule:
+        - cron: "0 0 * * */2"
+
+permissions:
+    checks: write
+
+env:
+    FLANG_VERSION: 20
+
+jobs:
+    build-dumper:
+        name: Build Dumper
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [ubuntu-latest, windows-latest, macos-latest]
+
+        runs-on: ${{ matrix.os }}
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v4
+
+            - name: Install dependencies
+              run: sudo ./scripts/install-dependencies.sh
+
+            - name: Build
+              run: |
+                  mkdir build
+                  cd build
+                  cmake ..
+                  make -j 4
