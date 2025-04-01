@@ -1,3 +1,4 @@
 #!/usr/bin/env bash
 
-./install-dependencies.sh
+SCRIPTDIR=`dirname $0`
+${SCRIPTDIR}/install-dependencies.sh

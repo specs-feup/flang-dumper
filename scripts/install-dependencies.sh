@@ -1,10 +1,16 @@
 #!/usr/bin/env bash
 
-# This script installs the LLVM dependencies for Ubuntu.
-
+# This script installs the LLVM dependencies for Debian-based distros (e.g Ubuntu).
 LLVM_VERSION=20
 
-./llvm.sh ${LLVM_VERSION}
+SCRIPTDIR=`dirname $0`
+${SCRIPTDIR}/llvm.sh ${LLVM_VERSION}
+
+# Check if script was successful
+if [ $? -ne 0 ]; then
+    echo "LLVM base installation failed."
+    exit 1
+fi
 
 apt install -y flang-${LLVM_VERSION} libflang-${LLVM_VERSION}-dev llvm-${LLVM_VERSION}-dev libmlir-${LLVM_VERSION}-dev mlir-${LLVM_VERSION}-tools
 apt install -y cmake
@@ -12,9 +18,9 @@ apt install -y cmake
 
 # Check if the installation was successful
 if [ $? -eq 0 ]; then
-    echo "LLVM installation completed successfully."
+    echo "Dependency installation completed successfully."
 else
-    echo "LLVM installation failed."
+    echo "Dependency installation failed."
     exit 1
 fi
 
