@@ -91,8 +91,13 @@ endif()
 
 # Build plugin
 #add_library(plugin MODULE ${SOURCE_FILES} src/plugin.cpp)
-add_library(plugin MODULE src/plugin.cpp)
-target_compile_features(plugin PRIVATE)
+
+add_library(DumpASTPlugin MODULE src/plugin.cpp)
+
+# Avoid lib prefix so that Flang finds the plugin as `DumpParseTreePlugin.so`, not `libDumpParseTreePlugin.so`
+set_target_properties(DumpASTPlugin PROPERTIES PREFIX "")
+target_compile_features(DumpASTPlugin PRIVATE)
+
 #add_dependencies(plugin flang_enums)
 
 # Build tool
@@ -106,128 +111,3 @@ target_compile_features(plugin PRIVATE)
 #else()
 #    set(PROCESSOR_PREFIX "X86")
 #endif()
-#
-#target_link_libraries( tool
-#    flangAnalysis
-#    flangAPINotes
-#    flangARCMigrate
-#    flangAST
-#    flangASTMatchers
-#    flangBasic
-#    #flangChangeNamespace
-#    flangCodeGen
-#    flangCrossTU
-#    flangDependencyScanning
-#    flangDirectoryWatcher		
-#    #flangDoc
-#    flangDriver
-#    flangDynamicASTMatchers
-#    flangEdit
-#    flangFormat
-#    flangFrontend
-#    flangFrontendTool
-#    flangHandleCXX
-#    flangHandleLLVM
-#    flangIndex
-#    flangIndexSerialization		
-#    flangLex
-#    #flangMove
-#    flangParse
-#    #flangReorderFields
-#    flangRewrite
-#    flangRewriteFrontend
-#    flangSema
-#    flangSerialization
-#    flangStaticAnalyzerCheckers
-#    flangStaticAnalyzerCore
-#    flangStaticAnalyzerFrontend
-#    flangTooling
-#    flangToolingASTDiff
-#    flangToolingCore
-#    flangToolingInclusions
-#    flangToolingRefactoring
-#    flangToolingSyntax		
-#    flangTransformer
-#    #DynamicLibraryLib
-#        
-#    # LLVM libraries, as given by 'llvm-config --libs'
-#    LLVMWindowsManifest
-#    LLVMXRay
-#    LLVMLibDriver
-#    LLVMDlltoolDriver
-#    LLVMCoverage
-#    #LLVMLineEditor
-#    LLVMXCoreDisassembler
-#    LLVMXCoreCodeGen
-#    LLVMXCoreDesc
-#    LLVMXCoreInfo
-#    LLVM${PROCESSOR_PREFIX}Disassembler
-#    LLVM${PROCESSOR_PREFIX}AsmParser
-#    LLVM${PROCESSOR_PREFIX}CodeGen
-#    LLVM${PROCESSOR_PREFIX}Desc
-#    LLVM${PROCESSOR_PREFIX}Info
-#    LLVMARMUtils
-#    LLVMAArch64Utils
-#    LLVMOrcJIT
-#    LLVMMCJIT
-#    LLVMJITLink
-#    LLVMOrcTargetProcess
-#    LLVMOrcShared
-#    LLVMInterpreter
-#    LLVMExecutionEngine
-#    LLVMRuntimeDyld
-#    LLVMSymbolize
-#    LLVMDebugInfoPDB
-#    LLVMDebugInfoGSYM
-#    LLVMOption
-#    LLVMObjectYAML
-#    LLVMMCA
-#    LLVMMCDisassembler
-#    LLVMLTO
-#    LLVMPasses
-#    LLVMCFGuard
-#    LLVMCoroutines
-#    LLVMObjCARCOpts
-#    LLVMipo
-#    LLVMVectorize
-#    LLVMLinker
-#    LLVMInstrumentation
-#    LLVMFrontendOpenMP
-#    LLVMFrontendOpenACC
-#    LLVMExtensions
-#    LLVMDWARFLinker
-#    LLVMGlobalISel
-#    LLVMMIRParser
-#    LLVMAsmPrinter
-#    LLVMDebugInfoDWARF
-#    LLVMSelectionDAG
-#    LLVMCodeGen
-#    LLVMIRReader
-#    LLVMAsmParser
-#    LLVMInterfaceStub
-#    LLVMFileCheck
-#    LLVMFuzzMutate
-#    LLVMTarget
-#    LLVMScalarOpts
-#    LLVMInstCombine
-#    LLVMAggressiveInstCombine
-#    LLVMTransformUtils
-#    LLVMBitWriter
-#    LLVMAnalysis
-#    LLVMProfileData
-#    LLVMObject
-#    LLVMTextAPI
-#    LLVMMCParser
-#    LLVMMC
-#    LLVMDebugInfoCodeView
-#    LLVMDebugInfoMSF
-#    LLVMBitReader
-#    LLVMCore
-#    LLVMRemarks
-#    LLVMBitstreamReader
-#    LLVMBinaryFormat
-#    LLVMTableGen
-#    LLVMSupport
-#    LLVMDemangle
-#)
-#
