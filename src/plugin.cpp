@@ -10,6 +10,9 @@
 #include "flang/Parser/parse-tree.h"
 #include "flang/Parser/parsing.h"
 
+#define DUMP_PROPERTY(KEY, VALUE)                                              \
+  llvm::outs() << "\"" << KEY << "\": \"" << VALUE << "\",\n";
+
 template <typename T, template <typename...> class Template>
 struct is_specialization : std::false_type {};
 
@@ -22,29 +25,142 @@ template <typename T, bool COPY>
 struct is_indirection<Fortran::common::Indirection<T, COPY>> : std::true_type {
 };
 
-auto variant_visitor = [](auto &value) {
-  using T = std::decay_t<decltype(value)>;
-
-  llvm::outs() << "\"value\": ";
-
-  if constexpr (std::is_same_v<T, std::nullopt_t>) {
-    // Value is nullopt
-    llvm::outs() << "\"null\"";
-  } else if constexpr (is_specialization<T, std::optional>::value) {
-    if (value.has_value()) {
-      llvm::outs() << "\"" << static_cast<const void *>(&value.value()) << "\"";
-    } else {
-      // Optional is empty (nullptr)
-      llvm::outs() << "\"null\"";
-    }
-  } else if constexpr (is_indirection<T>::value) {
-    llvm::outs() << "\"" << static_cast<const void *>(&value.value()) << "\"";
+template <typename T> const char *getNodeName(const T &v) {
+  if constexpr (is_specialization<T, Fortran::parser::Statement>::value) {
+    return "Statement";
   } else {
-    llvm::outs() << "\"" << static_cast<const void *>(&value) << "\"";
+    return Fortran::parser::ParseTreeDumper::GetNodeName(v);
+  }
+}
+
+template <typename T> const char *getNodeName(const std::optional<T> &v) {
+  if (v.has_value()) {
+    return getNodeName(v.value());
+  } else {
+    return "null";
+  }
+}
+
+template <typename T>
+const char *getNodeName(const Fortran::common::Indirection<T> &v) {
+  return getNodeName(v.value());
+}
+
+template <typename T> const char *getNodeName(const std::list<T> &v) {
+  if (v.empty()) {
+    return "list";
+  } else {
+    return getNodeName(v.front());
+  }
+}
+
+template <typename T> std::string &getId(const T &v, const char *name) {
+  std::ostringstream oss;
+  oss << "0x" << std::hex << reinterpret_cast<uintptr_t>(&v) << "-" << name;
+  static std::string id;
+  id = oss.str();
+  return id;
+}
+
+template <typename T> std::string getId(const T &v) {
+  return getId(v, getNodeName(v));
+}
+
+template <typename T>
+std::string getId(const Fortran::parser::Statement<T> &v) {
+  return getId(v, "Statement");
+}
+
+template <typename T> std::string getId(const std::optional<T> &v) {
+  if (v.has_value()) {
+    return getId(v.value());
+  } else {
+    return getId(std::nullopt);
+  }
+}
+
+template <typename T>
+std::string getId(const Fortran::common::Indirection<T> &v) {
+  return getId(v.value());
+}
+
+template <> std::string getId(const std::nullopt_t &) { return "null"; }
+
+#define DUMP_NODE(CLASS, CONTENTS)                                             \
+  bool Pre(const CLASS &v) const {                                             \
+    llvm::outs() << "{\n";                                                     \
+    DUMP_PROPERTY("id", getId(v))                                              \
+                                                                               \
+    CONTENTS;                                                                  \
+                                                                               \
+    llvm::outs() << "},\n";                                                    \
+    return true;                                                               \
   }
 
-  llvm::outs() << ",\n";
+auto variant_visitor = [](auto &value) {
+  llvm::outs() << "\"" << getId(value) << "\"";
 };
+
+template <typename T> void dump(const T &v, const char *property_name) {
+  llvm::outs() << "\"" << property_name << "\": \"" << getId(v) << "\",\n";
+}
+
+void dump(const char *v, const char *property_name) {
+  llvm::outs() << "\"" << property_name << "\": \"" << v << "\",\n";
+}
+
+template <> void dump(const std::string &v, const char *property_name) {
+  dump(v.c_str(), property_name);
+}
+
+template <>
+void dump(const Fortran::parser::CharBlock &v, const char *property_name) {
+  dump(v.ToString(), property_name);
+}
+
+template <> void dump(const std::nullopt_t &v, const char *property_name) {
+  dump("null", property_name);
+}
+
+template <typename T>
+void dump(const std::list<T> &v, const char *property_name) {
+  llvm::outs() << "\"" << property_name << "\": [\n";
+  for (const auto &item : v) {
+    llvm::outs() << "\"" << getId(item) << "\",\n";
+  }
+  llvm::outs() << "],\n";
+}
+
+template <typename... T>
+void dump(const std::variant<T...> &v, const char *property_name = "value") {
+  llvm::outs() << "\"" << property_name << "\": ";
+  std::visit(variant_visitor, v);
+  llvm::outs() << ",\n";
+}
+
+template <typename T>
+void dump(const Fortran::common::Indirection<T> &v, const char *property_name) {
+  dump(v.value(), property_name);
+}
+
+template <typename T>
+void dump(const std::optional<T> &v, const char *property_name) {
+  if (v.has_value()) {
+    dump(v.value(), property_name);
+  } else {
+    dump(std::nullopt, property_name);
+  }
+}
+
+template <typename... T> void dump(const std::tuple<T...> &v) {
+  // For each element in the tuple, call dump
+  std::apply([](const auto &...e) { ((dump(e, getNodeName(e))), ...); }, v);
+}
+
+template <typename T>
+void dump(const Fortran::parser::Statement<T> &v, const char *property_name) {
+  llvm::outs() << "\"" << property_name << "\": \"" << getId(v) << "\",\n";
+}
 
 // Visitor struct that defines Pre/Post functions for different types of nodes
 struct ParseTreeVisitor {
@@ -52,215 +168,43 @@ public:
   template <typename A> bool Pre(const A &) const { return true; }
   template <typename A> void Post(const A &) const { return; }
 
-  bool Pre(const Fortran::parser::Program &v) const {
+  DUMP_NODE(Fortran::parser::Program, { dump(v.v, "ProgramUnit"); })
+
+  DUMP_NODE(Fortran::parser::ProgramUnit, { dump(v.u); })
+
+  DUMP_NODE(Fortran::parser::MainProgram, { dump(v.t); })
+
+  DUMP_NODE(Fortran::parser::SpecificationPart, { dump(v.t); })
+
+  DUMP_NODE(Fortran::parser::Block, { dump(v, "ExecutionPartConstruct"); })
+
+  DUMP_NODE(Fortran::parser::InternalSubprogramPart, { dump(v.t); })
+
+  DUMP_NODE(Fortran::parser::ExecutionPartConstruct, { dump(v.u); })
+
+  DUMP_NODE(Fortran::parser::ExecutableConstruct, { dump(v.u); })
+
+  template <typename T> bool Pre(const Fortran::parser::Statement<T> &v) const {
     llvm::outs() << "{\n";
-    llvm::outs() << "\"id\": \"" << static_cast<const void *>(&v) << "\",\n";
-    llvm::outs() << "\"type\": \"program\",\n";
+    llvm::outs() << "\"id\": \"" << static_cast<const void *>(&v)
+                 << "-Statement" << "\",\n";
 
-    const auto &lst = v.v;
-
-    llvm::outs() << "\"program-unit\": [\n";
-    for (const auto &item : lst) {
-      llvm::outs() << "\"" << static_cast<const void *>(&item) << "\",\n";
-    }
-    llvm::outs() << "],\n";
-
-    llvm::outs() << "},\n";
-    return true;
-  }
-
-  bool Pre(const Fortran::parser::ProgramUnit &v) const {
-    llvm::outs() << "{\n";
-    llvm::outs() << "\"id\": \"" << static_cast<const void *>(&v) << "\",\n";
-    llvm::outs() << "\"type\": \"program-unit\",\n";
-
-    const auto &var = v.u;
-
-    std::visit(variant_visitor, var);
-
-    llvm::outs() << "},\n";
-    return true;
-  }
-
-  bool Pre(const Fortran::parser::MainProgram &v) const {
-    llvm::outs() << "{\n";
-    llvm::outs() << "\"id\": \"" << static_cast<const void *>(&v) << "\",\n";
-    llvm::outs() << "\"type\": \"main-program\",\n";
-
-    const auto &[program_stmt, specification_part, execution_part,
-                 internal_subprogram_part, end_program_stmt] = v.t;
-
-    llvm::outs() << "\"program-stmt\": \""
-                 << static_cast<const void *>(&program_stmt.value()) << "\",\n";
-    llvm::outs() << "\"specification-part\": \""
-                 << static_cast<const void *>(&specification_part) << "\",\n";
-    llvm::outs() << "\"execution-part\": \""
-                 << static_cast<const void *>(&execution_part) << "\",\n";
-    llvm::outs() << "\"internal-subprogram-part\": \""
-                 << static_cast<const void *>(&internal_subprogram_part)
+    llvm::outs() << "\"statement\": \""
+                 << static_cast<const void *>(&v.statement) << "\",\n";
+    llvm::outs() << "\"label\": \"" << static_cast<const void *>(&v.label)
                  << "\",\n";
-    llvm::outs() << "\"end-program-stmt\": \""
-                 << end_program_stmt.statement.v->ToString() << "\",\n";
+    llvm::outs() << "\"source\": \"" << v.source << "\",\n";
 
     llvm::outs() << "},\n";
     return true;
   }
 
-  bool Pre(const Fortran::parser::SpecificationPart &v) const {
-    llvm::outs() << "{\n";
-    llvm::outs() << "\"id\": \"" << static_cast<const void *>(&v) << "\",\n";
-    llvm::outs() << "\"type\": \"specification-part\",\n";
+  DUMP_NODE(Fortran::parser::EndProgramStmt,
+            { dump(v.v.value().ToString(), "name"); })
 
-    const auto &[OpenACCDeclarativeConstructs, OpenMPDeclarativeConstructs,
-                 CompilerDirectives, UseStmts, ImportStmts, ImplicitPart,
-                 DeclarationConstructs] = v.t;
+  DUMP_NODE(Fortran::parser::ActionStmt, { dump(v.u); })
 
-    llvm::outs() << "\"OpenACCDeclarativeConstructs\": [\n";
-    for (const auto &item : OpenACCDeclarativeConstructs) {
-      llvm::outs() << "\"" << static_cast<const void *>(&item) << "\",\n";
-    }
-    llvm::outs() << "],\n";
-
-    llvm::outs() << "\"OpenMPDeclarativeConstructs\": [\n";
-    for (const auto &item : OpenMPDeclarativeConstructs) {
-      llvm::outs() << "\"" << static_cast<const void *>(&item) << "\",\n";
-    }
-    llvm::outs() << "],\n";
-
-    llvm::outs() << "\"CompilerDirectives\": [\n";
-    for (const auto &item : CompilerDirectives) {
-      llvm::outs() << "\"" << static_cast<const void *>(&item.value())
-                   << "\",\n";
-    }
-    llvm::outs() << "],\n";
-
-    llvm::outs() << "\"UseStmts\": [\n";
-    for (const auto &item : UseStmts) {
-      llvm::outs() << "\"" << static_cast<const void *>(&item) << "\",\n";
-    }
-    llvm::outs() << "],\n";
-
-    llvm::outs() << "\"ImportStmts\": [\n";
-    for (const auto &item : ImportStmts) {
-      llvm::outs() << "\"" << static_cast<const void *>(&item) << "\",\n";
-    }
-    llvm::outs() << "],\n";
-
-    llvm::outs() << "\"ImplicitPart\": \""
-                 << static_cast<const void *>(&ImplicitPart) << "\",\n";
-
-    llvm::outs() << "\"DeclarationConstructs\": [\n";
-    for (const auto &item : DeclarationConstructs) {
-      llvm::outs() << "\"" << static_cast<const void *>(&item) << "\",\n";
-    }
-    llvm::outs() << "],\n";
-
-    llvm::outs() << "},\n";
-    return true;
-  }
-
-  bool Pre(const Fortran::parser::Block &v) const {
-    llvm::outs() << "{\n";
-    llvm::outs() << "\"id\": \"" << static_cast<const void *>(&v) << "\",\n";
-    llvm::outs() << "\"type\": \"block\",\n";
-
-    llvm::outs() << "\"ExecutionPartConstruct\": [\n";
-    for (const auto &item : v) {
-      llvm::outs() << "\"" << static_cast<const void *>(&item) << "\",\n";
-    }
-    llvm::outs() << "],\n";
-
-    llvm::outs() << "},\n";
-    return true;
-  }
-
-  bool Pre(const Fortran::parser::InternalSubprogramPart &v) const {
-    llvm::outs() << "{\n";
-    llvm::outs() << "\"id\": \"" << static_cast<const void *>(&v) << "\",\n";
-    llvm::outs() << "\"type\": \"internal-subprogram-part\",\n";
-
-    const auto &[contains_stmt, InternalSubprograms] = v.t;
-
-    llvm::outs() << "\"contains-stmt\": \""
-                 << static_cast<const void *>(&contains_stmt) << "\",\n";
-
-    llvm::outs() << "\"InternalSubprograms\": [\n";
-    for (const auto &item : InternalSubprograms) {
-      llvm::outs() << "\"" << static_cast<const void *>(&item) << "\",\n";
-    }
-    llvm::outs() << "],\n";
-
-    llvm::outs() << "},\n";
-    return true;
-  }
-
-  bool Pre(const Fortran::parser::EndProgramStmt &v) const {
-    llvm::outs() << "{\n";
-    llvm::outs() << "\"id\": \"" << static_cast<const void *>(&v) << "\",\n";
-    llvm::outs() << "\"type\": \"end-program-stmt\",\n";
-
-    const auto &var = v.v.value();
-    llvm::outs() << "\"name\": \"" << var.ToString() << "\",\n";
-
-    llvm::outs() << "},\n";
-    return true;
-  }
-
-  bool Pre(const Fortran::parser::ExecutionPartConstruct &v) const {
-    llvm::outs() << "{\n";
-    llvm::outs() << "\"id\": \"" << static_cast<const void *>(&v) << "\",\n";
-    llvm::outs() << "\"type\": \"execution-part-construct\",\n";
-
-    const auto &var = v.u;
-    std::visit(variant_visitor, var);
-
-    llvm::outs() << "},\n";
-    return true;
-  }
-
-  bool Pre(const Fortran::parser::ExecutableConstruct &v) const {
-    llvm::outs() << "{\n";
-    llvm::outs() << "\"id\": \"" << static_cast<const void *>(&v) << "\",\n";
-    llvm::outs() << "\"type\": \"executable-construct\",\n";
-
-    const auto &var = v.u;
-    std::visit(variant_visitor, var);
-
-    llvm::outs() << "},\n";
-    return true;
-  }
-
-  bool Pre(const Fortran::parser::ActionStmt &v) const {
-    llvm::outs() << "{\n";
-    llvm::outs() << "\"id\": \"" << static_cast<const void *>(&v) << "\",\n";
-    llvm::outs() << "\"type\": \"action-stmt\",\n";
-
-    const auto &var = v.u;
-    std::visit(variant_visitor, var);
-
-    llvm::outs() << "},\n";
-    return true;
-  }
-
-  bool Pre(const Fortran::parser::PrintStmt &v) const {
-    llvm::outs() << "{\n";
-    llvm::outs() << "\"id\": \"" << static_cast<const void *>(&v) << "\",\n";
-    llvm::outs() << "\"type\": \"print-stmt\",\n";
-
-    const auto &[format, output_items] = v.t;
-
-    llvm::outs() << "\"format\": \"" << static_cast<const void *>(&format)
-                 << "\",\n";
-
-    llvm::outs() << "\"output-items\": [\n";
-    for (const auto &item : output_items) {
-      llvm::outs() << "\"" << static_cast<const void *>(&item) << "\",\n";
-    }
-    llvm::outs() << "]\n";
-
-    llvm::outs() << "},\n";
-    return true;
-  }
+  DUMP_NODE(Fortran::parser::PrintStmt, { dump(v.t); })
 };
 
 class DumpAST : public Fortran::frontend::PluginParseTreeAction {
