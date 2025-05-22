@@ -110,6 +110,10 @@ void dump(const char *v, const char *property_name) {
   llvm::outs() << "\"" << property_name << "\": \"" << v << "\",\n";
 }
 
+void dump(const std::uint64_t v, const char *property_name) {
+  llvm::outs() << "\"" << property_name << "\": \"" << v << "\",\n";
+}
+
 template <> void dump(const std::string &v, const char *property_name) {
   dump(v.c_str(), property_name);
 }
@@ -119,7 +123,13 @@ void dump(const Fortran::parser::CharBlock &v, const char *property_name) {
   dump(v.ToString(), property_name);
 }
 
-template <> void dump(const std::nullopt_t &v, const char *property_name) {}
+template <> void dump(const std::nullopt_t &v, const char *property_name) {
+  if (!strcmp(property_name, "null")) {
+    return;
+  }
+
+  dump("null", property_name);
+}
 
 template <typename T>
 void dump(const std::list<T> &v, const char *property_name) {
@@ -180,7 +190,8 @@ public:
 
   DUMP_NODE(Fortran::parser::SpecificationPart, { dump(v.t); })
 
-  DUMP_NODE(Fortran::parser::Block, { dump(v, "ExecutionPartConstruct"); })
+  DUMP_NODE(Fortran::parser::ExecutionPart,
+            { dump(v.v, "ExecutionPartConstruct"); })
 
   DUMP_NODE(Fortran::parser::InternalSubprogramPart, { dump(v.t); })
 
@@ -190,14 +201,11 @@ public:
 
   template <typename T> bool Pre(const Fortran::parser::Statement<T> &v) const {
     llvm::outs() << "{\n";
-    llvm::outs() << "\"id\": \"" << static_cast<const void *>(&v)
-                 << "-Statement" << "\",\n";
+    dump(getId(v), "id");
 
-    llvm::outs() << "\"statement\": \""
-                 << static_cast<const void *>(&v.statement) << "\",\n";
-    llvm::outs() << "\"label\": \"" << static_cast<const void *>(&v.label)
-                 << "\",\n";
-    llvm::outs() << "\"source\": \"" << v.source << "\",\n";
+    dump(v.statement, "Statement");
+    dump(v.label, "label");
+    dump(v.source, "source");
 
     llvm::outs() << "},\n";
     return true;
