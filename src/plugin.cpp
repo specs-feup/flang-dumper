@@ -1,5 +1,6 @@
 #include <llvm-20/llvm/Support/raw_ostream.h>
 #include <optional>
+#include <string>
 #include <type_traits>
 #include <variant>
 
@@ -118,17 +119,25 @@ void dump(const Fortran::parser::CharBlock &v, const char *property_name) {
   dump(v.ToString(), property_name);
 }
 
-template <> void dump(const std::nullopt_t &v, const char *property_name) {
-  dump("null", property_name);
-}
+template <> void dump(const std::nullopt_t &v, const char *property_name) {}
 
 template <typename T>
 void dump(const std::list<T> &v, const char *property_name) {
+  if (!strcmp(property_name, "list")) {
+    return;
+  }
+
   llvm::outs() << "\"" << property_name << "\": [\n";
   for (const auto &item : v) {
     llvm::outs() << "\"" << getId(item) << "\",\n";
   }
   llvm::outs() << "],\n";
+}
+
+template <typename T>
+void dump(const Fortran::parser::Statement<T> &v, const char *property_name) {
+  llvm::outs() << "\"" << property_name << "<" << getNodeName(v.statement)
+               << ">\": \"" << getId(v) << "\",\n";
 }
 
 template <typename... T>
@@ -155,11 +164,6 @@ void dump(const std::optional<T> &v, const char *property_name) {
 template <typename... T> void dump(const std::tuple<T...> &v) {
   // For each element in the tuple, call dump
   std::apply([](const auto &...e) { ((dump(e, getNodeName(e))), ...); }, v);
-}
-
-template <typename T>
-void dump(const Fortran::parser::Statement<T> &v, const char *property_name) {
-  llvm::outs() << "\"" << property_name << "\": \"" << getId(v) << "\",\n";
 }
 
 // Visitor struct that defines Pre/Post functions for different types of nodes
