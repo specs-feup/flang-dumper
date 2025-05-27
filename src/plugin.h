@@ -34,8 +34,28 @@ template <typename T> const char *getNodeName(const T &v) {
     return "UnlabeledStatement";
   } else if constexpr (is_specialization<T, Fortran::parser::Scalar>::value) {
     return "Scalar";
+  } else if constexpr (is_specialization<T, Fortran::parser::Constant>::value) {
+    return "Constant";
+  } else if constexpr (is_specialization<T, Fortran::parser::Integer>::value) {
+    return "Integer";
+  } else if constexpr (is_specialization<T, Fortran::parser::Logical>::value) {
+    return "Logical";
+  } else if constexpr (is_specialization<T,
+                                         Fortran::parser::DefaultChar>::value) {
+    return "DefaultChar";
+  } else if constexpr (std::is_same_v<T, Fortran::parser::CharBlock>) {
+    return "CharBlock";
   } else {
-    return Fortran::parser::ParseTreeDumper::GetNodeName(v);
+    if constexpr (std::is_same_v<
+                      decltype(Fortran::parser::ParseTreeDumper::GetNodeName(
+                          v)),
+                      std::string>) {
+      static std::string name =
+          Fortran::parser::ParseTreeDumper::GetNodeName(v);
+      return name.c_str();
+    } else {
+      return Fortran::parser::ParseTreeDumper::GetNodeName(v);
+    }
   }
 }
 
