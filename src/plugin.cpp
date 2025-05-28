@@ -1,3 +1,6 @@
+#include <sstream>
+#include <type_traits>
+
 #include <llvm-20/llvm/Support/raw_ostream.h>
 
 #include "flang/Frontend/FrontendActions.h"
@@ -7,6 +10,197 @@
 #include "flang/Parser/parsing.h"
 
 #include "plugin.h"
+
+template <typename T, template <typename...> class Template>
+struct is_specialization : std::false_type {};
+
+template <typename... Args, template <typename...> class Template>
+struct is_specialization<Template<Args...>, Template> : std::true_type {};
+
+template <typename T> struct is_indirection : std::false_type {};
+
+template <typename T, bool COPY>
+struct is_indirection<Fortran::common::Indirection<T, COPY>> : std::true_type {
+};
+
+template <typename T> const char *getNodeName(const T &v) {
+  if constexpr (is_specialization<T, Fortran::parser::Statement>::value) {
+    return "Statement";
+  } else if constexpr (is_specialization<
+                           T, Fortran::parser::UnlabeledStatement>::value) {
+    return "UnlabeledStatement";
+  } else if constexpr (is_specialization<T, Fortran::parser::Scalar>::value) {
+    return "Scalar";
+  } else if constexpr (is_specialization<T, Fortran::parser::Constant>::value) {
+    return "Constant";
+  } else if constexpr (is_specialization<T, Fortran::parser::Integer>::value) {
+    return "Integer";
+  } else if constexpr (is_specialization<T, Fortran::parser::Logical>::value) {
+    return "Logical";
+  } else if constexpr (is_specialization<T,
+                                         Fortran::parser::DefaultChar>::value) {
+    return "DefaultChar";
+  } else if constexpr (std::is_same_v<T, Fortran::parser::CharBlock>) {
+    return "CharBlock";
+  } else {
+    if constexpr (std::is_same_v<
+                      decltype(Fortran::parser::ParseTreeDumper::GetNodeName(
+                          v)),
+                      std::string>) {
+      static std::string name =
+          Fortran::parser::ParseTreeDumper::GetNodeName(v);
+      return name.c_str();
+    } else {
+      return Fortran::parser::ParseTreeDumper::GetNodeName(v);
+    }
+  }
+}
+
+template <typename T> const char *getNodeName(const std::optional<T> &v) {
+  if (v.has_value()) {
+    return getNodeName(v.value());
+  } else {
+    return "null";
+  }
+}
+
+template <typename T>
+const char *getNodeName(const Fortran::common::Indirection<T> &v) {
+  return getNodeName(v.value());
+}
+
+template <typename T> const char *getNodeName(const std::list<T> &v) {
+  if (v.empty()) {
+    return "list";
+  } else {
+    return getNodeName(v.front());
+  }
+}
+
+template <typename T> std::string &getId(const T &v, const char *name) {
+  std::ostringstream oss;
+  oss << "0x" << std::hex << reinterpret_cast<uintptr_t>(&v) << "-" << name;
+  static std::string id;
+  id = oss.str();
+  return id;
+}
+
+template <typename T> std::string getId(const T &v) {
+  return getId(v, getNodeName(v));
+}
+
+template <typename T> std::string getId(const std::optional<T> &v) {
+  if (v.has_value()) {
+    return getId(v.value());
+  } else {
+    return getId(std::nullopt);
+  }
+}
+
+template <typename T>
+std::string getId(const Fortran::common::Indirection<T> &v) {
+  return getId(v.value());
+}
+
+template <> std::string getId(const std::nullopt_t &) { return "null"; }
+
+struct variant_visitor {
+  template <typename T> void operator()(const T &value) const {
+    llvm::outs() << "\"" << getId(value) << "\"";
+  }
+};
+
+template <typename T> void dump(const T &v, const char *property_name) {
+  llvm::outs() << "\"" << property_name << "\": \"" << getId(v) << "\",\n";
+}
+
+void dump(const char *v, const char *property_name) {
+  llvm::outs() << "\"" << property_name << "\": \"" << v << "\",\n";
+}
+
+void dump(const std::uint64_t v, const char *property_name) {
+  llvm::outs() << "\"" << property_name << "\": \"" << v << "\",\n";
+}
+
+template <> void dump(const std::string &v, const char *property_name) {
+  dump(v.c_str(), property_name);
+}
+
+template <>
+void dump(const Fortran::parser::CharBlock &v, const char *property_name) {
+  dump(v.ToString(), property_name);
+}
+
+template <> void dump(const std::nullopt_t &v, const char *property_name) {
+  if (!strcmp(property_name, "null")) {
+    return;
+  }
+
+  dump("null", property_name);
+}
+
+template <typename T>
+void dump(const std::list<T> &v, const char *property_name) {
+  if (!strcmp(property_name, "list")) {
+    return;
+  }
+
+  llvm::outs() << "\"" << property_name << "\": [\n";
+  for (const auto &item : v) {
+    llvm::outs() << "\"" << getId(item) << "\",\n";
+  }
+  llvm::outs() << "],\n";
+}
+
+template <typename T>
+void dump(const Fortran::parser::Statement<T> &v, const char *property_name) {
+  llvm::outs() << "\"" << property_name << "<" << getNodeName(v.statement)
+               << ">\": \"" << getId(v) << "\",\n";
+}
+
+template <typename T> void dump(const Fortran::parser::Statement<T> &v) {
+  llvm::outs() << "\"" << getNodeName(v) << "<" << getNodeName(v.statement)
+               << ">\": \"" << getId(v) << "\",\n";
+}
+
+template <typename T>
+void dump(const Fortran::parser::UnlabeledStatement<T> &v,
+          const char *property_name) {
+  llvm::outs() << "\"" << property_name << "<" << getNodeName(v.statement)
+               << ">\": \"" << getId(v) << "\",\n";
+}
+
+template <typename T>
+void dump(const Fortran::parser::UnlabeledStatement<T> &v) {
+  llvm::outs() << "\"" << getNodeName(v) << "<" << getNodeName(v.statement)
+               << ">\": \"" << getId(v) << "\",\n";
+}
+
+template <typename... T>
+void dump(const std::variant<T...> &v, const char *property_name) {
+  llvm::outs() << "\"" << property_name << "\": ";
+  std::visit(variant_visitor{}, v);
+  llvm::outs() << ",\n";
+}
+
+template <typename T>
+void dump(const Fortran::common::Indirection<T> &v, const char *property_name) {
+  dump(v.value(), property_name);
+}
+
+template <typename T>
+void dump(const std::optional<T> &v, const char *property_name) {
+  if (v.has_value()) {
+    dump(v.value(), property_name);
+  } else {
+    dump(std::nullopt, property_name);
+  }
+}
+
+template <typename... T> void dump(const std::tuple<T...> &v) {
+  // For each element in the tuple, call dump
+  std::apply([](const auto &...e) { ((dump(e, getNodeName(e))), ...); }, v);
+}
 
 // Visitor struct that defines Pre/Post functions for different types of nodes
 struct ParseTreeVisitor {
@@ -18,7 +212,7 @@ public:
     llvm::outs() << "{\n";
     dump(getId(v), "id");
 
-    dump(v.statement, "Statement");
+    dump(v.statement, "statement");
     dump(v.label, "label");
     dump(v.source, "source");
 
@@ -31,7 +225,7 @@ public:
     llvm::outs() << "{\n";
     dump(getId(v), "id");
 
-    dump(v.statement, "Statement");
+    dump(v.statement, "statement");
     dump(v.source, "source");
 
     llvm::outs() << "},\n";
@@ -463,11 +657,11 @@ public:
   DUMP_NODE(Fortran::parser::OmpMapTypeModifier, {})
   DUMP_NODE(Fortran::parser::OmpIteratorSpecifier, {})
   DUMP_NODE(Fortran::parser::OmpIterator, {})
-  // DUMP_NODE(Fortran::parser::OmpAffinityClause, {})
+  DUMP_NODE(Fortran::parser::OmpAffinityClause, {})
   DUMP_NODE(Fortran::parser::OmpAffinityClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpAlignment, {})
   DUMP_NODE(Fortran::parser::OmpAlignClause, {})
-  // DUMP_NODE(Fortran::parser::OmpAlignedClause, {})
+  DUMP_NODE(Fortran::parser::OmpAlignedClause, {})
   DUMP_NODE(Fortran::parser::OmpAlignedClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpAtClause, {})
   DUMP_NODE(Fortran::parser::OmpAtomic, {})
@@ -495,7 +689,7 @@ public:
   DUMP_NODE(Fortran::parser::OmpDeclareMapperSpecifier, {})
   DUMP_NODE(Fortran::parser::OmpDefaultClause, {})
   DUMP_NODE(Fortran::parser::OmpVariableCategory, {})
-  // DUMP_NODE(Fortran::parser::OmpDefaultmapClause, {})
+  DUMP_NODE(Fortran::parser::OmpDefaultmapClause, {})
   DUMP_NODE(Fortran::parser::OmpDefaultmapClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpDependenceType, {})
   DUMP_NODE(Fortran::parser::OmpTaskDependenceType, {})
@@ -506,7 +700,7 @@ public:
   DUMP_NODE(Fortran::parser::OmpDoacross::Sink, {})
   DUMP_NODE(Fortran::parser::OmpDoacross::Source, {})
   DUMP_NODE(Fortran::parser::OmpDependClause, {})
-  // DUMP_NODE(Fortran::parser::OmpDependClause::TaskDep, {})
+  DUMP_NODE(Fortran::parser::OmpDependClause::TaskDep, {})
   DUMP_NODE(Fortran::parser::OmpDependClause::TaskDep::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpDetachClause, {})
   DUMP_NODE(Fortran::parser::OmpDoacrossClause, {})
@@ -518,56 +712,56 @@ public:
   DUMP_NODE(Fortran::parser::OmpEndLoopDirective, {})
   DUMP_NODE(Fortran::parser::OmpEndSectionsDirective, {})
   DUMP_NODE(Fortran::parser::OmpFailClause, {})
-  // DUMP_NODE(Fortran::parser::OmpFromClause, {})
-  // DUMP_NODE(Fortran::parser::OmpFromClause::Modifier, {})
+  DUMP_NODE(Fortran::parser::OmpFromClause, {})
+  DUMP_NODE(Fortran::parser::OmpFromClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpExpectation, {})
   DUMP_NODE(Fortran::parser::OmpDirectiveNameModifier, {})
-  // DUMP_NODE(Fortran::parser::OmpIfClause, {})
-  // DUMP_NODE(Fortran::parser::OmpIfClause::Modifier, {})
-  // DUMP_NODE(Fortran::parser::OmpLastprivateClause, {})
-  // DUMP_NODE(Fortran::parser::OmpLastprivateClause::Modifier, {})
+  DUMP_NODE(Fortran::parser::OmpIfClause, {})
+  DUMP_NODE(Fortran::parser::OmpIfClause::Modifier, {})
+  DUMP_NODE(Fortran::parser::OmpLastprivateClause, {})
+  DUMP_NODE(Fortran::parser::OmpLastprivateClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpLastprivateModifier, {})
-  // DUMP_NODE(Fortran::parser::OmpLinearClause, {})
+  DUMP_NODE(Fortran::parser::OmpLinearClause, {})
   DUMP_NODE(Fortran::parser::OmpLinearClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpLinearModifier, {})
   DUMP_NODE(Fortran::parser::OmpStepComplexModifier, {})
   DUMP_NODE(Fortran::parser::OmpStepSimpleModifier, {})
   DUMP_NODE(Fortran::parser::OmpLoopDirective, {})
-  // DUMP_NODE(Fortran::parser::OmpMapClause, {})
+  DUMP_NODE(Fortran::parser::OmpMapClause, {})
   DUMP_NODE(Fortran::parser::OmpMessageClause, {})
   DUMP_NODE(Fortran::parser::OmpMapClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpObject, {})
   DUMP_NODE(Fortran::parser::OmpObjectList, {})
-  // DUMP_NODE(Fortran::parser::OmpOrderClause, {})
-  // DUMP_NODE(Fortran::parser::OmpOrderClause::Modifier, {})
+  DUMP_NODE(Fortran::parser::OmpOrderClause, {})
+  DUMP_NODE(Fortran::parser::OmpOrderClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpOrderModifier, {})
-  // DUMP_NODE(Fortran::parser::OmpGrainsizeClause, {})
+  DUMP_NODE(Fortran::parser::OmpGrainsizeClause, {})
   DUMP_NODE(Fortran::parser::OmpGrainsizeClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpPrescriptiveness, {})
-  // DUMP_NODE(Fortran::parser::OmpNumTasksClause, {})
+  DUMP_NODE(Fortran::parser::OmpNumTasksClause, {})
   DUMP_NODE(Fortran::parser::OmpNumTasksClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpBindClause, {})
   DUMP_NODE(Fortran::parser::OmpProcBindClause, {})
   DUMP_NODE(Fortran::parser::OmpReductionModifier, {})
-  // DUMP_NODE(Fortran::parser::OmpReductionClause, {})
+  DUMP_NODE(Fortran::parser::OmpReductionClause, {})
   DUMP_NODE(Fortran::parser::OmpReductionClause::Modifier, {})
-  // DUMP_NODE(Fortran::parser::OmpInReductionClause, {})
+  DUMP_NODE(Fortran::parser::OmpInReductionClause, {})
   DUMP_NODE(Fortran::parser::OmpInReductionClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpReductionCombiner, {})
-  // DUMP_NODE(Fortran::parser::OmpTaskReductionClause, {})
+  DUMP_NODE(Fortran::parser::OmpTaskReductionClause, {})
   DUMP_NODE(Fortran::parser::OmpTaskReductionClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpReductionCombiner::FunctionCombiner, {})
   DUMP_NODE(Fortran::parser::OmpReductionInitializerClause, {})
   DUMP_NODE(Fortran::parser::OmpReductionIdentifier, {})
-  // DUMP_NODE(Fortran::parser::OmpAllocateClause, {})
+  DUMP_NODE(Fortran::parser::OmpAllocateClause, {})
   DUMP_NODE(Fortran::parser::OmpAllocateClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpAlignModifier, {})
   DUMP_NODE(Fortran::parser::OmpAllocatorComplexModifier, {})
   DUMP_NODE(Fortran::parser::OmpAllocatorSimpleModifier, {})
-  // DUMP_NODE(Fortran::parser::OmpScheduleClause, {})
+  DUMP_NODE(Fortran::parser::OmpScheduleClause, {})
   DUMP_NODE(Fortran::parser::OmpScheduleClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpSeverityClause, {})
-  // DUMP_NODE(Fortran::parser::OmpDeviceClause, {})
+  DUMP_NODE(Fortran::parser::OmpDeviceClause, {})
   DUMP_NODE(Fortran::parser::OmpDeviceClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpDeviceModifier, {})
   DUMP_NODE(Fortran::parser::OmpDeviceTypeClause, {})
@@ -577,7 +771,7 @@ public:
   DUMP_NODE(Fortran::parser::OmpSectionBlocks, {})
   DUMP_NODE(Fortran::parser::OmpSectionsDirective, {})
   DUMP_NODE(Fortran::parser::OmpSimpleStandaloneDirective, {})
-  // DUMP_NODE(Fortran::parser::OmpToClause, {})
+  DUMP_NODE(Fortran::parser::OmpToClause, {})
   DUMP_NODE(Fortran::parser::OmpToClause::Modifier, {})
   DUMP_NODE(Fortran::parser::Only, {})
   DUMP_NODE(Fortran::parser::OpenACCAtomicConstruct, {})
