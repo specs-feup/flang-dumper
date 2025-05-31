@@ -28,7 +28,9 @@ public:
       }
 
     llvm::outs() << "{\n";
-    dump_first(getId(v), "id");
+    //dump_first(getId(v), "id");
+    //dump(getId(v), "id");
+    DUMP_FIRST_PROPERTY("id", getId(v))
 
     dump(v.statement, "Statement");
     dump(v.label, "label");
@@ -49,7 +51,9 @@ public:
       }
 
     llvm::outs() << "{\n";
-    dump(getId(v), "id");
+    //dump_first(getId(v), "id");
+    //dump(getId(v), "id");
+    DUMP_FIRST_PROPERTY("id", getId(v))
 
     dump(v.statement, "Statement");
     dump(v.source, "source");

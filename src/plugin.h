@@ -144,19 +144,25 @@ auto variant_visitor = [](auto &value) {
 template <typename T> void dump(const T &v, const char *property_name) {
   llvm::outs() << ",\n\"" << property_name << "\": \"" << getId(v) << "\"";
 }
-
+/*
 template <typename T> void dump_first(const T &v, const char *property_name) {
     llvm::outs() << "\"" << property_name << "\": \"" << getId(v) << "\"";
 }
+*/
 
 inline void dump(const char *v, const char *property_name) {
   llvm::outs() << ",\n\"" << property_name << "\": \"" << v << "\"";
 }
-
+/*
 inline void dump_first(const char *v, const char *property_name) {
     llvm::outs() << "\"" << property_name << "\": \"" << v << "\"";
 }
-
+*/
+/*
+inline void dump_first(const std::string &v, const char *property_name) {
+    llvm::outs() << "\"" << property_name << "\": \"" << v << "\"";
+}
+*/
 inline void dump(const std::uint64_t v, const char *property_name) {
   llvm::outs() << ",\n\"" << property_name << "\": \"" << v << "\"";
 }
@@ -164,11 +170,11 @@ inline void dump(const std::uint64_t v, const char *property_name) {
 template <> inline void dump(const std::string &v, const char *property_name) {
     dump(v.c_str(), property_name);
 }
-
+/*
 template <> inline void dump_first(const std::string &v, const char *property_name) {
     dump_first(v.c_str(), property_name);
 }
-
+*/
 
 
 template <>
