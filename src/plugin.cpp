@@ -10,31 +10,51 @@
 
 // Visitor struct that defines Pre/Post functions for different types of nodes
 struct ParseTreeVisitor {
-public:
-  template <typename A> bool Pre(const A &) const { return true; }
-  template <typename A> void Post(const A &) const { return; }
 
-  template <typename T> bool Pre(const Fortran::parser::Statement<T> &v) const {
+public:
+    ParseTreeVisitor() : list_first(true) {};
+
+    bool list_first;
+
+  template <typename A> bool Pre(const A &) { return true; }
+  template <typename A> void Post(const A &) { return; }
+
+  template <typename T> bool Pre(const Fortran::parser::Statement<T> &v) {
+      // Commas
+      if(list_first) {
+          list_first = false;
+      } else {
+          llvm::outs() << ",\n";
+      }
+
     llvm::outs() << "{\n";
-    dump(getId(v), "id");
+    dump_first(getId(v), "id");
 
     dump(v.statement, "Statement");
     dump(v.label, "label");
     dump(v.source, "source");
 
-    llvm::outs() << "},\n";
+    llvm::outs() << "}";
+
     return true;
   }
 
   template <typename T>
-  bool Pre(const Fortran::parser::UnlabeledStatement<T> &v) const {
+  bool Pre(const Fortran::parser::UnlabeledStatement<T> &v) {
+      // Commas
+      if(list_first) {
+          list_first = false;
+      } else {
+          llvm::outs() << ",\n";
+      }
+
     llvm::outs() << "{\n";
     dump(getId(v), "id");
 
     dump(v.statement, "Statement");
     dump(v.source, "source");
 
-    llvm::outs() << "},\n";
+    llvm::outs() << "}";
     return true;
   }
 

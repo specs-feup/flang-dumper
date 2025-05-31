@@ -12,7 +12,10 @@
 #include "flang/Parser/parse-tree.h"
 
 #define DUMP_PROPERTY(KEY, VALUE)                                              \
-  llvm::outs() << "\"" << KEY << "\": \"" << VALUE << "\",\n";
+  llvm::outs() << ",\n\"" << KEY << "\": \"" << VALUE << "\"";
+
+#define DUMP_FIRST_PROPERTY(KEY, VALUE)                                              \
+  llvm::outs() << "\"" << KEY << "\": \"" << VALUE << "\"";
 
 template <typename T, template <typename...> class Template>
 struct is_specialization : std::false_type {};
@@ -108,9 +111,15 @@ std::string getId(const Fortran::common::Indirection<T> &v) {
 template <> inline std::string getId(const std::nullopt_t &) { return "null"; }
 
 #define DUMP_NODE(CLASS, CONTENTS)                                             \
-  bool Pre(const CLASS &v) const {                                             \
+  bool Pre(const CLASS &v) {                                             \
+    if(list_first) {                                                            \
+        list_first = false;                                                     \
+    } else {                                                                    \
+        llvm::outs() << ",\n";                                                  \
+    }                                                                           \
+                                                                               \
     llvm::outs() << "{\n";                                                     \
-    DUMP_PROPERTY("id", getId(v))                                              \
+    DUMP_FIRST_PROPERTY("id", getId(v))                                              \
                                                                                \
     if constexpr (UnionTrait<CLASS>) {                                         \
       dumpUnion(v);                                                            \
@@ -124,7 +133,7 @@ template <> inline std::string getId(const std::nullopt_t &) { return "null"; }
                                                                                \
     CONTENTS;                                                                  \
                                                                                \
-    llvm::outs() << "},\n";                                                    \
+    llvm::outs() << "}";                                                    \
     return true;                                                               \
   }
 
@@ -133,20 +142,34 @@ auto variant_visitor = [](auto &value) {
 };
 
 template <typename T> void dump(const T &v, const char *property_name) {
-  llvm::outs() << "\"" << property_name << "\": \"" << getId(v) << "\",\n";
+  llvm::outs() << ",\n\"" << property_name << "\": \"" << getId(v) << "\"";
+}
+
+template <typename T> void dump_first(const T &v, const char *property_name) {
+    llvm::outs() << "\"" << property_name << "\": \"" << getId(v) << "\"";
 }
 
 inline void dump(const char *v, const char *property_name) {
-  llvm::outs() << "\"" << property_name << "\": \"" << v << "\",\n";
+  llvm::outs() << ",\n\"" << property_name << "\": \"" << v << "\"";
+}
+
+inline void dump_first(const char *v, const char *property_name) {
+    llvm::outs() << "\"" << property_name << "\": \"" << v << "\"";
 }
 
 inline void dump(const std::uint64_t v, const char *property_name) {
-  llvm::outs() << "\"" << property_name << "\": \"" << v << "\",\n";
+  llvm::outs() << ",\n\"" << property_name << "\": \"" << v << "\"";
 }
 
 template <> inline void dump(const std::string &v, const char *property_name) {
-  dump(v.c_str(), property_name);
+    dump(v.c_str(), property_name);
 }
+
+template <> inline void dump_first(const std::string &v, const char *property_name) {
+    dump_first(v.c_str(), property_name);
+}
+
+
 
 template <>
 inline void dump(const Fortran::parser::CharBlock &v,
@@ -169,42 +192,49 @@ void dump(const std::list<T> &v, const char *property_name) {
     return;
   }
 
-  llvm::outs() << "\"" << property_name << "\": [\n";
+  llvm::outs() << ",\n\"" << property_name << "\": [\n";
+
+  bool first = true;
   for (const auto &item : v) {
-    llvm::outs() << "\"" << getId(item) << "\",\n";
+      if(first) {
+          first = false;
+      } else {
+          llvm::outs() << ",\n";
+      }
+    llvm::outs() << "\"" << getId(item) << "\"";
   }
-  llvm::outs() << "],\n";
+  llvm::outs() << "]";
 }
 
 template <typename T>
 void dump(const Fortran::parser::Statement<T> &v, const char *property_name) {
-  llvm::outs() << "\"" << property_name << "<" << getNodeName(v.statement)
-               << ">\": \"" << getId(v) << "\",\n";
+  llvm::outs() << ",\n\"" << property_name << "<" << getNodeName(v.statement)
+               << ">\": \"" << getId(v) << "\"";
 }
 
 template <typename T> void dump(const Fortran::parser::Statement<T> &v) {
-  llvm::outs() << "\"" << getNodeName(v) << "<" << getNodeName(v.statement)
-               << ">\": \"" << getId(v) << "\",\n";
+  llvm::outs() << ",\n\"" << getNodeName(v) << "<" << getNodeName(v.statement)
+               << ">\": \"" << getId(v) << "\"";
 }
 
 template <typename T>
 void dump(const Fortran::parser::UnlabeledStatement<T> &v,
           const char *property_name) {
-  llvm::outs() << "\"" << property_name << "<" << getNodeName(v.statement)
-               << ">\": \"" << getId(v) << "\",\n";
+  llvm::outs() << ",\n\"" << property_name << "<" << getNodeName(v.statement)
+               << ">\": \"" << getId(v) << "\"";
 }
 
 template <typename T>
 void dump(const Fortran::parser::UnlabeledStatement<T> &v) {
-  llvm::outs() << "\"" << getNodeName(v) << "<" << getNodeName(v.statement)
-               << ">\": \"" << getId(v) << "\",\n";
+  llvm::outs() << ",\n\"" << getNodeName(v) << "<" << getNodeName(v.statement)
+               << ">\": \"" << getId(v) << "\"";
 }
 
 template <typename... T>
 void dump(const std::variant<T...> &v, const char *property_name = "value") {
-  llvm::outs() << "\"" << property_name << "\": ";
+  llvm::outs() << ",\n\"" << property_name << "\": ";
   std::visit(variant_visitor, v);
-  llvm::outs() << ",\n";
+  llvm::outs() << "";
 }
 
 template <typename T>
