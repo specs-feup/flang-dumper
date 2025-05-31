@@ -455,7 +455,7 @@ public:
   DUMP_NODE(Fortran::parser::ModuleSubprogramPart, {})
   DUMP_NODE(Fortran::parser::MpSubprogramStmt, {})
   DUMP_NODE(Fortran::parser::MsgVariable, {})
-  DUMP_NODE(Fortran::parser::Name, {})
+  DUMP_NODE(Fortran::parser::Name, {dump(v.source, "source");})
   DUMP_NODE(Fortran::parser::NamedConstant, {})
   DUMP_NODE(Fortran::parser::NamedConstantDef, {})
   DUMP_NODE(Fortran::parser::NamelistStmt, {})
