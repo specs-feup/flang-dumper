@@ -8,6 +8,8 @@
 #include "flang/Common/indirection.h"
 #include "flang/Parser/parse-tree.h"
 
+#include "collector.h"
+
 template <typename T> const char *getNodeName(const T &v);
 template <typename T> const char *getNodeName(const std::optional<T> &v);
 template <typename T>
@@ -57,27 +59,44 @@ template <typename T> void dumpTuple(const T &v) { dump(v.t); }
 template <typename T> void dumpConstraint(const T &v) { dump(v.thing); }
 
 #define DUMP_PROPERTY(KEY, VALUE)                                              \
-  llvm::outs() << "\"" << KEY << "\": \"" << VALUE << "\",\n";
+  llvm::outs() << ",\n\"" << KEY << "\": \"" << VALUE << "\"";
+
+#define DUMP_BARE_NODE(CONTENT)                                                \
+    if (!firstNodeDump) {                                                 \
+      llvm::outs() << ",\n";                                                   \
+    } else {                                                                   \
+      firstNodeDump = false;                                              \
+    }                                                                          \
+    llvm::outs() << "{\n";                                                     \
+    llvm::outs() << "\"" << "id" << "\": \"" << getId(v) << "\"";              \
+    CONTENT;                                                                   \
+    llvm::outs() << "\n}";                                                     \
+    return true;
+
+
+
 
 #define DUMP_NODE(CLASS, CONTENTS)                                             \
-  bool Pre(const CLASS &v) const {                                             \
-    llvm::outs() << "{\n";                                                     \
-    DUMP_PROPERTY("id", getId(v))                                              \
+  bool Pre(const CLASS &v) {                                             \
+    DUMP_BARE_NODE({                                                           \
+      if constexpr (UnionTrait<CLASS>) {                                       \
+        dumpUnion(v);                                                          \
+      } else if constexpr (TupleTrait<CLASS>) {                                \
+        dumpTuple(v);                                                          \
+      } else if constexpr (WrapperTrait<CLASS>) {                              \
+        dumpWrapper(v);                                                        \
+      } else if constexpr (ConstraintTrait<CLASS>) {                           \
+        dumpConstraint(v);                                                     \
+      }                                                                        \
                                                                                \
-    if constexpr (UnionTrait<CLASS>) {                                         \
-      dumpUnion(v);                                                            \
-    } else if constexpr (TupleTrait<CLASS>) {                                  \
-      dumpTuple(v);                                                            \
-    } else if constexpr (WrapperTrait<CLASS>) {                                \
-      dumpWrapper(v);                                                          \
-    } else if constexpr (ConstraintTrait<CLASS>) {                             \
-      dumpConstraint(v);                                                       \
-    }                                                                          \
-                                                                               \
-    CONTENTS;                                                                  \
-                                                                               \
-    llvm::outs() << "},\n";                                                    \
-    return true;                                                               \
+      CONTENTS;                                                                \
+      })                                                                       \
   }
+
+#define DUMP_ENUM(CLASS)                                                       \
+  REGISTER_TYPE(CLASS);                                                        \
+  DUMP_NODE(CLASS, {                                                           \
+                                                                               \
+                   })
 
 #endif // __PLUGIN_H__
