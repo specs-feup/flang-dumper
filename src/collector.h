@@ -10,20 +10,17 @@
 // === Collector class ===
 
 template <typename Owner> struct Collector {
-  static inline std::vector<std::function<void()>> registry;
+  using EnumDumpFunc = void (*)();
+  static inline std::vector<std::pair<const char *, EnumDumpFunc>> registry;
 
-  template <typename T> struct Registrar {
-    Registrar() {
-      Collector<Owner>::registry.emplace_back(
-          [] { Owner::template dump_enum<T>(); });
+  struct Registrar {
+    Registrar(const char *name, EnumDumpFunc func) {
+      Collector<Owner>::registry.emplace_back(name, func);
     }
   };
 
-  static void for_each() {
-    for (auto &fn : registry) {
-      fn(); // Call each registered function
-    }
-  }
+  // No output/printing here; just data collection.
+  static const auto &get_registry() { return registry; }
 };
 
 #define REGISTER_TYPE(CLASS)                                                   \

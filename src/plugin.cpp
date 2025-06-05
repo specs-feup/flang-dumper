@@ -1,13 +1,13 @@
 #include <sstream>
 #include <type_traits>
 
-#include <llvm-20/llvm/Support/raw_ostream.h>
+#include <llvm/Support/raw_ostream.h>
 
+#include "flang/Common/Fortran.h"
 #include "flang/Frontend/FrontendActions.h"
 #include "flang/Frontend/FrontendPluginRegistry.h"
 #include "flang/Parser/dump-parse-tree.h"
 #include "flang/Parser/parse-tree.h"
-#include "flang/Parser/parsing.h"
 
 #include "plugin.h"
 
@@ -118,6 +118,10 @@ void dump(const char *v, const char *property_name) {
   DUMP_PROPERTY(property_name, v);
 }
 
+void dump(std::string_view v, const char *property_name) {
+  DUMP_PROPERTY(property_name, v);
+}
+
 void dump(const std::uint64_t v, const char *property_name) {
   DUMP_PROPERTY(property_name, v)
 }
@@ -220,7 +224,19 @@ public:
     // llvm::outs() << T::name() << ": " << T::value() << '\n';
   }
 
-  static void dumpEnumValues() { Collector<ThisClass>::for_each(); }
+  // Function to dump all registered enums as JSON
+  static void dumpEnumValues() {
+    const auto &reg = Collector<ThisClass>::get_registry();
+    bool first = true;
+    for (const auto &[name, func] : reg) {
+      if (!first)
+        llvm::outs() << ",\n";
+      llvm::outs() << "  \"" << name << "\": ";
+      func();
+      first = false;
+    }
+    llvm::outs() << "\n";
+  }
 
   template <typename T> bool Pre(const Fortran::parser::Statement<T> &v) {
     DUMP_BARE_NODE({
@@ -243,9 +259,9 @@ public:
   // DUMP_NODE(std::string, {})
   // DUMP_NODE(std::int64_t, {})
   // DUMP_NODE(std::uint64_t, {})
-  DUMP_ENUM(Fortran::common::CUDADataAttr)
-  DUMP_ENUM(Fortran::common::CUDASubprogramAttrs)
-  DUMP_ENUM(Fortran::common::OpenACCDeviceType)
+  DUMP_ENUM(Fortran::common, CUDADataAttr)
+  DUMP_ENUM(Fortran::common, CUDASubprogramAttrs)
+  DUMP_ENUM(Fortran::common, OpenACCDeviceType)
   DUMP_NODE(Fortran::format::ControlEditDesc, {})
   DUMP_NODE(Fortran::format::ControlEditDesc::Kind, {})
   DUMP_NODE(Fortran::format::DerivedTypeDataEditDesc, {})
@@ -273,7 +289,7 @@ public:
   DUMP_NODE(Fortran::parser::AccCombinedDirective,
             { dump(v.source, "source"); })
   DUMP_NODE(Fortran::parser::AccDataModifier, { dump(v.source, "source"); })
-  // NODE_ENUM(parser::AccDataModifier, Modifier)
+  DUMP_ENUM(Fortran::parser::AccDataModifier, Modifier)
   DUMP_NODE(Fortran::parser::AccDeclarativeDirective,
             { dump(v.source, "source"); })
   DUMP_NODE(Fortran::parser::AccEndAtomic, {})
@@ -309,7 +325,7 @@ public:
   DUMP_NODE(Fortran::parser::AccessStmt, {})
   DUMP_NODE(Fortran::parser::AccessId, {})
   DUMP_NODE(Fortran::parser::AccessSpec, {})
-  // NODE_ENUM(AccessSpec, Kind)
+  DUMP_ENUM(Fortran::parser::AccessSpec, Kind)
   DUMP_NODE(Fortran::parser::AcSpec, {})
   DUMP_NODE(Fortran::parser::ActionStmt, {})
   DUMP_NODE(Fortran::parser::ActualArg, {})
@@ -355,7 +371,7 @@ public:
   DUMP_NODE(Fortran::parser::BindAttr::Deferred, {})
   DUMP_NODE(Fortran::parser::BindAttr::Non_Overridable, {})
   DUMP_NODE(Fortran::parser::BindEntity, {})
-  // NODE_ENUM(BindEntity, Kind)
+  DUMP_ENUM(Fortran::parser::BindEntity, Kind)
   DUMP_NODE(Fortran::parser::BindStmt, {})
   DUMP_NODE(Fortran::parser::Block, {})
   DUMP_NODE(Fortran::parser::BlockConstruct, {})
@@ -414,7 +430,7 @@ public:
   DUMP_NODE(Fortran::parser::ConcurrentHeader, {})
   DUMP_NODE(Fortran::parser::ConnectSpec, {})
   DUMP_NODE(Fortran::parser::ConnectSpec::CharExpr, {})
-  // NODE_ENUM(ConnectSpec::CharExpr, Kind)
+  DUMP_ENUM(Fortran::parser::ConnectSpec::CharExpr, Kind)
   DUMP_NODE(Fortran::parser::ConnectSpec::Newunit, {})
   DUMP_NODE(Fortran::parser::ConnectSpec::Recl, {})
   DUMP_NODE(Fortran::parser::ContainsStmt, {})
@@ -453,7 +469,7 @@ public:
   DUMP_NODE(Fortran::parser::DeferredShapeSpecList, {})
   DUMP_NODE(Fortran::parser::DefinedOpName, {})
   DUMP_NODE(Fortran::parser::DefinedOperator, {})
-  // NODE_ENUM(DefinedOperator, IntrinsicOperator)
+  DUMP_ENUM(Fortran::parser::DefinedOperator, IntrinsicOperator)
   DUMP_NODE(Fortran::parser::DerivedTypeDef, {})
   DUMP_NODE(Fortran::parser::DerivedTypeSpec, {})
   DUMP_NODE(Fortran::parser::DerivedTypeStmt, {})
@@ -574,7 +590,7 @@ public:
   DUMP_NODE(Fortran::parser::ImplicitPartStmt, {})
   DUMP_NODE(Fortran::parser::ImplicitSpec, {})
   DUMP_NODE(Fortran::parser::ImplicitStmt, {})
-  // NODE_ENUM(ImplicitStmt, ImplicitNoneNameSpec)
+  DUMP_ENUM(Fortran::parser::ImplicitStmt, ImplicitNoneNameSpec)
   DUMP_NODE(Fortran::parser::ImpliedShapeSpec, {})
   DUMP_NODE(Fortran::parser::ImportStmt, {})
   DUMP_NODE(Fortran::parser::Initialization, {})
@@ -582,16 +598,16 @@ public:
   DUMP_NODE(Fortran::parser::InputItem, {})
   DUMP_NODE(Fortran::parser::InquireSpec, {})
   DUMP_NODE(Fortran::parser::InquireSpec::CharVar, {})
-  // NODE_ENUM(InquireSpec::CharVar, Kind)
+  DUMP_ENUM(Fortran::parser::InquireSpec::CharVar, Kind)
   DUMP_NODE(Fortran::parser::InquireSpec::IntVar, {})
-  // NODE_ENUM(InquireSpec::IntVar, Kind)
+  DUMP_ENUM(Fortran::parser::InquireSpec::IntVar, Kind)
   DUMP_NODE(Fortran::parser::InquireSpec::LogVar, {})
-  // NODE_ENUM(InquireSpec::LogVar, Kind)
+  DUMP_ENUM(Fortran::parser::InquireSpec::LogVar, Kind)
   DUMP_NODE(Fortran::parser::InquireStmt, {})
   DUMP_NODE(Fortran::parser::InquireStmt::Iolength, {})
   DUMP_NODE(Fortran::parser::IntegerTypeSpec, {})
   DUMP_NODE(Fortran::parser::IntentSpec, {})
-  // NODE_ENUM(IntentSpec, Intent)
+  DUMP_ENUM(Fortran::parser::IntentSpec, Intent)
   DUMP_NODE(Fortran::parser::IntentStmt, {})
   DUMP_NODE(Fortran::parser::InterfaceBlock, {})
   DUMP_NODE(Fortran::parser::InterfaceBody, {})
@@ -613,7 +629,7 @@ public:
   DUMP_NODE(Fortran::parser::IoControlSpec, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::Asynchronous, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::CharExpr, {})
-  // NODE_ENUM(IoControlSpec::CharExpr, Kind)
+  DUMP_ENUM(Fortran::parser::IoControlSpec::CharExpr, Kind)
   DUMP_NODE(Fortran::parser::IoControlSpec::Pos, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::Rec, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::Size, {})
@@ -629,7 +645,7 @@ public:
   DUMP_NODE(Fortran::parser::LiteralConstant, {})
   DUMP_NODE(Fortran::parser::IntLiteralConstant, {})
   DUMP_NODE(Fortran::parser::ReductionOperator, {})
-  // NODE_ENUM(parser::ReductionOperator, Operator)
+  DUMP_ENUM(Fortran::parser::ReductionOperator, Operator)
   DUMP_NODE(Fortran::parser::LocalitySpec, {})
   DUMP_NODE(Fortran::parser::LocalitySpec::DefaultNone, {})
   DUMP_NODE(Fortran::parser::LocalitySpec::Local, {})
@@ -673,18 +689,18 @@ public:
   DUMP_NODE(Fortran::parser::OmpTraitPropertyExtension::ExtensionValue, {})
   DUMP_NODE(Fortran::parser::OmpTraitProperty, {})
   DUMP_NODE(Fortran::parser::OmpTraitSelectorName, {})
-  // NODE_ENUM(OmpTraitSelectorName, Value)
+  DUMP_ENUM(Fortran::parser::OmpTraitSelectorName, Value)
   DUMP_NODE(Fortran::parser::OmpTraitSelector, {})
   DUMP_NODE(Fortran::parser::OmpTraitSelector::Properties, {})
   DUMP_NODE(Fortran::parser::OmpTraitSetSelectorName, {})
-  // NODE_ENUM(OmpTraitSetSelectorName, Value)
+  DUMP_ENUM(Fortran::parser::OmpTraitSetSelectorName, Value)
   DUMP_NODE(Fortran::parser::OmpTraitSetSelector, {})
   DUMP_NODE(Fortran::parser::OmpContextSelectorSpecification, {})
   DUMP_NODE(Fortran::parser::OmpMapper, {})
   DUMP_NODE(Fortran::parser::OmpMapType, {})
-  // NODE_ENUM(OmpMapType, Value)
+  DUMP_ENUM(Fortran::parser::OmpMapType, Value)
   DUMP_NODE(Fortran::parser::OmpMapTypeModifier, {})
-  // NODE_ENUM(OmpMapTypeModifier, Value)
+  DUMP_ENUM(Fortran::parser::OmpMapTypeModifier, Value)
   DUMP_NODE(Fortran::parser::OmpIteratorSpecifier, {})
   DUMP_NODE(Fortran::parser::OmpIterator, {})
   DUMP_NODE(Fortran::parser::OmpAffinityClause, {})
@@ -694,8 +710,8 @@ public:
   DUMP_NODE(Fortran::parser::OmpAlignedClause, {})
   DUMP_NODE(Fortran::parser::OmpAlignedClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpAtClause, {})
-  // NODE_ENUM(OmpAtClause, ActionTime)
-  // NODE_ENUM(OmpSeverityClause, Severity)
+  DUMP_ENUM(Fortran::parser::OmpAtClause, ActionTime)
+  DUMP_ENUM(Fortran::parser::OmpSeverityClause, Severity)
   DUMP_NODE(Fortran::parser::OmpAtomic, {})
   DUMP_NODE(Fortran::parser::OmpAtomicCapture, {})
   DUMP_NODE(Fortran::parser::OmpAtomicCapture::Stmt1, {})
@@ -710,7 +726,7 @@ public:
   DUMP_NODE(Fortran::parser::OmpBeginSectionsDirective, {})
   DUMP_NODE(Fortran::parser::OmpBlockDirective, {})
   DUMP_NODE(Fortran::parser::OmpCancelType, {})
-  // NODE_ENUM(OmpCancelType, Type)
+  DUMP_ENUM(Fortran::parser::OmpCancelType, Type)
   DUMP_NODE(Fortran::parser::OmpClause, {})
   DUMP_NODE(Fortran::parser::OmpClauseList, {})
   DUMP_NODE(Fortran::parser::OmpCriticalDirective, {})
@@ -721,16 +737,16 @@ public:
   DUMP_NODE(Fortran::parser::OmpDeclareTargetWithList, {})
   DUMP_NODE(Fortran::parser::OmpDeclareMapperSpecifier, {})
   DUMP_NODE(Fortran::parser::OmpDefaultClause, {})
-  // NODE_ENUM(OmpDefaultClause, DataSharingAttribute)
+  DUMP_ENUM(Fortran::parser::OmpDefaultClause, DataSharingAttribute)
   DUMP_NODE(Fortran::parser::OmpVariableCategory, {})
-  // NODE_ENUM(OmpVariableCategory, Value)
+  DUMP_ENUM(Fortran::parser::OmpVariableCategory, Value)
   DUMP_NODE(Fortran::parser::OmpDefaultmapClause, {})
-  // NODE_ENUM(OmpDefaultmapClause, ImplicitBehavior)
+  DUMP_ENUM(Fortran::parser::OmpDefaultmapClause, ImplicitBehavior)
   DUMP_NODE(Fortran::parser::OmpDefaultmapClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpDependenceType, {})
-  // NODE_ENUM(OmpDependenceType, Value)
+  DUMP_ENUM(Fortran::parser::OmpDependenceType, Value)
   DUMP_NODE(Fortran::parser::OmpTaskDependenceType, {})
-  // NODE_ENUM(OmpTaskDependenceType, Value)
+  DUMP_ENUM(Fortran::parser::OmpTaskDependenceType, Value)
   DUMP_NODE(Fortran::parser::OmpIterationOffset, {})
   DUMP_NODE(Fortran::parser::OmpIteration, {})
   DUMP_NODE(Fortran::parser::OmpIterationVector, {})
@@ -753,18 +769,18 @@ public:
   DUMP_NODE(Fortran::parser::OmpFromClause, {})
   DUMP_NODE(Fortran::parser::OmpFromClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpExpectation, {})
-  // NODE_ENUM(OmpExpectation, Value)
+  DUMP_ENUM(Fortran::parser::OmpExpectation, Value)
   DUMP_NODE(Fortran::parser::OmpDirectiveNameModifier, {})
   DUMP_NODE(Fortran::parser::OmpIfClause, {})
   DUMP_NODE(Fortran::parser::OmpIfClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpLastprivateClause, {})
   DUMP_NODE(Fortran::parser::OmpLastprivateClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpLastprivateModifier, {})
-  // NODE_ENUM(OmpLastprivateModifier, Value)
+  DUMP_ENUM(Fortran::parser::OmpLastprivateModifier, Value)
   DUMP_NODE(Fortran::parser::OmpLinearClause, {})
   DUMP_NODE(Fortran::parser::OmpLinearClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpLinearModifier, {})
-  // NODE_ENUM(OmpLinearModifier, Value)
+  DUMP_ENUM(Fortran::parser::OmpLinearModifier, Value)
   DUMP_NODE(Fortran::parser::OmpStepComplexModifier, {})
   DUMP_NODE(Fortran::parser::OmpStepSimpleModifier, {})
   DUMP_NODE(Fortran::parser::OmpLoopDirective, {})
@@ -775,21 +791,21 @@ public:
   DUMP_NODE(Fortran::parser::OmpObjectList, {})
   DUMP_NODE(Fortran::parser::OmpOrderClause, {})
   DUMP_NODE(Fortran::parser::OmpOrderClause::Modifier, {})
-  // NODE_ENUM(OmpOrderClause, Ordering)
+  DUMP_ENUM(Fortran::parser::OmpOrderClause, Ordering)
   DUMP_NODE(Fortran::parser::OmpOrderModifier, {})
-  // NODE_ENUM(OmpOrderModifier, Value)
+  DUMP_ENUM(Fortran::parser::OmpOrderModifier, Value)
   DUMP_NODE(Fortran::parser::OmpGrainsizeClause, {})
   DUMP_NODE(Fortran::parser::OmpGrainsizeClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpPrescriptiveness, {})
-  // NODE_ENUM(OmpPrescriptiveness, Value)
+  DUMP_ENUM(Fortran::parser::OmpPrescriptiveness, Value)
   DUMP_NODE(Fortran::parser::OmpNumTasksClause, {})
   DUMP_NODE(Fortran::parser::OmpNumTasksClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpBindClause, {})
-  // NODE_ENUM(OmpBindClause, Binding)
+  DUMP_ENUM(Fortran::parser::OmpBindClause, Binding)
   DUMP_NODE(Fortran::parser::OmpProcBindClause, {})
-  // NODE_ENUM(OmpProcBindClause, AffinityPolicy)
+  DUMP_ENUM(Fortran::parser::OmpProcBindClause, AffinityPolicy)
   DUMP_NODE(Fortran::parser::OmpReductionModifier, {})
-  // NODE_ENUM(OmpReductionModifier, Value)
+  DUMP_ENUM(Fortran::parser::OmpReductionModifier, Value)
   DUMP_NODE(Fortran::parser::OmpReductionClause, {})
   DUMP_NODE(Fortran::parser::OmpReductionClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpInReductionClause, {})
@@ -807,19 +823,19 @@ public:
   DUMP_NODE(Fortran::parser::OmpAllocatorSimpleModifier, {})
   DUMP_NODE(Fortran::parser::OmpScheduleClause, {})
   DUMP_NODE(Fortran::parser::OmpScheduleClause::Modifier, {})
-  // NODE_ENUM(OmpScheduleClause, Kind)
+  DUMP_ENUM(Fortran::parser::OmpScheduleClause, Kind)
   DUMP_NODE(Fortran::parser::OmpSeverityClause, {})
   DUMP_NODE(Fortran::parser::OmpDeviceClause, {})
   DUMP_NODE(Fortran::parser::OmpDeviceClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpDeviceModifier, {})
-  // NODE_ENUM(OmpDeviceModifier, Value)
+  DUMP_ENUM(Fortran::parser::OmpDeviceModifier, Value)
   DUMP_NODE(Fortran::parser::OmpDeviceTypeClause, {})
-  // NODE_ENUM(OmpDeviceTypeClause, DeviceTypeDescription)
+  DUMP_ENUM(Fortran::parser::OmpDeviceTypeClause, DeviceTypeDescription)
   DUMP_NODE(Fortran::parser::OmpUpdateClause, {})
   DUMP_NODE(Fortran::parser::OmpChunkModifier, {})
-  // NODE_ENUM(OmpChunkModifier, Value)
+  DUMP_ENUM(Fortran::parser::OmpChunkModifier, Value)
   DUMP_NODE(Fortran::parser::OmpOrderingModifier, {})
-  // NODE_ENUM(OmpOrderingModifier, Value)
+  DUMP_ENUM(Fortran::parser::OmpOrderingModifier, Value)
   DUMP_NODE(Fortran::parser::OmpSectionBlocks, {})
   DUMP_NODE(Fortran::parser::OmpSectionsDirective, {})
   DUMP_NODE(Fortran::parser::OmpSimpleStandaloneDirective, {})
@@ -855,7 +871,7 @@ public:
   DUMP_NODE(Fortran::parser::OmpAtomicClause, {})
   DUMP_NODE(Fortran::parser::OmpAtomicClauseList, {})
   DUMP_NODE(Fortran::parser::OmpAtomicDefaultMemOrderClause, {})
-  // NODE_ENUM(common, OmpAtomicDefaultMemOrderType)
+  DUMP_ENUM(Fortran::common, OmpAtomicDefaultMemOrderType)
   DUMP_NODE(Fortran::parser::OpenMPDepobjConstruct, {})
   DUMP_NODE(Fortran::parser::OpenMPUtilityConstruct, {})
   DUMP_NODE(Fortran::parser::OpenMPDispatchConstruct, {})
@@ -912,7 +928,7 @@ public:
   DUMP_NODE(Fortran::parser::ProcedureDeclarationStmt, {})
   DUMP_NODE(Fortran::parser::ProcedureDesignator, {})
   DUMP_NODE(Fortran::parser::ProcedureStmt, {})
-  // NODE_ENUM(ProcedureStmt, Kind)
+  DUMP_ENUM(Fortran::parser::ProcedureStmt, Kind)
   DUMP_NODE(Fortran::parser::Program, {})
   DUMP_NODE(Fortran::parser::ProgramStmt, {})
   DUMP_NODE(Fortran::parser::ProgramUnit, {})
@@ -929,7 +945,7 @@ public:
   DUMP_NODE(Fortran::parser::Save, {})
   DUMP_NODE(Fortran::parser::SaveStmt, {})
   DUMP_NODE(Fortran::parser::SavedEntity, {})
-  // NODE_ENUM(SavedEntity, Kind)
+  DUMP_ENUM(Fortran::parser::SavedEntity, Kind)
   DUMP_NODE(Fortran::parser::SectionSubscript, {})
   DUMP_NODE(Fortran::parser::SelectCaseStmt, {})
   DUMP_NODE(Fortran::parser::SelectRankCaseStmt, {})
@@ -957,7 +973,7 @@ public:
   DUMP_NODE(Fortran::parser::StmtFunctionStmt, {})
   DUMP_NODE(Fortran::parser::StopCode, {})
   DUMP_NODE(Fortran::parser::StopStmt, {})
-  // NODE_ENUM(StopStmt, Kind)
+  DUMP_ENUM(Fortran::parser::StopStmt, Kind)
   DUMP_NODE(Fortran::parser::StructureComponent, {})
   DUMP_NODE(Fortran::parser::StructureConstructor, {})
   DUMP_NODE(Fortran::parser::StructureDef, {})
@@ -1007,7 +1023,7 @@ public:
   DUMP_NODE(Fortran::parser::UnsignedLiteralConstant, {})
   DUMP_NODE(Fortran::parser::UnsignedTypeSpec, {})
   DUMP_NODE(Fortran::parser::UseStmt, {})
-  // NODE_ENUM(UseStmt, ModuleNature)
+  DUMP_ENUM(Fortran::parser::UseStmt, ModuleNature)
   DUMP_NODE(Fortran::parser::Value, {})
   DUMP_NODE(Fortran::parser::ValueStmt, {})
   DUMP_NODE(Fortran::parser::Variable, {})
@@ -1038,9 +1054,9 @@ class DumpAST : public Fortran::frontend::PluginParseTreeAction {
     Fortran::parser::Walk(getParsing().parseTree(), visitor);
     llvm::outs() << "],\n";
 
-    llvm::outs() << "\"enums\": [\n";
+    llvm::outs() << "\"enums\": {\n";
     ParseTreeVisitor::dumpEnumValues();
-    llvm::outs() << "]}\n";
+    llvm::outs() << "}\n}\n";
   }
 };
 
