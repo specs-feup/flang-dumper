@@ -106,7 +106,7 @@ template <> std::string getId(const std::nullopt_t &) { return "null"; }
 
 struct variant_visitor {
   template <typename T> void operator()(const T &value) const {
-    llvm::outs() << "\"" << getId(value) << "\"";
+    dump(value, "value");
   }
 };
 
@@ -122,8 +122,8 @@ void dump(std::string_view v, const char *property_name) {
   DUMP_PROPERTY(property_name, v);
 }
 
-void dump(const std::uint64_t v, const char *property_name) {
-  DUMP_PROPERTY(property_name, v)
+template <> void dump(const std::uint64_t &v, const char *property_name) {
+  DUMP_PROPERTY(property_name, v);
 }
 
 template <> void dump(const std::string &v, const char *property_name) {
@@ -188,7 +188,6 @@ void dump(const Fortran::parser::UnlabeledStatement<T> &v) {
 
 template <typename... T>
 void dump(const std::variant<T...> &v, const char *property_name) {
-  llvm::outs() << ",\n\"" << property_name << "\": ";
   std::visit(variant_visitor{}, v);
 }
 
@@ -671,7 +670,7 @@ public:
   DUMP_NODE(Fortran::parser::ModuleSubprogramPart, {})
   DUMP_NODE(Fortran::parser::MpSubprogramStmt, {})
   DUMP_NODE(Fortran::parser::MsgVariable, {})
-  DUMP_NODE(Fortran::parser::Name, {dump(v.source, "source");})
+  DUMP_NODE(Fortran::parser::Name, { dump(v.source, "source"); })
   DUMP_NODE(Fortran::parser::NamedConstant, {})
   DUMP_NODE(Fortran::parser::NamedConstantDef, {})
   DUMP_NODE(Fortran::parser::NamelistStmt, {})
