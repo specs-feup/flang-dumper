@@ -126,6 +126,10 @@ template <> void dump(const std::uint64_t &v, const char *property_name) {
   DUMP_PROPERTY(property_name, v);
 }
 
+template <> void dump(const int &v, const char *property_name) {
+  DUMP_PROPERTY(property_name, v);
+}
+
 template <> void dump(const std::string &v, const char *property_name) {
   dump(v.c_str(), property_name);
 }
@@ -204,6 +208,8 @@ void dump(const std::optional<T> &v, const char *property_name) {
     dump(std::nullopt, property_name);
   }
 }
+
+
 
 template <typename... T> void dump(const std::tuple<T...> &v) {
   // For each element in the tuple, call dump
