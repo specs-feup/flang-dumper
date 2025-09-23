@@ -1,18 +1,34 @@
-name: Mirror to GitLab
+name: Mirror to GitLab (SSH)
+
 on:
   push:
     branches: ["**"]
     tags: ["**"]
+
 jobs:
   mirror:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-      - name: Add GitLab remote
-        run: git remote add gitlab https://oauth2:${GITLAB_TOKEN}@git.dare.megware.com/compilers/flang-dumper.git
-      - name: Push mirror
-        run: git push --mirror gitlab
-    env:
-      GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          fetch-depth: 0   # get full history + tags
+
+      # Start an ssh-agent and load the private key from Secrets
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.GITLAB_SSH_PRIVATE_KEY }}
+
+      # Trust the GitLab host key (gitlab.com shown; change if self-managed)
+      - name: Add GitLab to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+
+      - name: Push mirror to GitLab
+        run: |
+          git remote add gitlab git@git.dare.megware.com:2221/compilers/flang-dumper.git
+          # Mirror ALL refs (branches, tags, notes). Use with care if you rewrite history.
+          git push --mirror gitlab
+      
+      
