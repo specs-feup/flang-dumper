@@ -13,6 +13,14 @@ jobs:
         with:
           fetch-depth: 0   # get full history + tags
 
+        # Make sure we have *all* branches & tags from GitHub
+      - name: Fetch all branches and tags
+        run: |
+          # Ensure origin fetches all heads
+          git config remote.origin.fetch "+refs/heads/*:refs/remotes/origin/*"
+          git fetch --prune origin
+          git fetch --prune --tags origin
+
       # Start an ssh-agent and load the private key from Secrets
       - name: Setup SSH agent
         uses: webfactory/ssh-agent@v0.9.1
@@ -25,10 +33,16 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p 2221 git.dare.megware.com >> ~/.ssh/known_hosts
 
-      - name: Push mirror to GitLab
-        run: |
-          git remote add gitlab ssh://git@git.dare.megware.com:2221/compilers/flang-dumper.git
-          # Mirror ALL refs (branches, tags, notes). Use with care if you rewrite history.
-          git push --mirror gitlab
-      
+
+
+      - name: Add GitLab remote (SSH)
+        run: git remote add gitlab ssh://git@git.dare.megware.com:2221/compilers/flang-dumper.git
+
+      # Push only the public namespaces (no refs/remotes/*)
+      - name: Push branches
+        run: git push --prune gitlab +refs/heads/*:refs/heads/*
+
+      - name: Push tags
+        run: git push --prune gitlab +refs/tags/*:refs/tags/*
+              
       
