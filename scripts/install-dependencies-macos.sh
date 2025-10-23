@@ -1,1 +1,143 @@
-#!/usr/bin/env bash# Installs LLVM “dependencies” on macOS using Homebrew, mirroring the Debian script’s flow.# - Calls a sibling llvm-macos.sh (the macOS port of your llvm.sh) with the same version.# - Installs cmake and ensures LLVM/MLIR tools are available.# - Checks for flang (flang-new) and other tools.## NOTE: On macOS, there are no separate *-dev packages; headers/libraries live in the LLVM keg.set -euo pipefailLLVM_VERSION=20# --- Guards & environment -----------------------------------------------------if [[ "$(uname -s)" != "Darwin" ]]; then  echo "This script is for macOS (Darwin) only." >&2  exit 1fiif [[ "${EUID:-$(id -u)}" -eq 0 ]]; then  echo "Do not run this script as root on macOS. Homebrew must run as your user." >&2  exit 1fiif ! command -v brew >/dev/null 2>&1; then  cat >&2 <<'EOF'Homebrew is not installed. Install it first:/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"EOF  exit 1fi# --- Step 1: Call base LLVM installer (macOS port of your llvm.sh) -----------SCRIPTDIR="$(cd "$(dirname "$0")" && pwd)"if [[ ! -x "${SCRIPTDIR}/llvm-macos.sh" ]]; then  echo "Missing or non-executable ${SCRIPTDIR}/llvm-macos.sh. Place the macOS LLVM installer next to this script." >&2  exit 1fi# keep the same contract (version only)if ! "${SCRIPTDIR}/llvm-macos.sh" "${LLVM_VERSION}"; then  echo "LLVM base installation failed."  exit 1fi# --- Step 2: Determine which LLVM formula we ended up with --------------------FORMULA_VERSIONED="llvm@${LLVM_VERSION}"FORMULA_UNVERSIONED="llvm"select_formula() {  if brew info --formula "$FORMULA_VERSIONED" >/dev/null 2>&1; then    echo "$FORMULA_VERSIONED"  else    echo "$FORMULA_UNVERSIONED"  fi}LLVM_FORMULA="$(select_formula)"# --- Step 3: Install additional dependencies (cmake, etc.) -------------------echo "Ensuring additional build tools are present…"brew install cmake >/dev/null || true# MLIR/clang/clangd/llvm-config are shipped inside the LLVM keg on macOS.# --- Step 4: Set up PATH to the chosen LLVM for this session ------------------# We do *not* force-link keg-only LLVM. Use the keg’s bin directory first in PATH.LLVM_PREFIX="$(brew --prefix "$LLVM_FORMULA" 2>/dev/null || true)"if [[ -z "$LLVM_PREFIX" ]]; then  # Fallback to conventional prefix path  LLVM_PREFIX="$(brew --prefix)/opt/${LLVM_FORMULA}"fiexport PATH="$LLVM_PREFIX/bin:$PATH"export LDFLAGS="-L$LLVM_PREFIX/lib ${LDFLAGS:-}"export CPPFLAGS="-I$LLVM_PREFIX/include ${CPPFLAGS:-}"echoecho "Using LLVM from: $LLVM_PREFIX"echo "Temporarily set PATH for this shell. To make it permanent:"echo "  echo 'export PATH=\"$LLVM_PREFIX/bin:\$PATH\"' >> ~/.zshrc"echo "  echo 'export LDFLAGS=\"-L$LLVM_PREFIX/lib \$LDFLAGS\"' >> ~/.zshrc"echo "  echo 'export CPPFLAGS=\"-I$LLVM_PREFIX/include \$CPPFLAGS\"' >> ~/.zshrc"echo# --- Step 5: Report “package” presence (Homebrew-style) -----------------------echo "Checking installed formulae:"if brew list --versions "$LLVM_FORMULA" >/dev/null 2>&1; then  echo " - $LLVM_FORMULA: installed ($(brew list --versions "$LLVM_FORMULA" | awk '{print $2}'))"else  echo " - $LLVM_FORMULA: NOT installed"fiif brew list --versions cmake >/dev/null 2>&1; then  echo " - cmake: installed ($(brew list --versions cmake | awk '{print $2}'))"else  echo " - cmake: NOT installed"fi# --- Step 6: Tool availability checks (macOS names/locations) -----------------# Debian script checked for version-suffixed binaries; on macOS they’re generally unsuffixed.# flang naming is evolving; check both 'flang' and 'flang-new'.echoecho "Tool availability checks (from $LLVM_PREFIX/bin):"have() { command -v "$1" >/dev/null 2>&1; }# Flang (try flang, then flang-new)if have flang; then  echo " - flang: available → $(flang --version | head -n 1 || true)"elif have flang-new; then  echo " - flang-new: available → $(flang-new --version | head -n 1 || true)"  echo "   (Note: Homebrew LLVM often exposes the Fortran frontend as 'flang-new')"else  echo " - flang/flang-new: NOT found."  echo "   Tip: Homebrew’s LLVM may not ship a stable 'flang' yet for all versions."  echo "   If you require Fortran, consider:"  echo "     - gfortran (via 'brew install gcc'), or"  echo "     - checking whether the chosen LLVM formula includes flang-new."fi# llvm-config (unsuffixed)if have llvm-config; then  echo " - llvm-config: available → $(llvm-config --version 2>/dev/null || echo "?")"else  echo " - llvm-config: NOT found."fi# mlir-opt lives in the LLVM bin when MLIR is built (it normally is)if have mlir-opt; then  echo " - mlir-opt: available → $(mlir-opt --version 2>/dev/null | head -n 1 || echo "?")"else  echo " - mlir-opt: NOT found."fi# clang (for completeness, also mirrors your dev deps)if have clang; then  echo " - clang: available → $(clang --version | head -n 1 || true)"else  echo " - clang: NOT found."fiechoecho "Dependency installation & checks completed."
+#!/usr/bin/env bash
+# Installs LLVM “dependencies” on macOS using Homebrew, mirroring the Debian script’s flow.
+# - Calls a sibling llvm-macos.sh (the macOS port of your llvm.sh) with the same version.
+# - Installs cmake and ensures LLVM/MLIR tools are available.
+# - Checks for flang (flang-new) and other tools.
+#
+# NOTE: On macOS, there are no separate *-dev packages; headers/libraries live in the LLVM keg.
+
+set -euo pipefail
+
+LLVM_VERSION=20
+
+# --- Guards & environment -----------------------------------------------------
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "This script is for macOS (Darwin) only." >&2
+  exit 1
+fi
+
+if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+  echo "Do not run this script as root on macOS. Homebrew must run as your user." >&2
+  exit 1
+fi
+
+if ! command -v brew >/dev/null 2>&1; then
+  cat >&2 <<'EOF'
+Homebrew is not installed. Install it first:
+
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+EOF
+  exit 1
+fi
+
+# --- Step 1: Call base LLVM installer (macOS port of your llvm.sh) -----------
+SCRIPTDIR="$(cd "$(dirname "$0")" && pwd)"
+if [[ ! -x "${SCRIPTDIR}/llvm-macos.sh" ]]; then
+  echo "Missing or non-executable ${SCRIPTDIR}/llvm-macos.sh. Place the macOS LLVM installer next to this script." >&2
+  exit 1
+fi
+
+# keep the same contract (version only)
+if ! "${SCRIPTDIR}/llvm-macos.sh" "${LLVM_VERSION}"; then
+  echo "LLVM base installation failed."
+  exit 1
+fi
+
+# --- Step 2: Determine which LLVM formula we ended up with --------------------
+FORMULA_VERSIONED="llvm@${LLVM_VERSION}"
+FORMULA_UNVERSIONED="llvm"
+
+select_formula() {
+  if brew info --formula "$FORMULA_VERSIONED" >/dev/null 2>&1; then
+    echo "$FORMULA_VERSIONED"
+  else
+    echo "$FORMULA_UNVERSIONED"
+  fi
+}
+
+LLVM_FORMULA="$(select_formula)"
+
+# --- Step 3: Install additional dependencies (cmake, etc.) -------------------
+echo "Ensuring additional build tools are present…"
+brew install cmake >/dev/null || true
+
+# MLIR/clang/clangd/llvm-config are shipped inside the LLVM keg on macOS.
+
+# --- Step 4: Set up PATH to the chosen LLVM for this session ------------------
+# We do *not* force-link keg-only LLVM. Use the keg’s bin directory first in PATH.
+LLVM_PREFIX="$(brew --prefix "$LLVM_FORMULA" 2>/dev/null || true)"
+if [[ -z "$LLVM_PREFIX" ]]; then
+  # Fallback to conventional prefix path
+  LLVM_PREFIX="$(brew --prefix)/opt/${LLVM_FORMULA}"
+fi
+
+export PATH="$LLVM_PREFIX/bin:$PATH"
+export LDFLAGS="-L$LLVM_PREFIX/lib ${LDFLAGS:-}"
+export CPPFLAGS="-I$LLVM_PREFIX/include ${CPPFLAGS:-}"
+
+echo
+echo "Using LLVM from: $LLVM_PREFIX"
+echo "Temporarily set PATH for this shell. To make it permanent:"
+echo "  echo 'export PATH=\"$LLVM_PREFIX/bin:\$PATH\"' >> ~/.zshrc"
+echo "  echo 'export LDFLAGS=\"-L$LLVM_PREFIX/lib \$LDFLAGS\"' >> ~/.zshrc"
+echo "  echo 'export CPPFLAGS=\"-I$LLVM_PREFIX/include \$CPPFLAGS\"' >> ~/.zshrc"
+echo
+
+# --- Step 5: Report “package” presence (Homebrew-style) -----------------------
+echo "Checking installed formulae:"
+if brew list --versions "$LLVM_FORMULA" >/dev/null 2>&1; then
+  echo " - $LLVM_FORMULA: installed ($(brew list --versions "$LLVM_FORMULA" | awk '{print $2}'))"
+else
+  echo " - $LLVM_FORMULA: NOT installed"
+fi
+if brew list --versions cmake >/dev/null 2>&1; then
+  echo " - cmake: installed ($(brew list --versions cmake | awk '{print $2}'))"
+else
+  echo " - cmake: NOT installed"
+fi
+
+# --- Step 6: Tool availability checks (macOS names/locations) -----------------
+# Debian script checked for version-suffixed binaries; on macOS they’re generally unsuffixed.
+# flang naming is evolving; check both 'flang' and 'flang-new'.
+echo
+echo "Tool availability checks (from $LLVM_PREFIX/bin):"
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+# Flang (try flang, then flang-new)
+if have flang; then
+  echo " - flang: available → $(flang --version | head -n 1 || true)"
+elif have flang-new; then
+  echo " - flang-new: available → $(flang-new --version | head -n 1 || true)"
+  echo "   (Note: Homebrew LLVM often exposes the Fortran frontend as 'flang-new')"
+else
+  echo " - flang/flang-new: NOT found."
+  echo "   Tip: Homebrew’s LLVM may not ship a stable 'flang' yet for all versions."
+  echo "   If you require Fortran, consider:"
+  echo "     - gfortran (via 'brew install gcc'), or"
+  echo "     - checking whether the chosen LLVM formula includes flang-new."
+fi
+
+# llvm-config (unsuffixed)
+if have llvm-config; then
+  echo " - llvm-config: available → $(llvm-config --version 2>/dev/null || echo "?")"
+else
+  echo " - llvm-config: NOT found."
+fi
+
+# mlir-opt lives in the LLVM bin when MLIR is built (it normally is)
+if have mlir-opt; then
+  echo " - mlir-opt: available → $(mlir-opt --version 2>/dev/null | head -n 1 || echo "?")"
+else
+  echo " - mlir-opt: NOT found."
+fi
+
+# clang (for completeness, also mirrors your dev deps)
+if have clang; then
+  echo " - clang: available → $(clang --version | head -n 1 || true)"
+else
+  echo " - clang: NOT found."
+fi
+
+echo
+echo "Dependency installation & checks completed."

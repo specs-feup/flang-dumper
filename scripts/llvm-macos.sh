@@ -1,1 +1,204 @@
-#!/usr/bin/env bash################################################################################# Adapted for macOS (Homebrew) from the Debian/Ubuntu installer.# Installs LLVM toolchain via Homebrew, matching the Ubuntu script's interface.## Usage: ./llvm-macos.sh [llvm_major_version] [all] [OPTIONS]#   all                 Install the full LLVM toolchain (same intent as Ubuntu).#   -n=code_name        (ignored on macOS; accepted for CLI parity)#   -m=repo_base_url    (ignored on macOS; accepted for CLI parity)#   -h                  Show help.## Examples:#   ./llvm-macos.sh                 # installs current stable (19) via brew#   ./llvm-macos.sh 18              # tries llvm@18, falls back to 'llvm' if missing#   ./llvm-macos.sh all             # installs full toolchain (keg-only PATH tips)#   ./llvm-macos.sh 17 all          # version + all## Notes:# - Requires Homebrew (https://brew.sh). The script will guide you if missing.# - Homebrew's LLVM formulae are keg-only; you'll usually add them to PATH.# - Do NOT run with sudo on macOS; brew must run as your user.################################################################################set -euo pipefailusage() {  cat 1>&2 <<'EOF'Usage: ./llvm-macos.sh [llvm_major_version] [all] [OPTIONS]  all                 Install the full LLVM toolchain (clang/clangd/clang-tidy/etc.).  -n=code_name        Ignored on macOS (kept for CLI compatibility).  -m=repo_base_url    Ignored on macOS (kept for CLI compatibility).  -h                  Show this help.Examples:  ./llvm-macos.sh  ./llvm-macos.sh 18  ./llvm-macos.sh all  ./llvm-macos.sh 17 allEOF  exit 1}CURRENT_LLVM_STABLE=19# DefaultsLLVM_VERSION="$CURRENT_LLVM_STABLE"ALL=0# macOS onlyif [[ "$(uname -s)" != "Darwin" ]]; then  echo "This script is for macOS (Darwin) only." >&2  exit 1fi# Don't run as root/sudo on macOS with brewif [[ "${EUID:-$(id -u)}" -eq 0 ]]; then  echo "Do not run this script as root on macOS. Homebrew must run as your user." >&2  exit 1fi# Parse leading positionals: [llvm_major_version] [all]if [[ $# -ge 1 && "${1:0:1}" != "-" ]]; then  if [[ "$1" == "all" ]]; then    ALL=1  else    if [[ ! "$1" =~ ^[0-9]+$ ]]; then      echo "First argument must be an LLVM major version (e.g., 18) or 'all'." >&2      usage    fi    LLVM_VERSION="$1"  fi  shift  if [[ $# -ge 1 && "${1:0:1}" != "-" ]]; then    if [[ "$1" == "all" ]]; then      ALL=1      shift    fi  fifi# Parse options (accept -h, and accept-but-ignore -m/-n to mirror Ubuntu script)while getopts ":hm:n:" opt; do  case "$opt" in    h) usage ;;    m)      echo "Note: -m is ignored on macOS (no APT mirrors needed)." >&2      ;;    n)      echo "Note: -n is ignored on macOS (no distro codename needed)." >&2      ;;    \? | :)      usage      ;;  esacdone# Check Homebrewif ! command -v brew >/dev/null 2>&1; then  cat >&2 <<'EOF'Homebrew is not installed. Install it first:/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"Then re-run this script.EOF  exit 1fi# Determine candidate formula names:# Prefer versioned formula (llvm@X); if unavailable, fall back to 'llvm'.FORMULA_VERSIONED="llvm@${LLVM_VERSION}"FORMULA_UNVERSIONED="llvm"have_formula() {  # Returns 0 if formula is found in brew search, else 1.  # Using 'brew info --formula' is faster and exits non-zero when not found.  if brew info --formula "$1" >/dev/null 2>&1; then    return 0  fi  return 1}install_formula() {  local formula="$1"  echo "Installing $formula via Homebrew..."  brew install "$formula"}link_if_possible() {  local formula="$1"  # Many llvm formulae are keg-only; don't try to force-link by default.  # Provide clear PATH hints instead.  if brew info --formula "$formula" 2>/dev/null | grep -q "keg-only"; then    echo    echo "✅ Installed '$formula' (keg-only)."    local prefix    prefix="$(brew --prefix "$formula" 2>/dev/null || true)"    if [[ -z "$prefix" ]]; then      prefix="$(brew --prefix)/opt/$formula"    fi    echo "Add to your shell PATH (recommended):"    echo "  echo 'export PATH=\"$prefix/bin:\$PATH\"' >> ~/.zshrc"    echo "  echo 'export LDFLAGS=\"-L$prefix/lib \$LDFLAGS\"' >> ~/.zshrc"    echo "  echo 'export CPPFLAGS=\"-I$prefix/include \$CPPFLAGS\"' >> ~/.zshrc"    echo "Then restart your shell."    echo  else    echo "Linking '$formula'..."    brew link "$formula"  fi}ensure_llvm_tools() {  # On macOS, the llvm formula already includes clang, clangd, lld, lldb,  # clang-format, clang-tidy, llvm-ar, etc. If user requested 'all', we just  # ensure the same keg and provide PATH hints (done above).  :}main() {  local target_formula=""  if have_formula "$FORMULA_VERSIONED"; then    target_formula="$FORMULA_VERSIONED"  else    echo "Versioned formula '$FORMULA_VERSIONED' not found in Homebrew. Will try '$FORMULA_UNVERSIONED' (latest available)." >&2    if ! have_formula "$FORMULA_UNVERSIONED"; then      echo "Homebrew formula 'llvm' not found. Your Homebrew catalog may be out-of-date or taps missing." >&2      echo "Try: brew update && brew tap homebrew/core" >&2      exit 2    fi    target_formula="$FORMULA_UNVERSIONED"  fi  # Install  if brew list --formula "$target_formula" >/dev/null 2>&1; then    echo "'$target_formula' is already installed."  else    install_formula "$target_formula"  fi  # Post-install  link_if_possible "$target_formula"  if [[ "$ALL" -eq 1 ]]; then    ensure_llvm_tools  fi  echo  echo "Done."  echo "Useful checks:"  echo "  which clang && clang --version"  echo "  which clangd && clangd --version"  echo "  which lldb && lldb --version"  echo "  which lld && ld.lld --version || lld --version || true"  echo  echo "Tip: Apple's Clang (in Xcode Command Line Tools) is different from Homebrew LLVM."  echo "If you still see Apple Clang, ensure the Homebrew LLVM bin dir is first in PATH."  echo  echo "Optional (LLDB debug signing on macOS if needed):"  echo "  sudo /usr/sbin/DevToolsSecurity -enable"  echo "  # For deeper codesign/entitlements, consult LLDB docs if you hit permissions."}main "$@"
+#!/usr/bin/env bash
+################################################################################
+# Adapted for macOS (Homebrew) from the Debian/Ubuntu installer.
+# Installs LLVM toolchain via Homebrew, matching the Ubuntu script's interface.
+#
+# Usage: ./llvm-macos.sh [llvm_major_version] [all] [OPTIONS]
+#   all                 Install the full LLVM toolchain (same intent as Ubuntu).
+#   -n=code_name        (ignored on macOS; accepted for CLI parity)
+#   -m=repo_base_url    (ignored on macOS; accepted for CLI parity)
+#   -h                  Show help.
+#
+# Examples:
+#   ./llvm-macos.sh                 # installs current stable (19) via brew
+#   ./llvm-macos.sh 18              # tries llvm@18, falls back to 'llvm' if missing
+#   ./llvm-macos.sh all             # installs full toolchain (keg-only PATH tips)
+#   ./llvm-macos.sh 17 all          # version + all
+#
+# Notes:
+# - Requires Homebrew (https://brew.sh). The script will guide you if missing.
+# - Homebrew's LLVM formulae are keg-only; you'll usually add them to PATH.
+# - Do NOT run with sudo on macOS; brew must run as your user.
+################################################################################
+
+set -euo pipefail
+
+usage() {
+  cat 1>&2 <<'EOF'
+Usage: ./llvm-macos.sh [llvm_major_version] [all] [OPTIONS]
+  all                 Install the full LLVM toolchain (clang/clangd/clang-tidy/etc.).
+  -n=code_name        Ignored on macOS (kept for CLI compatibility).
+  -m=repo_base_url    Ignored on macOS (kept for CLI compatibility).
+  -h                  Show this help.
+
+Examples:
+  ./llvm-macos.sh
+  ./llvm-macos.sh 18
+  ./llvm-macos.sh all
+  ./llvm-macos.sh 17 all
+EOF
+  exit 1
+}
+
+CURRENT_LLVM_STABLE=19
+
+# Defaults
+LLVM_VERSION="$CURRENT_LLVM_STABLE"
+ALL=0
+
+# macOS only
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "This script is for macOS (Darwin) only." >&2
+  exit 1
+fi
+
+# Don't run as root/sudo on macOS with brew
+if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
+  echo "Do not run this script as root on macOS. Homebrew must run as your user." >&2
+  exit 1
+fi
+
+# Parse leading positionals: [llvm_major_version] [all]
+if [[ $# -ge 1 && "${1:0:1}" != "-" ]]; then
+  if [[ "$1" == "all" ]]; then
+    ALL=1
+  else
+    if [[ ! "$1" =~ ^[0-9]+$ ]]; then
+      echo "First argument must be an LLVM major version (e.g., 18) or 'all'." >&2
+      usage
+    fi
+    LLVM_VERSION="$1"
+  fi
+  shift
+  if [[ $# -ge 1 && "${1:0:1}" != "-" ]]; then
+    if [[ "$1" == "all" ]]; then
+      ALL=1
+      shift
+    fi
+  fi
+fi
+
+# Parse options (accept -h, and accept-but-ignore -m/-n to mirror Ubuntu script)
+while getopts ":hm:n:" opt; do
+  case "$opt" in
+    h) usage ;;
+    m)
+      echo "Note: -m is ignored on macOS (no APT mirrors needed)." >&2
+      ;;
+    n)
+      echo "Note: -n is ignored on macOS (no distro codename needed)." >&2
+      ;;
+    \? | :)
+      usage
+      ;;
+  esac
+done
+
+# Check Homebrew
+if ! command -v brew >/dev/null 2>&1; then
+  cat >&2 <<'EOF'
+Homebrew is not installed. Install it first:
+
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+Then re-run this script.
+EOF
+  exit 1
+fi
+
+# Determine candidate formula names:
+# Prefer versioned formula (llvm@X); if unavailable, fall back to 'llvm'.
+FORMULA_VERSIONED="llvm@${LLVM_VERSION}"
+FORMULA_UNVERSIONED="llvm"
+
+have_formula() {
+  # Returns 0 if formula is found in brew search, else 1.
+  # Using 'brew info --formula' is faster and exits non-zero when not found.
+  if brew info --formula "$1" >/dev/null 2>&1; then
+    return 0
+  fi
+  return 1
+}
+
+install_formula() {
+  local formula="$1"
+  echo "Installing $formula via Homebrew..."
+  brew install "$formula"
+}
+
+link_if_possible() {
+  local formula="$1"
+  # Many llvm formulae are keg-only; don't try to force-link by default.
+  # Provide clear PATH hints instead.
+  if brew info --formula "$formula" 2>/dev/null | grep -q "keg-only"; then
+    echo
+    echo "✅ Installed '$formula' (keg-only)."
+    local prefix
+    prefix="$(brew --prefix "$formula" 2>/dev/null || true)"
+    if [[ -z "$prefix" ]]; then
+      prefix="$(brew --prefix)/opt/$formula"
+    fi
+    echo "Add to your shell PATH (recommended):"
+    echo "  echo 'export PATH=\"$prefix/bin:\$PATH\"' >> ~/.zshrc"
+    echo "  echo 'export LDFLAGS=\"-L$prefix/lib \$LDFLAGS\"' >> ~/.zshrc"
+    echo "  echo 'export CPPFLAGS=\"-I$prefix/include \$CPPFLAGS\"' >> ~/.zshrc"
+    echo "Then restart your shell."
+    echo
+  else
+    echo "Linking '$formula'..."
+    brew link "$formula"
+  fi
+}
+
+ensure_llvm_tools() {
+  # On macOS, the llvm formula already includes clang, clangd, lld, lldb,
+  # clang-format, clang-tidy, llvm-ar, etc. If user requested 'all', we just
+  # ensure the same keg and provide PATH hints (done above).
+  :
+}
+
+main() {
+  local target_formula=""
+  if have_formula "$FORMULA_VERSIONED"; then
+    target_formula="$FORMULA_VERSIONED"
+  else
+    echo "Versioned formula '$FORMULA_VERSIONED' not found in Homebrew. Will try '$FORMULA_UNVERSIONED' (latest available)." >&2
+    if ! have_formula "$FORMULA_UNVERSIONED"; then
+      echo "Homebrew formula 'llvm' not found. Your Homebrew catalog may be out-of-date or taps missing." >&2
+      echo "Try: brew update && brew tap homebrew/core" >&2
+      exit 2
+    fi
+    target_formula="$FORMULA_UNVERSIONED"
+  fi
+
+  # Install
+  if brew list --formula "$target_formula" >/dev/null 2>&1; then
+    echo "'$target_formula' is already installed."
+  else
+    install_formula "$target_formula"
+  fi
+
+  # Post-install
+  link_if_possible "$target_formula"
+
+  if [[ "$ALL" -eq 1 ]]; then
+    ensure_llvm_tools
+  fi
+
+  echo
+  echo "Done."
+  echo "Useful checks:"
+  echo "  which clang && clang --version"
+  echo "  which clangd && clangd --version"
+  echo "  which lldb && lldb --version"
+  echo "  which lld && ld.lld --version || lld --version || true"
+  echo
+  echo "Tip: Apple's Clang (in Xcode Command Line Tools) is different from Homebrew LLVM."
+  echo "If you still see Apple Clang, ensure the Homebrew LLVM bin dir is first in PATH."
+  echo
+  echo "Optional (LLDB debug signing on macOS if needed):"
+  echo "  sudo /usr/sbin/DevToolsSecurity -enable"
+  echo "  # For deeper codesign/entitlements, consult LLDB docs if you hit permissions."
+}
+
+main "$@"
