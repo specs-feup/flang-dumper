@@ -196,6 +196,17 @@ void dump(const Fortran::common::Indirection<T> &v, const char *property_name) {
   dump(v.value(), property_name);
 }
 
+
+template <typename T>
+void dump(const Fortran::common::Indirection<T> &v) {
+  dump(v.value());
+}
+
+
+void dump(const Fortran::parser::Expr &v) {
+  dump(v.u);  
+}
+
 template <typename T>
 void dump(const std::optional<T> &v, const char *property_name) {
   if (v.has_value()) {
@@ -432,6 +443,7 @@ public:
   DUMP_ENUM(Fortran::parser::ConnectSpec::CharExpr, Kind)
   DUMP_NODE(Fortran::parser::ConnectSpec::Newunit, {})
   DUMP_NODE(Fortran::parser::ConnectSpec::Recl, {})
+  DUMP_NODE(Fortran::parser::ConstantExpr, {})
   DUMP_NODE(Fortran::parser::ContainsStmt, {})
   DUMP_NODE(Fortran::parser::Contiguous, {})
   DUMP_NODE(Fortran::parser::ContiguousStmt, {})
