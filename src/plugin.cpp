@@ -118,6 +118,10 @@ void dump(const char *v, const char *property_name) {
   DUMP_PROPERTY(property_name, v);
 }
 
+void dump(const bool v, const char *property_name) {
+    DUMP_PROPERTY(property_name, v);
+}
+
 void dump(std::string_view v, const char *property_name) {
   DUMP_PROPERTY(property_name, v);
 }
@@ -671,7 +675,12 @@ public:
   DUMP_NODE(Fortran::parser::LocalitySpec::Shared, {})
   DUMP_NODE(Fortran::parser::LockStmt, {})
   DUMP_NODE(Fortran::parser::LockStmt::LockStat, {})
-  DUMP_NODE(Fortran::parser::LogicalLiteralConstant, {})
+  DUMP_NODE(Fortran::parser::LogicalLiteralConstant, {
+      // TODO: This has not been tested yet
+      if(std::get<1>(v.t).has_value()){
+          dump(std::get<1>(v.t).value(), "kind");
+      }
+  })
   // NODE_NAME(LoopControl::Bounds, "LoopBounds")
   // NODE_NAME(AcImpliedDoControl::Bounds, "LoopBounds")
   // NODE_NAME(DataImpliedDo::Bounds, "LoopBounds")
