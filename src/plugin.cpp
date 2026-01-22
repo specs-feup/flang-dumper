@@ -1,5 +1,6 @@
 #include <sstream>
 #include <type_traits>
+#include <iomanip>
 
 #include <llvm/Support/raw_ostream.h>
 
@@ -115,7 +116,7 @@ template <typename T> void dump(const T &v, const char *property_name) {
 }
 
 void dump(const char *v, const char *property_name) {
-  DUMP_PROPERTY(property_name, v);
+  dump(v ? std::string_view{v} : std::string_view{}, property_name);
 }
 
 void dump(const bool v, const char *property_name) {
@@ -123,7 +124,20 @@ void dump(const bool v, const char *property_name) {
 }
 
 void dump(std::string_view v, const char *property_name) {
-  DUMP_PROPERTY(property_name, v);
+  DUMP_PROPERTY(property_name, escape_quotes(v));
+}
+
+std::string escape_quotes(std::string_view sv) {
+    std::string out;
+    out.reserve(sv.size());
+
+    for (char c : sv) {
+        if (c == '"')
+            out += "\\\"";
+        else
+            out += c;
+    }
+    return out;
 }
 
 template <> void dump(const std::uint64_t &v, const char *property_name) {
@@ -135,7 +149,7 @@ template <> void dump(const int &v, const char *property_name) {
 }
 
 template <> void dump(const std::string &v, const char *property_name) {
-  dump(v.c_str(), property_name);
+  dump(std::string_view{v}, property_name);
 }
 
 template <>
