@@ -1,5 +1,6 @@
 #include <sstream>
 #include <type_traits>
+#include <iomanip>
 
 #include <llvm/Support/raw_ostream.h>
 
@@ -115,11 +116,43 @@ template <typename T> void dump(const T &v, const char *property_name) {
 }
 
 void dump(const char *v, const char *property_name) {
-  DUMP_PROPERTY(property_name, v);
+  dump(v ? std::string_view{v} : std::string_view{}, property_name);
+}
+
+void dump(const bool v, const char *property_name) {
+    DUMP_PROPERTY(property_name, v);
 }
 
 void dump(std::string_view v, const char *property_name) {
-  DUMP_PROPERTY(property_name, v);
+  DUMP_PROPERTY(property_name, escape_quotes(v));
+}
+
+std::string escape_quotes(std::string_view sv) {
+    std::string out;
+    out.reserve(sv.size());
+
+    for (char c : sv) {
+        if (c == '"')
+            out += "\\\"";
+        else
+            out += c;
+    }
+    return out;
+}
+
+void dump(const Fortran::parser::Scalar<Fortran::parser::Integer<Fortran::parser::Constant<Fortran::parser::Name>>> &v, const char *property_name) {
+    dump(v.thing.thing.thing.source, property_name);
+}
+
+void dump(const Fortran::parser::Sign &v, const char *property_name) {
+    switch(v) {
+        case Fortran::parser::Sign::Positive:
+            dump("positive", property_name);
+            break;
+        case Fortran::parser::Sign::Negative:
+            dump("negative", property_name);
+            break;
+    }
 }
 
 template <> void dump(const std::uint64_t &v, const char *property_name) {
@@ -131,7 +164,7 @@ template <> void dump(const int &v, const char *property_name) {
 }
 
 template <> void dump(const std::string &v, const char *property_name) {
-  dump(v.c_str(), property_name);
+  dump(std::string_view{v}, property_name);
 }
 
 template <>
@@ -431,7 +464,7 @@ public:
   DUMP_NODE(Fortran::parser::CompilerDirective::NameValue, {})
   DUMP_NODE(Fortran::parser::CompilerDirective::Unrecognized, {})
   DUMP_NODE(Fortran::parser::CompilerDirective::VectorAlways, {})
-  DUMP_NODE(Fortran::parser::ComplexLiteralConstant, {})
+  DUMP_NODE(Fortran::parser::ComplexLiteralConstant, {dump(std::get<0>(v.t), "real"); dump(std::get<1>(v.t), "imaginary");})
   DUMP_NODE(Fortran::parser::ComplexPart, {})
   DUMP_NODE(Fortran::parser::ComponentArraySpec, {})
   DUMP_NODE(Fortran::parser::ComponentAttrSpec, {})
@@ -671,7 +704,12 @@ public:
   DUMP_NODE(Fortran::parser::LocalitySpec::Shared, {})
   DUMP_NODE(Fortran::parser::LockStmt, {})
   DUMP_NODE(Fortran::parser::LockStmt::LockStat, {})
-  DUMP_NODE(Fortran::parser::LogicalLiteralConstant, {})
+  DUMP_NODE(Fortran::parser::LogicalLiteralConstant, {
+      // TODO: This has not been tested yet
+      if(std::get<1>(v.t).has_value()){
+          dump(std::get<1>(v.t).value(), "kind");
+      }
+  })
   // NODE_NAME(LoopControl::Bounds, "LoopBounds")
   // NODE_NAME(AcImpliedDoControl::Bounds, "LoopBounds")
   // NODE_NAME(DataImpliedDo::Bounds, "LoopBounds")
@@ -952,8 +990,14 @@ public:
   DUMP_NODE(Fortran::parser::Protected, {})
   DUMP_NODE(Fortran::parser::ProtectedStmt, {})
   DUMP_NODE(Fortran::parser::ReadStmt, {})
-  DUMP_NODE(Fortran::parser::RealLiteralConstant, {})
-  DUMP_NODE(Fortran::parser::RealLiteralConstant::Real, {})
+  DUMP_NODE(Fortran::parser::RealLiteralConstant, {
+      dump(v.real, "real");
+      // TODO: This has not been tested yet
+      if(v.kind.has_value()){
+          dump(v.kind.value(), "kind");
+      }
+  })
+  DUMP_NODE(Fortran::parser::RealLiteralConstant::Real, {dump(v.source, "source");})
   DUMP_NODE(Fortran::parser::Rename, {})
   DUMP_NODE(Fortran::parser::Rename::Names, {})
   DUMP_NODE(Fortran::parser::Rename::Operators, {})

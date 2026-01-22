@@ -33,7 +33,12 @@ std::string getId(const std::nullopt_t &);
 template <typename T>
 void dump(const T &v, const char *property_name);
 void dump(const char *v, const char *property_name);
+std::string escape_cpp_string(const char *input);
+
+void dump(const bool v, const char *property_name);
 void dump(std::string_view v, const char *property_name);
+std::string escape_quotes(std::string_view sv);
+
 template <>
 void dump(const std::uint64_t &v, const char *property_name);
 template <>
@@ -64,6 +69,9 @@ void dump(const std::optional<T> &v, const char *property_name);
 template <typename... T>
 void dump(const std::tuple<T...> &v);
 void dump(const Fortran::parser::Expr &v);
+void dump(const Fortran::parser::Scalar<Fortran::parser::Integer<Fortran::parser::Constant<Fortran::parser::Name>>> &v, const char *property_name);
+void dump(const Fortran::parser::Sign &v, const char *property_name);
+
 
 template <typename T>
 void dumpWrapper(const T &v)
