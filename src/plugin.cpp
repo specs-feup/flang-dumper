@@ -144,6 +144,17 @@ void dump(const Fortran::parser::Scalar<Fortran::parser::Integer<Fortran::parser
     dump(v.thing.thing.thing.source, property_name);
 }
 
+void dump(const Fortran::parser::Sign &v, const char *property_name) {
+    switch(v) {
+        case Fortran::parser::Sign::Positive:
+            dump("positive", property_name);
+            break;
+        case Fortran::parser::Sign::Negative:
+            dump("negative", property_name);
+            break;
+    }
+}
+
 template <> void dump(const std::uint64_t &v, const char *property_name) {
   DUMP_PROPERTY(property_name, v);
 }
@@ -453,7 +464,7 @@ public:
   DUMP_NODE(Fortran::parser::CompilerDirective::NameValue, {})
   DUMP_NODE(Fortran::parser::CompilerDirective::Unrecognized, {})
   DUMP_NODE(Fortran::parser::CompilerDirective::VectorAlways, {})
-  DUMP_NODE(Fortran::parser::ComplexLiteralConstant, {})
+  DUMP_NODE(Fortran::parser::ComplexLiteralConstant, {dump(std::get<0>(v.t), "real"); dump(std::get<1>(v.t), "imaginary");})
   DUMP_NODE(Fortran::parser::ComplexPart, {})
   DUMP_NODE(Fortran::parser::ComponentArraySpec, {})
   DUMP_NODE(Fortran::parser::ComponentAttrSpec, {})
