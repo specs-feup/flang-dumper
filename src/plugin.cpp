@@ -140,6 +140,10 @@ std::string escape_quotes(std::string_view sv) {
     return out;
 }
 
+void dump(const Fortran::parser::Scalar<Fortran::parser::Integer<Fortran::parser::Constant<Fortran::parser::Name>>> &v, const char *property_name) {
+    dump(v.thing.thing.thing.source, property_name);
+}
+
 template <> void dump(const std::uint64_t &v, const char *property_name) {
   DUMP_PROPERTY(property_name, v);
 }
@@ -975,8 +979,14 @@ public:
   DUMP_NODE(Fortran::parser::Protected, {})
   DUMP_NODE(Fortran::parser::ProtectedStmt, {})
   DUMP_NODE(Fortran::parser::ReadStmt, {})
-  DUMP_NODE(Fortran::parser::RealLiteralConstant, {})
-  DUMP_NODE(Fortran::parser::RealLiteralConstant::Real, {})
+  DUMP_NODE(Fortran::parser::RealLiteralConstant, {
+      dump(v.real, "real");
+      // TODO: This has not been tested yet
+      if(v.kind.has_value()){
+          dump(v.kind.value(), "kind");
+      }
+  })
+  DUMP_NODE(Fortran::parser::RealLiteralConstant::Real, {dump(v.source, "source");})
   DUMP_NODE(Fortran::parser::Rename, {})
   DUMP_NODE(Fortran::parser::Rename::Names, {})
   DUMP_NODE(Fortran::parser::Rename::Operators, {})
