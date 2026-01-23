@@ -135,6 +135,15 @@ void dumpConstraint(const T &v) { dump(v.thing); }
     })                                                              \
   }
 
+#define DUMP_NODE_MANUAL(CLASS, CONTENTS)                                  \
+  bool Pre(const CLASS &v)                                          \
+  {                                                                 \
+    DUMP_BARE_NODE({                                                \
+      CONTENTS;                                                     \
+    })                                                              \
+  }
+
+
 #define CONCATENATE_(X, Y) X##Y
 #define CONCATENATE(X, Y) CONCATENATE_(X, Y)
 #define STRINGIFY_DETAIL(x) #x

@@ -464,7 +464,7 @@ public:
   DUMP_NODE(Fortran::parser::CompilerDirective::NameValue, {})
   DUMP_NODE(Fortran::parser::CompilerDirective::Unrecognized, {})
   DUMP_NODE(Fortran::parser::CompilerDirective::VectorAlways, {})
-  DUMP_NODE(Fortran::parser::ComplexLiteralConstant, {dump(std::get<0>(v.t), "real"); dump(std::get<1>(v.t), "imaginary");})
+  DUMP_NODE_MANUAL(Fortran::parser::ComplexLiteralConstant, {dump(std::get<0>(v.t), "real"); dump(std::get<1>(v.t), "imaginary");})
   DUMP_NODE(Fortran::parser::ComplexPart, {})
   DUMP_NODE(Fortran::parser::ComponentArraySpec, {})
   DUMP_NODE(Fortran::parser::ComponentAttrSpec, {})
