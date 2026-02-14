@@ -580,10 +580,10 @@ public:
   DUMP_NODE(Fortran::parser::Expr::PercentLoc, {})
   DUMP_NODE(Fortran::parser::Expr::DefinedUnary, {})
   DUMP_NODE(Fortran::parser::Expr::Power, {})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::Multiply, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("MULTIPLY", "op");})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::Divide, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("DIVIDE", "op");})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::Add, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("ADD", "op");})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::Subtract, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("SUBTRACT", "op");})
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::Multiply, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("Multiply", "op");})
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::Divide, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("Divide", "op");})
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::Add, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("Add", "op");})
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::Subtract, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("Subtract", "op");})
   DUMP_NODE(Fortran::parser::Expr::Concat, {})
   DUMP_NODE_MANUAL(Fortran::parser::Expr::LT, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("LT", "op");})
   DUMP_NODE_MANUAL(Fortran::parser::Expr::LE, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("LE", "op");})
@@ -1130,6 +1130,10 @@ class DumpParseTreeAction : public Fortran::frontend::PluginParseTreeAction {
 };
 
 const static Fortran::frontend::FrontendPluginRegistry::Add<DumpAST>
+    X("dump-ast", "Dump all AST node data as a JSON object");
+const static Fortran::frontend::FrontendPluginRegistry::Add<DumpParseTreeAction>
+    X2("dump-tree", "Run the ParseTreeDumper visitor on the code");
+ran::frontend::FrontendPluginRegistry::Add<DumpAST>
     X("dump-ast", "Dump all AST node data as a JSON object");
 const static Fortran::frontend::FrontendPluginRegistry::Add<DumpParseTreeAction>
     X2("dump-tree", "Run the ParseTreeDumper visitor on the code");
