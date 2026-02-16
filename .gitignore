@@ -2,6 +2,9 @@
 .vscode/
 build/
 .cache/
+.idea/
+.tmp_headers
+.claude
 
 # Prerequisites
 *.d
@@ -35,3 +38,6 @@ build/
 *.exe
 *.out
 *.app
+
+# macOS
+.DS_Store

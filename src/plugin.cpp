@@ -375,7 +375,9 @@ public:
   DUMP_NODE(Fortran::parser::AccessId, {})
   DUMP_NODE(Fortran::parser::AccessSpec, {})
   DUMP_ENUM(Fortran::parser::AccessSpec, Kind)
-  DUMP_NODE(Fortran::parser::AcSpec, {})
+  DUMP_NODE(Fortran::parser::AcSpec, {
+    dump(v.values, "values");
+  })
   DUMP_NODE(Fortran::parser::ActionStmt, {})
   DUMP_NODE(Fortran::parser::ActualArg, {})
   DUMP_NODE(Fortran::parser::ActualArg::PercentRef, {})
