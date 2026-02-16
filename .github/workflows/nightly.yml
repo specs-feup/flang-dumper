@@ -5,12 +5,13 @@ on:
         branches: [main]
     push:
         branches: [main]
-    # Daily at midnight
+    # Mondays at midnight
     schedule:
-        - cron: "0 0 * * */2"
+        - cron: "0 0 * * 1"
 
 permissions:
     checks: write
+    contents: write   # needed to push tags + create/edit releases
 
 env:
     FLANG_VERSION: 20
@@ -23,6 +24,10 @@ jobs:
         steps:
             - name: Checkout repo
               uses: actions/checkout@v4
+              with:
+                fetch-depth: 0  # needed if you plan to create/move tags in the runner
+                persist-credentials: true
+                # fetch-depth: 0 fetches all history/tags. :contentReference[oaicite:0]{index=0}
 
             - name: Install dependencies
               run: sudo ./scripts/install-dependencies.sh
@@ -39,3 +44,38 @@ jobs:
               with:
                   name: DumpASTPlugin
                   path: build/DumpASTPlugin.so
+            
+            
+            # --- Move the 'nightly' tag to this commit and push it ---
+            - name: Move nightly tag
+                run: |
+                    git config user.name "github-actions[bot]"
+                    git config user.email "github-actions[bot]@users.noreply.github.com"
+                    
+                    git tag -f nightly
+                    git push -f origin nightly
+                    # Force-moving tags is a supported pattern. :contentReference[oaicite:1]{index=1}
+                    
+            
+            # --- Create or update the Release, and upload assets (overwriting) ---      
+            - name: Create/Update Release + upload assets
+            env:
+                GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            run: |
+                # Create the release if it doesn't exist yet; otherwise edit it.
+                if gh release view nightly >/dev/null 2>&1; then
+                    gh release edit nightly \
+                        --title "Nightly" \
+                        --notes "Automated nightly build for commit $GITHUB_SHA"
+                else
+                    gh release create nightly \
+                        --title "Nightly" \
+                        --notes "Automated nightly build for commit $GITHUB_SHA" \
+                        --prerelease
+                fi
+                
+                # Upload assets, overwriting files with the same names.
+                gh release upload nightly build/DumpASTPlugin.so --clobber
+                # --clobber overwrites existing assets of the same name. :contentReference[oaicite:2]{index=2}            
+           
+ 
