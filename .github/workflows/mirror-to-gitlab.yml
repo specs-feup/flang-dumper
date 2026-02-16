@@ -2,8 +2,7 @@ name: Mirror to GitLab (SSH)
 
 on:
   push:
-    branches: ["**"]
-    tags: ["**"]
+    branches: [main]
 
 jobs:
   mirror:
