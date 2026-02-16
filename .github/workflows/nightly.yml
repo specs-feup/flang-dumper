@@ -48,7 +48,7 @@ jobs:
             
             # --- Move the 'nightly' tag to this commit and push it ---
             - name: Move nightly tag
-                run: |
+            run: |
                     git config user.name "github-actions[bot]"
                     git config user.email "github-actions[bot]@users.noreply.github.com"
                     
