@@ -27,7 +27,7 @@ jobs:
               with:
                 fetch-depth: 0  # needed if you plan to create/move tags in the runner
                 persist-credentials: true
-                # fetch-depth: 0 fetches all history/tags. :contentReference[oaicite:0]{index=0}
+
 
             - name: Install dependencies
               run: sudo ./scripts/install-dependencies.sh
