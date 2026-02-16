@@ -1,13 +1,8 @@
 name: nightly
 
 on:
-    pull_request:
-        branches: [main]
     push:
         branches: [main]
-    # Mondays at midnight
-    schedule:
-        - cron: "0 0 * * 1"
         
 permissions:
     checks: write
@@ -38,12 +33,6 @@ jobs:
                   cmake ..
                   make -j 4
                   
-            - name: Upload build artifact
-              uses: actions/upload-artifact@v4
-              with:
-                  name: DumpASTPlugin
-                  path: build/DumpASTPlugin.so
-                  
                   
             # --- Move the 'nightly' tag to this commit and push it ---
             - name: Move nightly tag
@@ -54,6 +43,13 @@ jobs:
                     git tag -f nightly
                     git push -f origin nightly
                     # Force-moving tags is a supported pattern. :contentReference[oaicite:1]{index=1}
+
+            # --- Task that creates the Release will use this artifact ---
+            - name: Upload build artifact
+              uses: actions/upload-artifact@v4
+              with:
+                name: DumpASTPlugin
+                path: build/DumpASTPlugin.so                    
                     
                     
             # --- Create or update the Release, and upload assets (overwriting) ---      
