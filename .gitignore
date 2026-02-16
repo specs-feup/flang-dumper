@@ -4,6 +4,7 @@ build/
 .cache/
 .idea/
 .tmp_headers
+.claude
 
 # Prerequisites
 *.d
