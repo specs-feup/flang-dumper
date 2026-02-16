@@ -3,7 +3,8 @@ name: nightly
 on:
     pull_request:
         branches: [main]
-
+    push:
+        branches: [main]
     # Daily at midnight
     schedule:
         - cron: "0 0 * * */2"
