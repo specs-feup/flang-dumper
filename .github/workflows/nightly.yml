@@ -1,7 +1,7 @@
 name: nightly
 
 on:
-    push:
+    pull_request:
         branches: [main]
 
     # Daily at midnight
