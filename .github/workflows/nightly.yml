@@ -38,12 +38,6 @@ jobs:
                   cmake ..
                   make -j 4
                   
-            - name: Upload build artifact
-              uses: actions/upload-artifact@v4
-              with:
-                  name: DumpASTPlugin
-                  path: build/DumpASTPlugin.so
-                  
                   
             # --- Move the 'nightly' tag to this commit and push it ---
             - name: Move nightly tag
