@@ -241,7 +241,7 @@ void dump(const Fortran::common::Indirection<T> &v) {
 
 
 void dump(const Fortran::parser::Expr &v) {
-  dump(v.u);  
+  dump(v.u);
 }
 
 template <typename T>
@@ -632,7 +632,10 @@ public:
   DUMP_NODE(Fortran::parser::IfConstruct::ElseBlock, {})
   DUMP_NODE(Fortran::parser::IfConstruct::ElseIfBlock, {})
   DUMP_NODE(Fortran::parser::IfStmt, {})
-  DUMP_NODE(Fortran::parser::IfThenStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::IfThenStmt, {
+    dump(std::get<0>(v.t), "ifConstructName");
+    dump(std::get<1>(v.t).thing.thing, "condition");
+  })
   DUMP_NODE(Fortran::parser::TeamValue, {})
   DUMP_NODE(Fortran::parser::ImageSelector, {})
   DUMP_NODE(Fortran::parser::ImageSelectorSpec, {})
