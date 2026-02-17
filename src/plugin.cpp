@@ -260,6 +260,16 @@ template <typename... T> void dump(const std::tuple<T...> &v) {
   std::apply([](const auto &...e) { ((dump(e, getNodeName(e))), ...); }, v);
 }
 
+template <typename T>
+void dump(const Fortran::parser::Scalar<T> &v, const char *property_name) {
+    dump(v.thing, property_name);
+}
+
+template <typename T>
+void dump(const Fortran::parser::Integer<T> &v, const char *property_name) {
+    dump(v.thing, property_name);
+}
+
 // Visitor struct that defines Pre/Post functions for different types of nodes
 struct ParseTreeVisitor {
 public:
