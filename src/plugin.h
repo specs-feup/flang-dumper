@@ -70,6 +70,10 @@ template <typename... T>
 void dump(const std::tuple<T...> &v);
 void dump(const Fortran::parser::Expr &v);
 void dump(const Fortran::parser::Scalar<Fortran::parser::Integer<Fortran::parser::Constant<Fortran::parser::Name>>> &v, const char *property_name);
+template <typename T>
+void dump(const Fortran::parser::Scalar<T> &v, const char *property_name);
+template <typename T>
+void dump(const Fortran::parser::Logical<T> &v, const char *property_name);
 void dump(const Fortran::parser::Sign &v, const char *property_name);
 
 

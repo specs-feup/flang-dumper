@@ -144,6 +144,16 @@ void dump(const Fortran::parser::Scalar<Fortran::parser::Integer<Fortran::parser
     dump(v.thing.thing.thing.source, property_name);
 }
 
+template <typename T>
+void dump(const Fortran::parser::Scalar<T> &v, const char *property_name) {
+    dump(v.thing, property_name);
+}
+
+template <typename T>
+void dump(const Fortran::parser::Logical<T> &v, const char *property_name) {
+    dump(v.thing, property_name);
+}
+
 void dump(const Fortran::parser::Sign &v, const char *property_name) {
     switch(v) {
         case Fortran::parser::Sign::Positive:
@@ -632,10 +642,7 @@ public:
   DUMP_NODE(Fortran::parser::IfConstruct::ElseBlock, {})
   DUMP_NODE(Fortran::parser::IfConstruct::ElseIfBlock, {})
   DUMP_NODE(Fortran::parser::IfStmt, {})
-  DUMP_NODE_MANUAL(Fortran::parser::IfThenStmt, {
-    dump(std::get<0>(v.t), "ifConstructName");
-    dump(std::get<1>(v.t).thing.thing, "condition");
-  })
+  DUMP_NODE(Fortran::parser::IfThenStmt, {})
   DUMP_NODE(Fortran::parser::TeamValue, {})
   DUMP_NODE(Fortran::parser::ImageSelector, {})
   DUMP_NODE(Fortran::parser::ImageSelectorSpec, {})
