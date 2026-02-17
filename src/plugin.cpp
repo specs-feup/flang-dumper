@@ -245,6 +245,12 @@ void dump(const Fortran::parser::Expr &v) {
 }
 
 template <typename T>
+void dump(const Fortran::parser::Scalar<T> &v) {
+  dump(v.thing);
+}
+
+
+template <typename T>
 void dump(const std::optional<T> &v, const char *property_name) {
   if (v.has_value()) {
     dump(v.value(), property_name);
@@ -1009,7 +1015,6 @@ public:
   DUMP_NODE(Fortran::parser::SaveStmt, {})
   DUMP_NODE(Fortran::parser::SavedEntity, {})
   DUMP_ENUM(Fortran::parser::SavedEntity, Kind)
-  DUMP_NODE(Fortran::parser::Scalar, {})
   DUMP_NODE(Fortran::parser::SectionSubscript, {})
   DUMP_NODE(Fortran::parser::SelectCaseStmt, {})
   DUMP_NODE(Fortran::parser::SelectRankCaseStmt, {})

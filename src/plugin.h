@@ -65,6 +65,8 @@ void dump(const Fortran::common::Indirection<T> &v, const char *property_name);
 template <typename T>
 void dump(const Fortran::common::Indirection<T> &v);
 template <typename T>
+void dump(const Fortran::parser::Scalar<T> &v);
+template <typename T>
 void dump(const std::optional<T> &v, const char *property_name);
 template <typename... T>
 void dump(const std::tuple<T...> &v);
