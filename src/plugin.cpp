@@ -1009,6 +1009,7 @@ public:
   DUMP_NODE(Fortran::parser::SaveStmt, {})
   DUMP_NODE(Fortran::parser::SavedEntity, {})
   DUMP_ENUM(Fortran::parser::SavedEntity, Kind)
+  DUMP_NODE(Fortran::parser::Scalar, {})
   DUMP_NODE(Fortran::parser::SectionSubscript, {})
   DUMP_NODE(Fortran::parser::SelectCaseStmt, {})
   DUMP_NODE(Fortran::parser::SelectRankCaseStmt, {})
