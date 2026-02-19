@@ -262,7 +262,7 @@ template <typename... T> void dump(const std::tuple<T...> &v) {
 
 template <typename T>
 void dump(const Fortran::parser::Scalar<T> &v, const char *property_name) {
-    dump(v.thing, property_name);
+    dump(v.thing, "value");
 }
 
 template <typename T>
