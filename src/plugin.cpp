@@ -645,7 +645,7 @@ public:
   DUMP_NODE(Fortran::parser::IdVariable, {})
   DUMP_NODE(Fortran::parser::IfConstruct, {})
   DUMP_NODE(Fortran::parser::IfConstruct::ElseBlock, {})
-  DUMP_NODE(Fortran::parser::IfConstruct::ElseIfBlock, { dump(std::get<0>(std::get<0>(v.t).statement.t), "condition"); })
+  DUMP_NODE(Fortran::parser::IfConstruct::ElseIfBlock, {})
   DUMP_NODE(Fortran::parser::IfStmt, {})
   DUMP_NODE(Fortran::parser::IfThenStmt, {})
   DUMP_NODE(Fortran::parser::TeamValue, {})
