@@ -144,6 +144,21 @@ void dump(const Fortran::parser::Scalar<Fortran::parser::Integer<Fortran::parser
     dump(v.thing.thing.thing.source, property_name);
 }
 
+template <typename T>
+void dump(const Fortran::parser::Scalar<T> &v, const char *property_name) {
+    dump(v.thing, "value");
+}
+
+template <typename T>
+void dump(const Fortran::parser::Logical<T> &v, const char *property_name) {
+    dump(v.thing, property_name);
+}
+
+template <typename T>
+void dump(const Fortran::parser::Integer<T> &v, const char *property_name) {
+    dump(v.thing, property_name);
+}
+
 void dump(const Fortran::parser::Sign &v, const char *property_name) {
     switch(v) {
         case Fortran::parser::Sign::Positive:
@@ -241,7 +256,7 @@ void dump(const Fortran::common::Indirection<T> &v) {
 
 
 void dump(const Fortran::parser::Expr &v) {
-  dump(v.u);  
+  dump(v.u);
 }
 
 template <typename T>
