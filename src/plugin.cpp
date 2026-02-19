@@ -146,7 +146,7 @@ void dump(const Fortran::parser::Scalar<Fortran::parser::Integer<Fortran::parser
 
 template <typename T>
 void dump(const Fortran::parser::Scalar<T> &v, const char *property_name) {
-    dump(v.thing, property_name);
+    dump(v.thing, "value");
 }
 
 template <typename T>
