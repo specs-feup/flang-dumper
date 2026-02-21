@@ -392,6 +392,9 @@ public:
   DUMP_ENUM(Fortran::parser::AccessSpec, Kind)
   DUMP_NODE(Fortran::parser::AcSpec, {
     dump(v.values, "values");
+    if(v.type.has_value()){
+      dump(v.type, "type");
+    }
   })
   DUMP_NODE(Fortran::parser::ActionStmt, {})
   DUMP_NODE(Fortran::parser::ActualArg, {})
