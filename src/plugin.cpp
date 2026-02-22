@@ -597,7 +597,7 @@ public:
 	if (lower_bound.has_value()) {
         dump(lower_bound.value(), "lower_bound");
     }
-    dump(upper_bound.value(), "upper_bound");
+    dump(upper_bound, "upper_bound");
   })
   DUMP_NODE(Fortran::parser::Expr, {})
   DUMP_NODE(Fortran::parser::Expr::Parentheses, {})
