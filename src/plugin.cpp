@@ -592,9 +592,9 @@ public:
   DUMP_NODE(Fortran::parser::ExitStmt, {})
   DUMP_NODE(Fortran::parser::ExplicitCoshapeSpec, {})
   DUMP_NODE_MANUAL(Fortran::parser::ExplicitShapeSpec, {
-    auto &lower_bound = std::get<0>(t);
-    auto &upper_bound = std::get<1>(t);
-	if(lower_bound.has_value()){
+    auto &lower_bound = std::get<0>(v.t);
+    auto &upper_bound = std::get<1>(v.t);
+	if (lower_bound.has_value()) {
         dump(lower_bound.value(), "lower_bound");
     }
     dump(upper_bound.value(), "upper_bound");
