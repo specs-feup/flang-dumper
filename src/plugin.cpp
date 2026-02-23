@@ -392,6 +392,9 @@ public:
   DUMP_ENUM(Fortran::parser::AccessSpec, Kind)
   DUMP_NODE(Fortran::parser::AcSpec, {
     dump(v.values, "values");
+    if(v.type.has_value()){
+      dump(v.type, "type");
+    }
   })
   DUMP_NODE(Fortran::parser::ActionStmt, {})
   DUMP_NODE(Fortran::parser::ActualArg, {})
@@ -588,7 +591,14 @@ public:
   DUMP_NODE(Fortran::parser::ExecutionPartConstruct, {})
   DUMP_NODE(Fortran::parser::ExitStmt, {})
   DUMP_NODE(Fortran::parser::ExplicitCoshapeSpec, {})
-  DUMP_NODE(Fortran::parser::ExplicitShapeSpec, {})
+  DUMP_NODE_MANUAL(Fortran::parser::ExplicitShapeSpec, {
+    auto &lower_bound = std::get<0>(v.t);
+    auto &upper_bound = std::get<1>(v.t);
+	if (lower_bound.has_value()) {
+        dump(lower_bound.value(), "lower_bound");
+    }
+    dump(upper_bound, "upper_bound");
+  })
   DUMP_NODE(Fortran::parser::Expr, {})
   DUMP_NODE(Fortran::parser::Expr::Parentheses, {})
   DUMP_NODE(Fortran::parser::Expr::UnaryPlus, {})
