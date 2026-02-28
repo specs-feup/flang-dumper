@@ -495,7 +495,7 @@ public:
   DUMP_NODE(Fortran::parser::ComponentDefStmt, {})
   DUMP_NODE(Fortran::parser::ComponentSpec, {})
   DUMP_NODE(Fortran::parser::ComputedGotoStmt, {})
-  DUMP_NODE(Fortran::parser::ConcurrentControl, {})
+  DUMP_NODE_MANUAL(Fortran::parser::ConcurrentControl, {dump(std::get<0>(v.t), "var"); dump(std::get<1>(v.t).thing, "lower"); dump(std::get<2>(v.t).thing, "upper"); if(std::get<3>(v.t).has_value()) dump(std::get<3>(v.t).value().thing, "step");})
   DUMP_NODE(Fortran::parser::ConcurrentHeader, {})
   DUMP_NODE(Fortran::parser::ConnectSpec, {})
   DUMP_NODE(Fortran::parser::ConnectSpec::CharExpr, {})
