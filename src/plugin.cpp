@@ -1014,7 +1014,7 @@ public:
   DUMP_NODE(Fortran::parser::Program, {})
   DUMP_NODE(Fortran::parser::ProgramStmt, {})
   DUMP_NODE(Fortran::parser::ProgramUnit, {})
-  DUMP_NODE(Fortran::parser::Protected, { dump("Protected", "keyword") })
+  DUMP_NODE(Fortran::parser::Protected, { dump("Protected", "keyword"); })
   DUMP_NODE(Fortran::parser::ProtectedStmt, {})
   DUMP_NODE(Fortran::parser::ReadStmt, {})
   DUMP_NODE(Fortran::parser::RealLiteralConstant, {
