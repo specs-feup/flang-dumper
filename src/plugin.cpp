@@ -159,6 +159,11 @@ void dump(const Fortran::parser::Integer<T> &v, const char *property_name) {
     dump(v.thing, property_name);
 }
 
+template <typename T>
+void dump(const Fortran::parser::Constant<T> &v, const char *property_name) {
+    dump(v.thing, property_name);
+}
+
 void dump(const Fortran::parser::Sign &v, const char *property_name) {
     switch(v) {
         case Fortran::parser::Sign::Positive:
@@ -502,7 +507,6 @@ public:
   DUMP_ENUM(Fortran::parser::ConnectSpec::CharExpr, Kind)
   DUMP_NODE(Fortran::parser::ConnectSpec::Newunit, {})
   DUMP_NODE(Fortran::parser::ConnectSpec::Recl, {})
-  DUMP_NODE(Fortran::parser::ConstantExpr, {})
   DUMP_NODE(Fortran::parser::ContainsStmt, {})
   DUMP_NODE(Fortran::parser::Contiguous, { dump("Contiguous", "keyword"); })
   DUMP_NODE(Fortran::parser::ContiguousStmt, {})
