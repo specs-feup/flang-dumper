@@ -30,14 +30,11 @@ template <typename T> const char *getNodeName(const T &v) {
   } else if constexpr (is_specialization<
                            T, Fortran::parser::UnlabeledStatement>::value) {
     return "UnlabeledStatement";
-  } else if constexpr (is_specialization<T, Fortran::parser::Scalar>::value) {
-    return "Scalar";
-  } else if constexpr (is_specialization<T, Fortran::parser::Constant>::value) {
-    return "Constant";
-  } else if constexpr (is_specialization<T, Fortran::parser::Integer>::value) {
-    return "Integer";
-  } else if constexpr (is_specialization<T, Fortran::parser::Logical>::value) {
-    return "Logical";
+  } else if constexpr (is_specialization<T, Fortran::parser::Scalar>::value
+                    || is_specialization<T, Fortran::parser::Constant>::value
+                    || is_specialization<T, Fortran::parser::Integer>::value
+                    || is_specialization<T, Fortran::parser::Logical>::value) {
+    return "Expr";
   } else if constexpr (is_specialization<T,
                                          Fortran::parser::DefaultChar>::value) {
     return "DefaultChar";
@@ -142,7 +139,7 @@ std::string escape_quotes(std::string_view sv) {
 
 template <typename T>
 void dump(const Fortran::parser::Scalar<T> &v, const char *property_name) {
-    dump(v.thing, "value");
+    dump(v.thing, property_name);
 }
 
 template <typename T>
