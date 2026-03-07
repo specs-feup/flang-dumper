@@ -140,10 +140,6 @@ std::string escape_quotes(std::string_view sv) {
     return out;
 }
 
-void dump(const Fortran::parser::Scalar<Fortran::parser::Integer<Fortran::parser::Constant<Fortran::parser::Name>>> &v, const char *property_name) {
-    dump(v.thing.thing.thing.source, property_name);
-}
-
 template <typename T>
 void dump(const Fortran::parser::Scalar<T> &v, const char *property_name) {
     dump(v.thing, "value");
