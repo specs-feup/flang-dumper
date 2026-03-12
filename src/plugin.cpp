@@ -739,7 +739,7 @@ public:
   // NODE_NAME(LoopControl::Bounds, "LoopBounds")
   // NODE_NAME(AcImpliedDoControl::Bounds, "LoopBounds")
   // NODE_NAME(DataImpliedDo::Bounds, "LoopBounds")
-  DUMP_NODE(Fortran::parser::AcImpliedDoControl, {
+  DUMP_NODE_MANUAL(Fortran::parser::AcImpliedDoControl, {
     if(std::get<0>(v.t).has_value()){
         dump(std::get<0>(v.t).value(), "type");
     }
