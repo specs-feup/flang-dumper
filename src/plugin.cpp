@@ -186,11 +186,7 @@ void dump(const Fortran::parser::CharBlock &v, const char *property_name) {
 }
 
 template <> void dump(const std::nullopt_t &v, const char *property_name) {
-  if (!strcmp(property_name, "null")) {
-    return;
-  }
-
-  dump("null", property_name);
+  // No need to dump anything
 }
 
 template <typename T>
