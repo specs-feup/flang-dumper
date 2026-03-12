@@ -457,7 +457,7 @@ public:
   DUMP_NODE(Fortran::parser::CaseSelector, {})
   DUMP_NODE(Fortran::parser::CaseStmt, {})
   DUMP_NODE(Fortran::parser::CaseValueRange, {})
-  DUMP_NODE(Fortran::parser::CaseValueRange::Range, { dump(v.lower, "lower"); dump(v.upper, "upper"); })
+  DUMP_NODE_MANUAL(Fortran::parser::CaseValueRange::Range, { dump(v.lower, "lower"); dump(v.upper, "upper"); })
   DUMP_NODE(Fortran::parser::ChangeTeamConstruct, {})
   DUMP_NODE(Fortran::parser::ChangeTeamStmt, {})
   DUMP_NODE(Fortran::parser::CharLength, {})
