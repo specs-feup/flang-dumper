@@ -384,7 +384,6 @@ public:
   DUMP_NODE(Fortran::parser::AccEndLoop, {})
   DUMP_NODE(Fortran::parser::AccWaitArgument, {})
   DUMP_NODE(Fortran::parser::AcImpliedDo, {})
-  DUMP_NODE(Fortran::parser::AcImpliedDoControl, {})
   DUMP_NODE(Fortran::parser::AcValue, {})
   DUMP_NODE(Fortran::parser::AccessStmt, {})
   DUMP_NODE(Fortran::parser::AccessId, {})
@@ -740,6 +739,19 @@ public:
   // NODE_NAME(LoopControl::Bounds, "LoopBounds")
   // NODE_NAME(AcImpliedDoControl::Bounds, "LoopBounds")
   // NODE_NAME(DataImpliedDo::Bounds, "LoopBounds")
+  DUMP_NODE_MANUAL(Fortran::parser::AcImpliedDoControl, {
+    if(std::get<0>(v.t).has_value()){
+        dump(std::get<0>(v.t).value(), "type");
+    }
+    dump(std::get<1>(v.t), "value");
+  })
+  DUMP_NODE_MANUAL(Fortran::parser::AcImpliedDoControl::Bounds, {
+      dump(v.name.thing, "var");
+      dump(v.lower.thing, "lower");
+      dump(v.upper.thing, "upper");
+      if(v.step.has_value()) dump(v.step.value().thing, "step");
+  })
+
   DUMP_NODE_MANUAL(Fortran::parser::LoopControl::Bounds, {dump(v.name.thing, "var"); dump(v.lower.thing, "lower"); dump(v.upper.thing, "upper"); if(v.step.has_value()) dump(v.step.value().thing, "step");})
   DUMP_NODE_MANUAL(Fortran::parser::LoopControl, {if (v.u.index() == 1) {dump(std::get<1>(v.u).thing.thing, "value"); dump("While", "kind");} else {dumpUnion(v); dump(v.u.index() == 0 ? "Range" : "Concurrent", "kind");}})
   DUMP_NODE(Fortran::parser::LoopControl::Concurrent, {})
