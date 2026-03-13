@@ -30,14 +30,11 @@ template <typename T> const char *getNodeName(const T &v) {
   } else if constexpr (is_specialization<
                            T, Fortran::parser::UnlabeledStatement>::value) {
     return "UnlabeledStatement";
-  } else if constexpr (is_specialization<T, Fortran::parser::Scalar>::value) {
-    return "Scalar";
-  } else if constexpr (is_specialization<T, Fortran::parser::Constant>::value) {
-    return "Constant";
-  } else if constexpr (is_specialization<T, Fortran::parser::Integer>::value) {
-    return "Integer";
-  } else if constexpr (is_specialization<T, Fortran::parser::Logical>::value) {
-    return "Logical";
+  } else if constexpr (is_specialization<T, Fortran::parser::Scalar>::value
+                    || is_specialization<T, Fortran::parser::Constant>::value
+                    || is_specialization<T, Fortran::parser::Integer>::value
+                    || is_specialization<T, Fortran::parser::Logical>::value) {
+    return "Expr";
   } else if constexpr (is_specialization<T,
                                          Fortran::parser::DefaultChar>::value) {
     return "DefaultChar";
@@ -140,13 +137,9 @@ std::string escape_quotes(std::string_view sv) {
     return out;
 }
 
-void dump(const Fortran::parser::Scalar<Fortran::parser::Integer<Fortran::parser::Constant<Fortran::parser::Name>>> &v, const char *property_name) {
-    dump(v.thing.thing.thing.source, property_name);
-}
-
 template <typename T>
 void dump(const Fortran::parser::Scalar<T> &v, const char *property_name) {
-    dump(v.thing, "value");
+    dump(v.thing, property_name);
 }
 
 template <typename T>
@@ -156,6 +149,11 @@ void dump(const Fortran::parser::Logical<T> &v, const char *property_name) {
 
 template <typename T>
 void dump(const Fortran::parser::Integer<T> &v, const char *property_name) {
+    dump(v.thing, property_name);
+}
+
+template <typename T>
+void dump(const Fortran::parser::Constant<T> &v, const char *property_name) {
     dump(v.thing, property_name);
 }
 
@@ -458,7 +456,7 @@ public:
   DUMP_NODE(Fortran::parser::CaseSelector, {})
   DUMP_NODE(Fortran::parser::CaseStmt, {})
   DUMP_NODE(Fortran::parser::CaseValueRange, {})
-  DUMP_NODE(Fortran::parser::CaseValueRange::Range, {})
+  DUMP_NODE_MANUAL(Fortran::parser::CaseValueRange::Range, { dump(v.lower, "lower"); dump(v.upper, "upper"); })
   DUMP_NODE(Fortran::parser::ChangeTeamConstruct, {})
   DUMP_NODE(Fortran::parser::ChangeTeamStmt, {})
   DUMP_NODE(Fortran::parser::CharLength, {})
@@ -501,7 +499,6 @@ public:
   DUMP_ENUM(Fortran::parser::ConnectSpec::CharExpr, Kind)
   DUMP_NODE(Fortran::parser::ConnectSpec::Newunit, {})
   DUMP_NODE(Fortran::parser::ConnectSpec::Recl, {})
-  DUMP_NODE(Fortran::parser::ConstantExpr, {})
   DUMP_NODE(Fortran::parser::ContainsStmt, {})
   DUMP_NODE(Fortran::parser::Contiguous, { dump("Contiguous", "keyword"); })
   DUMP_NODE(Fortran::parser::ContiguousStmt, {})
