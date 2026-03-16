@@ -807,7 +807,9 @@ public:
   DUMP_NODE(Fortran::parser::OmpBeginBlockDirective, {})
   DUMP_NODE(Fortran::parser::OmpBeginLoopDirective, {})
   DUMP_NODE(Fortran::parser::OmpBeginSectionsDirective, {})
-  DUMP_NODE(Fortran::parser::OmpBlockDirective, {})
+  DUMP_NODE(Fortran::parser::OmpBlockDirective, {
+    dump(llvm::omp::getOpenMPDirectiveName(v.v).str(), "directive");
+  })
   DUMP_NODE(Fortran::parser::OmpCancelType, {})
   DUMP_ENUM(Fortran::parser::OmpCancelType, Type)
   DUMP_NODE(Fortran::parser::OmpClause, {})
@@ -866,7 +868,9 @@ public:
   DUMP_ENUM(Fortran::parser::OmpLinearModifier, Value)
   DUMP_NODE(Fortran::parser::OmpStepComplexModifier, {})
   DUMP_NODE(Fortran::parser::OmpStepSimpleModifier, {})
-  DUMP_NODE(Fortran::parser::OmpLoopDirective, {})
+  DUMP_NODE(Fortran::parser::OmpLoopDirective, {
+   dump(llvm::omp::getOpenMPDirectiveName(v.v).str(), "directive");
+  })
   DUMP_NODE(Fortran::parser::OmpMapClause, {})
   DUMP_NODE(Fortran::parser::OmpMessageClause, {})
   DUMP_NODE(Fortran::parser::OmpMapClause::Modifier, {})
