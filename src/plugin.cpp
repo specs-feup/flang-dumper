@@ -104,7 +104,10 @@ template <> std::string getId(const std::nullopt_t &) { return "null"; }
 
 struct variant_visitor {
   template <typename T> void operator()(const T &value) const {
-    dump(value, "value");
+    const char *valueName = getNodeName(value);
+
+    dump(valueName, "variantType");
+    dump(value, valueName);
   }
 };
 
