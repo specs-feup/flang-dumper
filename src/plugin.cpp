@@ -448,7 +448,7 @@ public:
   DUMP_NODE(Fortran::parser::BoundsRemapping, {})
   DUMP_NODE(Fortran::parser::BoundsSpec, {})
   DUMP_NODE(Fortran::parser::Call, {})
-  DUMP_NODE(Fortran::parser::CallStmt, {})
+  DUMP_NODE(Fortran::parser::CallStmt, {dump(v.call, "call");})
   DUMP_NODE(Fortran::parser::CallStmt::Chevrons, {})
   DUMP_NODE(Fortran::parser::CallStmt::StarOrExpr, {})
   DUMP_NODE(Fortran::parser::CaseConstruct, {})
