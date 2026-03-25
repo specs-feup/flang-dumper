@@ -414,7 +414,7 @@ public:
   DUMP_NODE(Fortran::parser::AltReturnSpec, {})
   DUMP_NODE(Fortran::parser::ArithmeticIfStmt, {})
   DUMP_NODE(Fortran::parser::ArrayConstructor, {})
-  DUMP_NODE(Fortran::parser::ArrayElement, {})
+  DUMP_NODE(Fortran::parser::ArrayElement, { dump(v.base, "base"); dump(v.subscripts, "subscripts"); })
   DUMP_NODE(Fortran::parser::ArraySpec, {})
   DUMP_NODE(Fortran::parser::AssignStmt, {})
   DUMP_NODE(Fortran::parser::AssignedGotoStmt, {})
