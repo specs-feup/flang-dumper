@@ -106,7 +106,7 @@ struct variant_visitor {
   template <typename T> void operator()(const T &value) const {
     const char *valueName = getNodeName(value);
 
-    dump(valueName, "variantType");
+    dump(valueName, "variantKey");
     dump(value, valueName);
   }
 };
