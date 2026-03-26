@@ -104,7 +104,10 @@ template <> std::string getId(const std::nullopt_t &) { return "null"; }
 
 struct variant_visitor {
   template <typename T> void operator()(const T &value) const {
-    dump(value, "value");
+    const char *valueName = getNodeName(value);
+
+    dump(valueName, "variantKey");
+    dump(value, valueName);
   }
 };
 
@@ -186,11 +189,7 @@ void dump(const Fortran::parser::CharBlock &v, const char *property_name) {
 }
 
 template <> void dump(const std::nullopt_t &v, const char *property_name) {
-  if (!strcmp(property_name, "null")) {
-    return;
-  }
-
-  dump("null", property_name);
+  // No need to dump anything
 }
 
 template <typename T>
