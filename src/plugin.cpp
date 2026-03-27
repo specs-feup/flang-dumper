@@ -30,14 +30,11 @@ template <typename T> const char *getNodeName(const T &v) {
   } else if constexpr (is_specialization<
                            T, Fortran::parser::UnlabeledStatement>::value) {
     return "UnlabeledStatement";
-  } else if constexpr (is_specialization<T, Fortran::parser::Scalar>::value) {
-    return "Scalar";
-  } else if constexpr (is_specialization<T, Fortran::parser::Constant>::value) {
-    return "Constant";
-  } else if constexpr (is_specialization<T, Fortran::parser::Integer>::value) {
-    return "Integer";
-  } else if constexpr (is_specialization<T, Fortran::parser::Logical>::value) {
-    return "Logical";
+  } else if constexpr (is_specialization<T, Fortran::parser::Scalar>::value
+                    || is_specialization<T, Fortran::parser::Constant>::value
+                    || is_specialization<T, Fortran::parser::Integer>::value
+                    || is_specialization<T, Fortran::parser::Logical>::value) {
+    return "Expr";
   } else if constexpr (is_specialization<T,
                                          Fortran::parser::DefaultChar>::value) {
     return "DefaultChar";
@@ -140,13 +137,9 @@ std::string escape_quotes(std::string_view sv) {
     return out;
 }
 
-void dump(const Fortran::parser::Scalar<Fortran::parser::Integer<Fortran::parser::Constant<Fortran::parser::Name>>> &v, const char *property_name) {
-    dump(v.thing.thing.thing.source, property_name);
-}
-
 template <typename T>
 void dump(const Fortran::parser::Scalar<T> &v, const char *property_name) {
-    dump(v.thing, "value");
+    dump(v.thing, property_name);
 }
 
 template <typename T>
@@ -156,6 +149,11 @@ void dump(const Fortran::parser::Logical<T> &v, const char *property_name) {
 
 template <typename T>
 void dump(const Fortran::parser::Integer<T> &v, const char *property_name) {
+    dump(v.thing, property_name);
+}
+
+template <typename T>
+void dump(const Fortran::parser::Constant<T> &v, const char *property_name) {
     dump(v.thing, property_name);
 }
 
@@ -384,7 +382,6 @@ public:
   DUMP_NODE(Fortran::parser::AccEndLoop, {})
   DUMP_NODE(Fortran::parser::AccWaitArgument, {})
   DUMP_NODE(Fortran::parser::AcImpliedDo, {})
-  DUMP_NODE(Fortran::parser::AcImpliedDoControl, {})
   DUMP_NODE(Fortran::parser::AcValue, {})
   DUMP_NODE(Fortran::parser::AccessStmt, {})
   DUMP_NODE(Fortran::parser::AccessId, {})
@@ -407,7 +404,7 @@ public:
   DUMP_NODE(Fortran::parser::AllocOpt::Source, {})
   DUMP_NODE(Fortran::parser::AllocOpt::Stream, {})
   DUMP_NODE(Fortran::parser::AllocOpt::Pinned, {})
-  DUMP_NODE(Fortran::parser::Allocatable, {})
+  DUMP_NODE(Fortran::parser::Allocatable, { dump("Allocatable", "keyword"); })
   DUMP_NODE(Fortran::parser::AllocatableStmt, {})
   DUMP_NODE(Fortran::parser::AllocateCoarraySpec, {})
   DUMP_NODE(Fortran::parser::AllocateObject, {})
@@ -429,7 +426,7 @@ public:
   DUMP_NODE(Fortran::parser::AssumedRankSpec, {})
   DUMP_NODE(Fortran::parser::AssumedShapeSpec, {})
   DUMP_NODE(Fortran::parser::AssumedSizeSpec, {})
-  DUMP_NODE(Fortran::parser::Asynchronous, {})
+  DUMP_NODE(Fortran::parser::Asynchronous, { dump("Asynchronous", "keyword"); })
   DUMP_NODE(Fortran::parser::AsynchronousStmt, {})
   DUMP_NODE(Fortran::parser::AttrSpec, {})
   DUMP_NODE(Fortran::parser::BOZLiteralConstant, {})
@@ -459,7 +456,7 @@ public:
   DUMP_NODE(Fortran::parser::CaseSelector, {})
   DUMP_NODE(Fortran::parser::CaseStmt, {})
   DUMP_NODE(Fortran::parser::CaseValueRange, {})
-  DUMP_NODE(Fortran::parser::CaseValueRange::Range, {})
+  DUMP_NODE_MANUAL(Fortran::parser::CaseValueRange::Range, { dump(v.lower, "lower"); dump(v.upper, "upper"); })
   DUMP_NODE(Fortran::parser::ChangeTeamConstruct, {})
   DUMP_NODE(Fortran::parser::ChangeTeamStmt, {})
   DUMP_NODE(Fortran::parser::CharLength, {})
@@ -502,9 +499,8 @@ public:
   DUMP_ENUM(Fortran::parser::ConnectSpec::CharExpr, Kind)
   DUMP_NODE(Fortran::parser::ConnectSpec::Newunit, {})
   DUMP_NODE(Fortran::parser::ConnectSpec::Recl, {})
-  DUMP_NODE(Fortran::parser::ConstantExpr, {})
   DUMP_NODE(Fortran::parser::ContainsStmt, {})
-  DUMP_NODE(Fortran::parser::Contiguous, {})
+  DUMP_NODE(Fortran::parser::Contiguous, { dump("Contiguous", "keyword"); })
   DUMP_NODE(Fortran::parser::ContiguousStmt, {})
   DUMP_NODE(Fortran::parser::ContinueStmt, {})
   DUMP_NODE(Fortran::parser::CriticalConstruct, {})
@@ -624,7 +620,7 @@ public:
   DUMP_NODE(Fortran::parser::Expr::NEQV, {})
   DUMP_NODE(Fortran::parser::Expr::DefinedBinary, {})
   DUMP_NODE(Fortran::parser::Expr::ComplexConstructor, {})
-  DUMP_NODE(Fortran::parser::External, {})
+  DUMP_NODE(Fortran::parser::External, { dump("External", "keyword"); })
   DUMP_NODE(Fortran::parser::ExternalStmt, {})
   DUMP_NODE(Fortran::parser::FailImageStmt, {})
   DUMP_NODE(Fortran::parser::FileUnitNumber, {})
@@ -694,7 +690,7 @@ public:
   DUMP_NODE(Fortran::parser::InterfaceStmt, {})
   DUMP_NODE(Fortran::parser::InternalSubprogram, {})
   DUMP_NODE(Fortran::parser::InternalSubprogramPart, {})
-  DUMP_NODE(Fortran::parser::Intrinsic, {})
+  DUMP_NODE(Fortran::parser::Intrinsic, { dump("Intrinsic", "keyword"); })
   DUMP_NODE(Fortran::parser::IntrinsicStmt, {})
   DUMP_NODE(Fortran::parser::IntrinsicTypeSpec, {})
   DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::Character, {})
@@ -740,6 +736,19 @@ public:
   // NODE_NAME(LoopControl::Bounds, "LoopBounds")
   // NODE_NAME(AcImpliedDoControl::Bounds, "LoopBounds")
   // NODE_NAME(DataImpliedDo::Bounds, "LoopBounds")
+  DUMP_NODE_MANUAL(Fortran::parser::AcImpliedDoControl, {
+    if(std::get<0>(v.t).has_value()){
+        dump(std::get<0>(v.t).value(), "type");
+    }
+    dump(std::get<1>(v.t), "value");
+  })
+  DUMP_NODE_MANUAL(Fortran::parser::AcImpliedDoControl::Bounds, {
+      dump(v.name.thing, "var");
+      dump(v.lower.thing, "lower");
+      dump(v.upper.thing, "upper");
+      if(v.step.has_value()) dump(v.step.value().thing, "step");
+  })
+
   DUMP_NODE_MANUAL(Fortran::parser::LoopControl::Bounds, {dump(v.name.thing, "var"); dump(v.lower.thing, "lower"); dump(v.upper.thing, "upper"); if(v.step.has_value()) dump(v.step.value().thing, "step");})
   DUMP_NODE_MANUAL(Fortran::parser::LoopControl, {if (v.u.index() == 1) {dump(std::get<1>(v.u).thing.thing, "value"); dump("While", "kind");} else {dumpUnion(v); dump(v.u.index() == 0 ? "Range" : "Concurrent", "kind");}})
   DUMP_NODE(Fortran::parser::LoopControl::Concurrent, {})
@@ -978,17 +987,17 @@ public:
   DUMP_NODE(Fortran::parser::OpenMPSectionsConstruct, {})
   DUMP_NODE(Fortran::parser::OpenMPThreadprivate, {})
   DUMP_NODE(Fortran::parser::OpenStmt, {})
-  DUMP_NODE(Fortran::parser::Optional, {})
+  DUMP_NODE(Fortran::parser::Optional, { dump("Optional", "keyword"); })
   DUMP_NODE(Fortran::parser::OptionalStmt, {})
   DUMP_NODE(Fortran::parser::OtherSpecificationStmt, {})
   DUMP_NODE(Fortran::parser::OutputImpliedDo, {})
   DUMP_NODE(Fortran::parser::OutputItem, {})
-  DUMP_NODE(Fortran::parser::Parameter, {})
+  DUMP_NODE(Fortran::parser::Parameter, { dump("Parameter", "keyword"); })
   DUMP_NODE(Fortran::parser::ParameterStmt, {})
   DUMP_NODE(Fortran::parser::ParentIdentifier, {})
   DUMP_NODE(Fortran::parser::Pass, {})
   DUMP_NODE(Fortran::parser::PauseStmt, {})
-  DUMP_NODE(Fortran::parser::Pointer, {})
+  DUMP_NODE(Fortran::parser::Pointer, { dump("Pointer", "keyword"); })
   DUMP_NODE(Fortran::parser::PointerAssignmentStmt, {})
   DUMP_NODE(Fortran::parser::PointerAssignmentStmt::Bounds, {})
   DUMP_NODE(Fortran::parser::PointerDecl, {})
@@ -1022,7 +1031,7 @@ public:
   DUMP_NODE(Fortran::parser::Program, {})
   DUMP_NODE(Fortran::parser::ProgramStmt, {})
   DUMP_NODE(Fortran::parser::ProgramUnit, {})
-  DUMP_NODE(Fortran::parser::Protected, {})
+  DUMP_NODE(Fortran::parser::Protected, { dump("Protected", "keyword"); })
   DUMP_NODE(Fortran::parser::ProtectedStmt, {})
   DUMP_NODE(Fortran::parser::ReadStmt, {})
   DUMP_NODE(Fortran::parser::RealLiteralConstant, {
@@ -1038,7 +1047,7 @@ public:
   DUMP_NODE(Fortran::parser::Rename::Operators, {})
   DUMP_NODE(Fortran::parser::ReturnStmt, {})
   DUMP_NODE(Fortran::parser::RewindStmt, {})
-  DUMP_NODE(Fortran::parser::Save, {})
+  DUMP_NODE(Fortran::parser::Save, { dump("Save", "keyword"); })
   DUMP_NODE(Fortran::parser::SaveStmt, {})
   DUMP_NODE(Fortran::parser::SavedEntity, {})
   DUMP_ENUM(Fortran::parser::SavedEntity, Kind)
@@ -1090,7 +1099,7 @@ public:
   DUMP_NODE(Fortran::parser::SyncImagesStmt::ImageSet, {})
   DUMP_NODE(Fortran::parser::SyncMemoryStmt, {})
   DUMP_NODE(Fortran::parser::SyncTeamStmt, {})
-  DUMP_NODE(Fortran::parser::Target, {})
+  DUMP_NODE(Fortran::parser::Target, { dump("Target", "keyword"); })
   DUMP_NODE(Fortran::parser::TargetStmt, {})
   DUMP_NODE(Fortran::parser::TypeAttrSpec, {})
   DUMP_NODE(Fortran::parser::TypeAttrSpec::BindC, {})
@@ -1120,7 +1129,7 @@ public:
   DUMP_NODE(Fortran::parser::UnsignedTypeSpec, {})
   DUMP_NODE(Fortran::parser::UseStmt, {})
   DUMP_ENUM(Fortran::parser::UseStmt, ModuleNature)
-  DUMP_NODE(Fortran::parser::Value, {})
+  DUMP_NODE(Fortran::parser::Value, { dump("Value", "keyword"); })
   DUMP_NODE(Fortran::parser::ValueStmt, {})
   DUMP_NODE(Fortran::parser::Variable, {})
   DUMP_NODE(Fortran::parser::VectorTypeSpec, {})
@@ -1129,7 +1138,7 @@ public:
   DUMP_NODE(Fortran::parser::IntrinsicVectorTypeSpec, {})
   DUMP_NODE(Fortran::parser::VectorElementType, {})
   DUMP_NODE(Fortran::parser::Verbatim, {})
-  DUMP_NODE(Fortran::parser::Volatile, {})
+  DUMP_NODE(Fortran::parser::Volatile, { dump("Volatile", "keyword"); })
   DUMP_NODE(Fortran::parser::VolatileStmt, {})
   DUMP_NODE(Fortran::parser::WaitSpec, {})
   DUMP_NODE(Fortran::parser::WaitStmt, {})
