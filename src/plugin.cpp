@@ -679,7 +679,7 @@ public:
   DUMP_NODE(Fortran::parser::InquireStmt, {})
   DUMP_NODE(Fortran::parser::InquireStmt::Iolength, {})
   DUMP_NODE(Fortran::parser::IntegerTypeSpec, {})
-  DUMP_NODE(Fortran::parser::IntentSpec, {})
+  DUMP_NODE(Fortran::parser::IntentSpec, {dump(Fortran::parser::IntentSpec::EnumToString(v.v), "intent");})
   DUMP_ENUM(Fortran::parser::IntentSpec, Intent)
   DUMP_NODE(Fortran::parser::IntentStmt, {})
   DUMP_NODE(Fortran::parser::InterfaceBlock, {})
