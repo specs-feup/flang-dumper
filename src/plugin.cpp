@@ -386,10 +386,12 @@ public:
   DUMP_NODE(Fortran::parser::AccessId, {})
   DUMP_NODE(Fortran::parser::AccessSpec, {})
   DUMP_ENUM(Fortran::parser::AccessSpec, Kind)
-  DUMP_NODE(Fortran::parser::AcSpec, {
-    dump(v.values, "values");
-    if(v.type.has_value()){
-      dump(v.type, "type");
+  DUMP_NODE_MANUAL(Fortran::parser::AcSpec, {
+    dump(std::get<1>(v.t), "values");
+
+    const std::optional<Fortran::parser::TypeSpec> &type = std::get<0>(v.t);
+    if(type.has_value()){
+      dump(type.value(), "type");
     }
   })
   DUMP_NODE(Fortran::parser::ActionStmt, {})
