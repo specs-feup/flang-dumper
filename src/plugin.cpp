@@ -9,6 +9,7 @@
 #include "flang/Frontend/FrontendPluginRegistry.h"
 #include "flang/Parser/dump-parse-tree.h"
 #include "flang/Parser/parse-tree.h"
+#include "flang/Parser/parsing.h"
 
 #include "plugin.h"
 
