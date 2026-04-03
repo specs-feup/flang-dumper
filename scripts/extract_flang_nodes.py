@@ -201,35 +201,35 @@ def extract_classes_from_file(filepath):
         # Pattern 7: Using aliases for classes
         using_match = re.search(r"^\s*using\s+(\w+)\s*=\s*", line)
         if using_match:
-            # These are type aliases, not new classes
             pass
 
+        # Pattern 8: WRAPPER_CLASS(classname, type) - creates class (possibly nested)
+        # Only process when inside a struct body (brace_depth > 0)
+        # When at file scope, WRAPPER_CLASS is typically the SECOND definition
+        # of a class already defined via "struct Name {"
+        wrapper_match = re.search(r"^\s*WRAPPER_CLASS\s*\(\s*(\w+)\s*,", line)
+        if wrapper_match and brace_depth > 0:
+            class_name = wrapper_match.group(1)
+            if class_name not in ["classname", "Type", "Name", "Value", "Kind"]:
+                if class_stack:
+                    classes.add("::".join(class_stack) + "::" + class_name)
+                else:
+                    classes.add(class_name)
+            continue
+
+        # Pattern 9: TUPLE_CLASS_BOILERPLATE(Name) - implementation, NOT a new class
+        # Skip this - it's just boilerplate for an already-defined struct
+
+        # Pattern 10: UNION_CLASS_BOILERPLATE(Name) - implementation for existing struct
+        # Skip this
+
+        # Pattern 11: BOILERPLATE(Name) - implementation for existing struct
+        # Skip this
+
+        # Pattern 12: INHERITED_TUPLE_CLASS_BOILERPLATE(derived, base) - implementation
+        # Skip this
+
     return classes, enums
-
-
-def extract_using_macros(content):
-    """Extract classes defined via macro usage patterns."""
-    classes = set()
-
-    # TUPLE_CLASS_BOILERPLATE(classname)
-    tuple_matches = re.findall(r"TUPLE_CLASS_BOILERPLATE\s*\(\s*(\w+)\s*\)", content)
-    classes.update(m for m in tuple_matches if m != "classname")
-
-    # UNION_CLASS_BOILERPLATE(classname)
-    union_matches = re.findall(r"UNION_CLASS_BOILERPLATE\s*\(\s*(\w+)\s*\)", content)
-    classes.update(m for m in union_matches if m != "classname")
-
-    # BOILERPLATE(classname) - but only when used in struct context
-    boilerplate_matches = re.findall(r"BOILERPLATE\s*\(\s*(\w+)\s*\)", content)
-    classes.update(m for m in boilerplate_matches if m != "classname")
-
-    # INHERITED_TUPLE_CLASS_BOILERPLATE(derived, base)
-    inherited_matches = re.findall(
-        r"INHERITED_TUPLE_CLASS_BOILERPLATE\s*\(\s*(\w+)\s*,", content
-    )
-    classes.update(m for m in inherited_matches if m != "classname")
-
-    return classes
 
 
 def extract_names_from_cpp_file(filepath):
@@ -238,18 +238,15 @@ def extract_names_from_cpp_file(filepath):
         content = f.read()
 
     names = set()
-    # Match patterns like Fortran::parser::NodeName
-    # and Fortran::parser::Parent::Child
-    # DUMP_NODE(Fortran::parser::Name, ...)
-    # DUMP_ENUM(Fortran::parser::Enum, Value)
-    # also handles: Fortran::parser::Expr::AND
-    pattern = r"Fortran::parser::(\w+(?:::\w+)*)"
+    pattern = r"Fortran::parser::(\w+(?:::\w+)*)(?:,\s*(\w+))?"
     matches = re.findall(pattern, content)
     for match in matches:
-        if "::" in match:
-            names.add(f"Fortran::parser::{match}")
+        if match[1] == "":
+            names.add(f"Fortran::parser::{match[0]}")
         else:
-            names.add(f"Fortran::parser::{match}")
+            names.add(f"Fortran::parser::{match[0]}::{match[1]}")
+
+    print(names)
     return names
 
 
@@ -320,10 +317,9 @@ def main():
 
     # Get classes
     classes, enums = extract_classes_from_file(filepath)
-    macro_classes = extract_using_macros(content)
 
-    # Combine all classes - but macro_classes are always top-level (not nested)
-    all_classes = classes | macro_classes
+    # Combine all classes
+    all_classes = classes
 
     # Filter out false positives (macro parameter names and std types)
     false_positives = {"classname", "class", "Type", "Name", "Value", "Kind"}
