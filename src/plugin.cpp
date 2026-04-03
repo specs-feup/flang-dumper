@@ -862,7 +862,9 @@ public:
   DUMP_ENUM(Fortran::parser::OmpDeviceTypeClause, DeviceTypeDescription)
   DUMP_NODE(Fortran::parser::OmpDimsModifier, {})
   DUMP_NODE(Fortran::parser::OmpDirectiveName, {})
-  DUMP_NODE(Fortran::parser::OmpDirectiveSpecification, {})
+  DUMP_NODE(Fortran::parser::OmpDirectiveSpecification, {
+    dump(llvm::omp::getOpenMPDirectiveName(v.DirId()).str(), "directive");
+  })
   DUMP_ENUM(Fortran::parser::OmpDirectiveSpecification, Flag)
   // DUMP_ENUMSET(Fortran::parser::OmpDirectiveSpecification, Flags)
   DUMP_NODE(Fortran::parser::OmpDoacross, {})
@@ -1017,12 +1019,6 @@ public:
   DUMP_NODE(Fortran::parser::OmpWhenClause::Modifier, {})
   DUMP_NODE(Fortran::parser::OmpxHoldModifier, {})
   DUMP_ENUM(Fortran::parser::OmpxHoldModifier, Value)
-  // DUMP_NODE(Fortran::parser::OmpBlockDirective, {
-  //   dump(llvm::omp::getOpenMPDirectiveName(v.v).str(), "directive");
-  // })
-  // DUMP_NODE(Fortran::parser::OmpLoopDirective, {
-  //  dump(llvm::omp::getOpenMPDirectiveName(v.v).str(), "directive");
-  // })
 
   DUMP_NODE(Fortran::parser::Only, {})
   DUMP_NODE(Fortran::parser::OpenACCAtomicConstruct, {})
