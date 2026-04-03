@@ -41,3 +41,6 @@ build/
 
 # macOS
 .DS_Store
+
+# Script outputs
+flang_nodes.txt
