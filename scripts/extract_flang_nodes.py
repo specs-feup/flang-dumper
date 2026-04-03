@@ -9,8 +9,9 @@ This script extracts:
 - ENUM_CLASS declarations (enums)
 - Classes defined with various boilerplate macros
 
-All extracted names are prefixed with their namespace (Fortran::parser)
-and sorted alphabetically.
+All extracted names are prefixed with their namespace (Fortran::parser).
+For nested/inner classes, the parent class(es) are included in the path
+(e.g., Fortran::parser::IntrinsicTypeSpec::Real).
 
 Usage:
     python extract_flang_nodes.py [options] [file]
@@ -19,6 +20,7 @@ Options:
     --classes-only    Output only class/struct names
     --enums-only      Output only enum names
     --all-only        Output combined sorted list (no headers, useful for piping)
+    --missing-from FILE   Print classes/enums NOT mentioned in FILE (e.g., plugin.cpp)
     --save, -s        Save output to flang_nodes.txt
     file              Path to parse-tree.h (default: system include path)
 
@@ -27,6 +29,7 @@ Examples:
     python extract_flang_nodes.py --all-only                          # Clean list for iteration
     python extract_flang_nodes.py --classes-only > classes.txt        # Classes only
     python extract_flang_nodes.py --enums-only                        # Enums only
+    python extract_flang_nodes.py --missing-from src/plugin.cpp        # Show missing nodes
     python extract_flang_nodes.py --save                              # Save to file
     python extract_flang_nodes.py /path/to/parse-tree.h --all-only     # Custom path
 """
@@ -47,8 +50,14 @@ def extract_classes_from_file(filepath):
     in_parser_namespace = False
     parser_depth = 0
 
-    # Results
-    classes = set()
+    # Track class nesting for nested struct definitions
+    class_stack = []
+    brace_depth = 0
+
+    # Results - store tuples of (parent_path, class_name) where parent_path is tuple of parent names
+    classes = (
+        set()
+    )  # Will store "Parent::Class" strings for nested, "Class" for top-level
     enums = set()
 
     # Split into lines for processing
@@ -97,27 +106,67 @@ def extract_classes_from_file(filepath):
                 namespace_stack.pop()
             if in_parser_namespace and len(namespace_stack) < parser_depth:
                 in_parser_namespace = False
+            # Handle closing braces for class nesting
+            # Count closing braces in this line
+            close_braces = line.count("}")
+            if close_braces > 0:
+                # Pop from class_stack for each closing brace that ends a class definition
+                # But we need to be careful: only pop if brace_depth > 0 before this line
+                if brace_depth > 0:
+                    # First, find how many classes we're closing
+                    # Each "};" or "} // comment" typically closes a struct/class
+                    # The last } before ; or newline closes the struct
+                    if brace_depth >= close_braces:
+                        for _ in range(min(close_braces, len(class_stack))):
+                            class_stack.pop()
+                    else:
+                        # More braces closed than classes? Just pop what we have
+                        for _ in range(len(class_stack)):
+                            if class_stack:
+                                class_stack.pop()
+                    brace_depth -= close_braces
+                    if brace_depth < 0:
+                        brace_depth = 0
             continue
 
-        # Pattern 1: EMPTY_CLASS(classname)
-        empty_class_match = re.search(r"EMPTY_CLASS\s*\(\s*(\w+)\s*\)", line)
+        # Count opening braces in this line
+        open_braces = line.count("{")
+        if open_braces > 0:
+            brace_depth += open_braces
+
+        # Pattern 1: EMPTY_CLASS(classname) or EMPTY_CLASS(classname, something)
+        empty_class_match = re.search(r"EMPTY_CLASS\s*\(\s*(\w+)\s*[,)]", line)
         if empty_class_match:
-            classes.add(empty_class_match.group(1))
+            class_name = empty_class_match.group(1)
+            if class_name not in ["classname", "Type", "Name", "Value", "Kind"]:
+                if class_stack:
+                    classes.add("::".join(class_stack) + "::" + class_name)
+                else:
+                    classes.add(class_name)
             continue
 
         # Pattern 2: WRAPPER_CLASS(classname, type)
         wrapper_class_match = re.search(r"WRAPPER_CLASS\s*\(\s*(\w+)\s*,", line)
         if wrapper_class_match:
-            classes.add(wrapper_class_match.group(1))
+            class_name = wrapper_class_match.group(1)
+            if class_name not in ["classname", "Type", "Name", "Value", "Kind"]:
+                if class_stack:
+                    classes.add("::".join(class_stack) + "::" + class_name)
+                else:
+                    classes.add(class_name)
             continue
 
-        # Pattern 3: struct Name { (definition) - must have body
-        # We look for struct declarations followed by { on same line or next lines
+        # Pattern 3: struct Name { (definition) - must have body on same line
         struct_def_match = re.search(r"^\s*struct\s+(\w+)\s*\{", line)
         if struct_def_match:
             class_name = struct_def_match.group(1)
-            # Skip forward declarations (no body)
-            classes.add(class_name)
+            # This is a struct definition with body
+            if class_stack:
+                classes.add("::".join(class_stack) + "::" + class_name)
+            else:
+                classes.add(class_name)
+            # Push to class stack for tracking nested content
+            class_stack.append(class_name)
             continue
 
         # Pattern 4: struct Name; (forward declaration) - skip these
@@ -126,10 +175,15 @@ def extract_classes_from_file(filepath):
             # Forward declaration, will be defined later
             continue
 
-        # Pattern 5: struct Name { with inheritance
+        # Pattern 5: struct Name { with inheritance - struct Name : public Base {
         struct_inherit_match = re.search(r"^\s*struct\s+(\w+)\s*:\s*", line)
         if struct_inherit_match:
-            classes.add(struct_inherit_match.group(1))
+            class_name = struct_inherit_match.group(1)
+            if class_stack:
+                classes.add("::".join(class_stack) + "::" + class_name)
+            else:
+                classes.add(class_name)
+            class_stack.append(class_name)
             continue
 
         # Pattern 6: ENUM_CLASS(Name, ...) - but skip macro definitions
@@ -138,7 +192,10 @@ def extract_classes_from_file(filepath):
             enum_name = enum_class_match.group(1)
             # Skip if this looks like a macro parameter name
             if enum_name not in ["Kind", "classname", "Type", "Name", "Value"]:
-                enums.add(enum_name)
+                if class_stack:
+                    enums.add("::".join(class_stack) + "::" + enum_name)
+                else:
+                    enums.add(enum_name)
             continue
 
         # Pattern 7: Using aliases for classes
@@ -175,6 +232,27 @@ def extract_using_macros(content):
     return classes
 
 
+def extract_names_from_cpp_file(filepath):
+    """Extract Fortran::parser::Name patterns from a C++ file."""
+    with open(filepath, "r") as f:
+        content = f.read()
+
+    names = set()
+    # Match patterns like Fortran::parser::NodeName
+    # and Fortran::parser::Parent::Child
+    # DUMP_NODE(Fortran::parser::Name, ...)
+    # DUMP_ENUM(Fortran::parser::Enum, Value)
+    # also handles: Fortran::parser::Expr::AND
+    pattern = r"Fortran::parser::(\w+(?:::\w+)*)"
+    matches = re.findall(pattern, content)
+    for match in matches:
+        if "::" in match:
+            names.add(f"Fortran::parser::{match}")
+        else:
+            names.add(f"Fortran::parser::{match}")
+    return names
+
+
 def main():
     import argparse
 
@@ -197,6 +275,11 @@ def main():
         "-s",
         action="store_true",
         help="Save output to file (stored in flang_nodes.txt)",
+    )
+    parser.add_argument(
+        "--missing-from",
+        metavar="FILE",
+        help="Print classes/enums NOT mentioned in FILE (e.g., plugin.cpp)",
     )
     parser.add_argument("file", nargs="?", help="Path to parse-tree.h")
     args = parser.parse_args()
@@ -239,7 +322,7 @@ def main():
     classes, enums = extract_classes_from_file(filepath)
     macro_classes = extract_using_macros(content)
 
-    # Combine all classes
+    # Combine all classes - but macro_classes are always top-level (not nested)
     all_classes = classes | macro_classes
 
     # Filter out false positives (macro parameter names and std types)
@@ -257,7 +340,17 @@ def main():
     all_names = sorted(namespaced_classes + namespaced_enums)
 
     # Output based on options
-    if args.all_only:
+    if args.missing_from:
+        missing_file = Path(args.missing_from)
+        if not missing_file.exists():
+            print(f"Error: Could not find {missing_file}", file=sys.stderr)
+            sys.exit(1)
+        mentioned = extract_names_from_cpp_file(missing_file)
+        missing = [n for n in all_names if n not in mentioned]
+        print(f"\n=== Found {len(missing)} classes/enums NOT in {missing_file} ===\n")
+        for name in missing:
+            print(name)
+    elif args.all_only:
         for name in all_names:
             print(name)
     elif args.classes_only:
