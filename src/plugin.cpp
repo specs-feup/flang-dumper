@@ -609,7 +609,7 @@ public:
     auto &lower_bound = std::get<0>(v.t);
     auto &upper_bound = std::get<1>(v.t);
 
-    dump(lower_bound.value(), "lower_bound");
+    dump(lower_bound, "lower_bound");
     dump(upper_bound, "upper_bound");
   })
   DUMP_NODE(Fortran::parser::Expr, {})
