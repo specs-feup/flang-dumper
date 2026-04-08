@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # This script installs the LLVM dependencies for Debian-based distros (e.g Ubuntu).
-LLVM_VERSION=20
+LLVM_VERSION=22
 
 SCRIPTDIR=`dirname $0`
 ${SCRIPTDIR}/llvm.sh ${LLVM_VERSION}
