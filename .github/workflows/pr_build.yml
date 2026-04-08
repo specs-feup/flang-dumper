@@ -8,7 +8,7 @@ permissions:
   checks: write
 
 env:
-  FLANG_VERSION: 20
+  FLANG_VERSION: 22
 
 jobs:
   build-dumper:
@@ -31,9 +31,9 @@ jobs:
           cd build
           cmake ..
           make -j 4
-          
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-            name: DumpASTPlugin
-            path: build/DumpASTPlugin.so     
+
+      # - name: Upload build artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #       name: DumpASTPlugin
+      #       path: build/DumpASTPlugin.so

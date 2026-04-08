@@ -3,14 +3,14 @@ name: nightly
 on:
     push:
         branches: [main]
-        
+
 permissions:
     checks: write
     contents: write   # needed to push tags + create/edit releases
-    
+
 env:
-    FLANG_VERSION: 20
-    
+    FLANG_VERSION: 22
+
 jobs:
     build-dumper:
         name: Build Dumper
@@ -21,25 +21,25 @@ jobs:
               with:
                 fetch-depth: 0  # needed if you plan to create/move tags in the runner
                 persist-credentials: true
-                
-                
+
+
             - name: Install dependencies
               run: sudo ./scripts/install-dependencies.sh
-              
+
             - name: Build
               run: |
                   mkdir build
                   cd build
                   cmake ..
                   make -j 4
-                  
-                  
+
+
             # --- Move the 'nightly' tag to this commit and push it ---
             - name: Move nightly tag
               run: |
                     git config user.name "github-actions[bot]"
                     git config user.email "github-actions[bot]@users.noreply.github.com"
-                    
+
                     git tag -f nightly
                     git push -f origin nightly
                     # Force-moving tags is a supported pattern. :contentReference[oaicite:1]{index=1}
@@ -49,10 +49,10 @@ jobs:
               uses: actions/upload-artifact@v4
               with:
                 name: DumpASTPlugin
-                path: build/DumpASTPlugin.so                    
-                    
-                    
-            # --- Create or update the Release, and upload assets (overwriting) ---      
+                path: build/DumpASTPlugin.so
+
+
+            # --- Create or update the Release, and upload assets (overwriting) ---
             - name: Create/Update Release + upload assets
               env:
                 GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -68,7 +68,7 @@ jobs:
                         --notes "Automated nightly build for commit $GITHUB_SHA" \
                         --prerelease
                 fi
-                
+
                 # Upload assets, overwriting files with the same names.
                 gh release upload nightly build/DumpASTPlugin.so --clobber
                 # --clobber overwrites existing assets of the same name. :contentReference[oaicite:2]{index=2}
