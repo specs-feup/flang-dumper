@@ -3,8 +3,16 @@
 # This script installs the LLVM dependencies for Debian-based distros (e.g Ubuntu).
 LLVM_VERSION=22
 
-SCRIPTDIR=`dirname $0`
-${SCRIPTDIR}/llvm.sh ${LLVM_VERSION}
+# Update the package list
+apt update -y
+
+# Install needed packages
+DEBIAN_FRONTEND=noninteractive apt install -y wget lsb-release gnupg software-properties-common
+
+# Run the LLVM installation script
+wget https://apt.llvm.org/llvm.sh -O /tmp/llvm.sh
+chmod +x /tmp/llvm.sh
+/tmp/llvm.sh ${LLVM_VERSION}
 
 # Check if script was successful
 if [ $? -ne 0 ]; then

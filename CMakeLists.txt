@@ -1,15 +1,17 @@
 cmake_minimum_required(VERSION 3.14)
-project(FlangAstDumper)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(FLANG_VERSION 22)
 
 add_compile_options(-Wsuggest-override)
 set(CC clang-${FLANG_VERSION})
 set(CXX clang++-${FLANG_VERSION})
+
 set(CMAKE_C_COMPILER ${CC})
 set(CMAKE_CXX_COMPILER ${CXX})
+
+project(FlangAstDumper)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
