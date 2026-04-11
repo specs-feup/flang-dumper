@@ -104,7 +104,10 @@ template <> std::string getId(const std::nullopt_t &) { return "null"; }
 
 struct variant_visitor {
   template <typename T> void operator()(const T &value) const {
-    dump(value, "value");
+    const char *valueName = getNodeName(value);
+
+    dump(valueName, "variantKey");
+    dump(value, valueName);
   }
 };
 
@@ -186,11 +189,7 @@ void dump(const Fortran::parser::CharBlock &v, const char *property_name) {
 }
 
 template <> void dump(const std::nullopt_t &v, const char *property_name) {
-  if (!strcmp(property_name, "null")) {
-    return;
-  }
-
-  dump("null", property_name);
+  // No need to dump anything
 }
 
 template <typename T>
@@ -750,7 +749,7 @@ public:
   })
 
   DUMP_NODE_MANUAL(Fortran::parser::LoopControl::Bounds, {dump(v.name.thing, "var"); dump(v.lower.thing, "lower"); dump(v.upper.thing, "upper"); if(v.step.has_value()) dump(v.step.value().thing, "step");})
-  DUMP_NODE_MANUAL(Fortran::parser::LoopControl, {if (v.u.index() == 1) {dump(std::get<1>(v.u).thing.thing, "value"); dump("While", "kind");} else {dumpUnion(v); dump(v.u.index() == 0 ? "Range" : "Concurrent", "kind");}})
+  DUMP_NODE(Fortran::parser::LoopControl, {})
   DUMP_NODE(Fortran::parser::LoopControl::Concurrent, {})
   DUMP_NODE(Fortran::parser::MainProgram, {})
   DUMP_NODE(Fortran::parser::Map, {})
