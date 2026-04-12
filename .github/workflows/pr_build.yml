@@ -34,8 +34,8 @@ jobs:
           cmake ..
           make
 
-      # - name: Upload build artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #       name: DumpASTPlugin
-      #       path: build/DumpASTPlugin.so
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+            name: DumpASTPlugin
+            path: build/DumpASTPlugin.so
