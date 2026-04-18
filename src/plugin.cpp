@@ -416,7 +416,13 @@ public:
   DUMP_NODE(Fortran::parser::AllocatableStmt, {})
   DUMP_NODE(Fortran::parser::AllocateCoarraySpec, {})
   DUMP_NODE(Fortran::parser::AllocateObject, {})
-  DUMP_NODE(Fortran::parser::AllocateShapeSpec, {})
+  DUMP_NODE_MANUAL(Fortran::parser::AllocateShapeSpec, {
+    auto &lower_bound = std::get<0>(v.t);
+    auto &upper_bound = std::get<1>(v.t);
+
+    dump(lower_bound, "lower_bound");
+    dump(upper_bound, "upper_bound");
+  })
   DUMP_NODE(Fortran::parser::AllocateStmt, {})
   DUMP_NODE(Fortran::parser::Allocation, {})
   DUMP_NODE(Fortran::parser::AltReturnSpec, {})
