@@ -697,7 +697,7 @@ public:
   DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::DoubleComplex, {})
   DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::DoublePrecision, {})
   DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::Logical, {})
-  DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::Real, {})
+  DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::Real, { dump(v.kind, "KindSelector"); })
   DUMP_NODE(Fortran::parser::IoControlSpec, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::Asynchronous, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::CharExpr, {})
