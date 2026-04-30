@@ -1,15 +1,17 @@
 cmake_minimum_required(VERSION 3.14)
-project(FlangAstDumper)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-set(FLANG_VERSION 20)
+set(FLANG_VERSION 22)
 
 add_compile_options(-Wsuggest-override)
 set(CC clang-${FLANG_VERSION})
 set(CXX clang++-${FLANG_VERSION})
+
 set(CMAKE_C_COMPILER ${CC})
 set(CMAKE_CXX_COMPILER ${CXX})
+
+project(FlangAstDumper)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -86,7 +88,7 @@ endif()
 #
 #add_custom_target (
 #    flang_enums
-#    COMMAND node flang_enums/Main.mjs ${LLVM_DIR} src/	
+#    COMMAND node flang_enums/Main.mjs ${LLVM_DIR} src/
 #    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 # Build plugin
@@ -106,7 +108,7 @@ target_compile_features(DumpASTPlugin PRIVATE)
 #add_dependencies(tool flang_enums)
 #
 #message(STATUS "SYSTEM PROCESSOR: '${CMAKE_SYSTEM_PROCESSOR}'")
-#if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm") 
+#if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
 #    set(PROCESSOR_PREFIX "ARM")
 #else()
 #    set(PROCESSOR_PREFIX "X86")
