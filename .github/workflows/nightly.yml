@@ -18,10 +18,10 @@ jobs:
         container:
             image: ubuntu:25.10
         steps:
-            - name: Install git
+            - name: Install git and gh
               run: |
                 apt-get update
-                apt-get install -y git
+                apt-get install -y git gh ca-certificates
 
             - name: Checkout repo
               uses: actions/checkout@v4
@@ -48,14 +48,15 @@ jobs:
 
             # --- Move the 'nightly' tag to this commit and push it ---
             - name: Move nightly tag
-              working-directory: flang-dumper
               run: |
+                    git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
                     git config user.name "github-actions[bot]"
                     git config user.email "github-actions[bot]@users.noreply.github.com"
 
-                    git tag -f nightly
+                    git rev-parse --show-toplevel
+                    git tag -f nightly "$GITHUB_SHA"
                     git push -f origin nightly
-                    # Force-moving tags is a supported pattern. :contentReference[oaicite:1]{index=1}
 
             # --- Task that creates the Release will use this artifact ---
             - name: Upload build artifact
@@ -84,4 +85,4 @@ jobs:
 
                 # Upload assets, overwriting files with the same names.
                 gh release upload nightly build/DumpASTPlugin.so --clobber
-                # --clobber overwrites existing assets of the same name. :contentReference[oaicite:2]{index=2}
+
