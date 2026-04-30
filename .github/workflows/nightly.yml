@@ -18,6 +18,11 @@ jobs:
         container:
             image: ubuntu:25.10
         steps:
+            - name: Install git
+              run: |
+                apt-get update
+                apt-get install -y git
+
             - name: Checkout repo
               uses: actions/checkout@v4
               with:
@@ -34,11 +39,6 @@ jobs:
                   cd build
                   cmake ..
                   make -j 4
-
-            - name: Install git
-              run: |
-                apt-get update
-                apt-get install -y git
 
             # --- Move the 'nightly' tag to this commit and push it ---
             - name: Move nightly tag
