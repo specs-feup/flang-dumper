@@ -563,7 +563,11 @@ public:
   DUMP_NODE(Fortran::parser::DeferredCoshapeSpecList, {})
   DUMP_NODE(Fortran::parser::DeferredShapeSpecList, {})
   DUMP_NODE(Fortran::parser::DefinedOpName, {})
-  DUMP_NODE(Fortran::parser::DefinedOperator, {})
+  DUMP_NODE_MANUAL(Fortran::parser::DefinedOperator, {
+    if (v.u.index() == 1) {
+      dump(Fortran::parser::DefinedOperator::EnumToString(std::get<1>(v.u)), "op");
+    }
+  })
   DUMP_ENUM(Fortran::parser::DefinedOperator, IntrinsicOperator)
   DUMP_NODE(Fortran::parser::DerivedTypeDef, {})
   DUMP_NODE(Fortran::parser::DerivedTypeSpec, {})
@@ -841,6 +845,9 @@ public:
   DUMP_NODE(Fortran::parser::OmpClause::Private, {dump("PRIVATE", "kind");})
   DUMP_NODE(Fortran::parser::OmpClause::Shared, {dump("SHARED", "kind");})
   DUMP_NODE(Fortran::parser::OmpClause::Firstprivate, {dump("FIRST_PRIVATE", "kind");})
+  DUMP_NODE(Fortran::parser::OmpClause::Reduction, {dump("REDUCTION", "kind");})
+  DUMP_NODE(Fortran::parser::OmpClause::Nowait, {dump("NOWAIT", "kind");})
+  DUMP_NODE(Fortran::parser::OmpClause::Ordered, {dump("ORDERED", "kind");})
   DUMP_NODE(Fortran::parser::OmpClauseList, {})
   DUMP_NODE(Fortran::parser::OmpCloseModifier, {})
   DUMP_ENUM(Fortran::parser::OmpCloseModifier, Value)
@@ -872,7 +879,9 @@ public:
   DUMP_NODE(Fortran::parser::OmpDeviceTypeClause, {})
   DUMP_ENUM(Fortran::parser::OmpDeviceTypeClause, DeviceTypeDescription)
   DUMP_NODE(Fortran::parser::OmpDimsModifier, {})
-  DUMP_NODE(Fortran::parser::OmpDirectiveName, {})
+  DUMP_NODE_MANUAL(Fortran::parser::OmpDirectiveName, {
+    dump(llvm::omp::getOpenMPDirectiveName(v.v).str(), "directive");
+  })
   DUMP_NODE(Fortran::parser::OmpDirectiveSpecification, {
     dump(llvm::omp::getOpenMPDirectiveName(v.DirId()).str(), "directive");
   })
