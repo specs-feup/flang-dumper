@@ -161,6 +161,11 @@ void dump(const Fortran::parser::Constant<T> &v, const char *property_name) {
     dump(v.thing, property_name);
 }
 
+template <typename T>
+void dump(const Fortran::parser::DefaultChar<T> &v, const char *property_name) {
+  dump(v.thing, property_name);
+}
+
 void dump(const Fortran::parser::Sign &v, const char *property_name) {
     switch(v) {
         case Fortran::parser::Sign::Positive:
@@ -411,7 +416,13 @@ public:
   DUMP_NODE(Fortran::parser::AllocatableStmt, {})
   DUMP_NODE(Fortran::parser::AllocateCoarraySpec, {})
   DUMP_NODE(Fortran::parser::AllocateObject, {})
-  DUMP_NODE(Fortran::parser::AllocateShapeSpec, {})
+  DUMP_NODE_MANUAL(Fortran::parser::AllocateShapeSpec, {
+    auto &lower_bound = std::get<0>(v.t);
+    auto &upper_bound = std::get<1>(v.t);
+
+    dump(lower_bound, "lower_bound");
+    dump(upper_bound, "upper_bound");
+  })
   DUMP_NODE(Fortran::parser::AllocateStmt, {})
   DUMP_NODE(Fortran::parser::Allocation, {})
   DUMP_NODE(Fortran::parser::AltReturnSpec, {})
@@ -631,7 +642,7 @@ public:
   DUMP_NODE_MANUAL(Fortran::parser::Expr::NE, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("NE", "op");})
   DUMP_NODE_MANUAL(Fortran::parser::Expr::GE, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("GE", "op");})
   DUMP_NODE_MANUAL(Fortran::parser::Expr::GT, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("GT", "op");})
-  DUMP_NODE(Fortran::parser::Expr::AND, {})
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::AND, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("AND", "op");})
   DUMP_NODE(Fortran::parser::Expr::OR, {})
   DUMP_NODE(Fortran::parser::Expr::EQV, {})
   DUMP_NODE(Fortran::parser::Expr::NEQV, {})
@@ -719,7 +730,7 @@ public:
   DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::Real, {})
   DUMP_NODE(Fortran::parser::IoControlSpec, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::Asynchronous, {})
-  DUMP_NODE(Fortran::parser::IoControlSpec::CharExpr, {})
+  DUMP_NODE(Fortran::parser::IoControlSpec::CharExpr, {dump(Fortran::parser::IoControlSpec::CharExpr::EnumToString(std::get<0>(v.t)), "kind");})
   DUMP_ENUM(Fortran::parser::IoControlSpec::CharExpr, Kind)
   DUMP_NODE(Fortran::parser::IoControlSpec::Pos, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::Rec, {})
@@ -1225,7 +1236,12 @@ public:
   DUMP_NODE(Fortran::parser::WhereConstruct::MaskedElsewhere, {})
   DUMP_NODE(Fortran::parser::WhereConstructStmt, {})
   DUMP_NODE(Fortran::parser::WhereStmt, {})
-  DUMP_NODE(Fortran::parser::WriteStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::WriteStmt, {
+    dump(v.iounit, "iounit");
+    dump(v.format, "format");
+    dump(v.controls, "controls");
+    dump(v.items, "items");
+  })
 };
 
 class DumpAST : public Fortran::frontend::PluginParseTreeAction {

@@ -77,6 +77,8 @@ template <typename T>
 void dump(const Fortran::parser::Integer<T> &v, const char *property_name);
 template <typename T>
 void dump(const Fortran::parser::Constant<T> &v, const char *property_name);
+template <typename T>
+void dump(const Fortran::parser::DefaultChar<T> &v, const char *property_name);
 void dump(const Fortran::parser::Sign &v, const char *property_name);
 
 
