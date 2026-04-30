@@ -846,6 +846,8 @@ public:
   DUMP_NODE(Fortran::parser::OmpClause::Shared, {dump("SHARED", "kind");})
   DUMP_NODE(Fortran::parser::OmpClause::Firstprivate, {dump("FIRST_PRIVATE", "kind");})
   DUMP_NODE(Fortran::parser::OmpClause::Reduction, {dump("REDUCTION", "kind");})
+  DUMP_NODE(Fortran::parser::OmpClause::Nowait, {dump("NOWAIT", "kind");})
+  DUMP_NODE(Fortran::parser::OmpClause::Ordered, {dump("ORDERED", "kind");})
   DUMP_NODE(Fortran::parser::OmpClauseList, {})
   DUMP_NODE(Fortran::parser::OmpCloseModifier, {})
   DUMP_ENUM(Fortran::parser::OmpCloseModifier, Value)
