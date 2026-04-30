@@ -35,6 +35,10 @@ jobs:
                   cmake ..
                   make -j 4
 
+            - name: Install git
+              run: |
+                apt-get update
+                apt-get install -y git
 
             # --- Move the 'nightly' tag to this commit and push it ---
             - name: Move nightly tag
