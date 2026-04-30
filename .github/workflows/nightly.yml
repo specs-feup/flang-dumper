@@ -33,6 +33,12 @@ jobs:
             - name: Install dependencies
               run: ./scripts/install-dependencies.sh
 
+            - name: Debug checkout location
+              run: |
+                pwd
+                ls -la
+                find . -maxdepth 3 -name .git -type d
+
             - name: Build
               run: |
                   mkdir build
@@ -42,6 +48,7 @@ jobs:
 
             # --- Move the 'nightly' tag to this commit and push it ---
             - name: Move nightly tag
+              working-directory: flang-dumper
               run: |
                     git config user.name "github-actions[bot]"
                     git config user.email "github-actions[bot]@users.noreply.github.com"
