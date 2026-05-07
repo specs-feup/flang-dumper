@@ -668,7 +668,14 @@ public:
   DUMP_NODE(Fortran::parser::Format, {})
   DUMP_NODE(Fortran::parser::FormatStmt, {})
   DUMP_NODE(Fortran::parser::FunctionReference, {})
-  DUMP_NODE(Fortran::parser::FunctionStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::FunctionStmt, {
+    dump(std::get<0>(v.t), "PrefixSpec");
+    dump(std::get<1>(v.t), "Name");
+    dump(std::get<2>(v.t), "FunctionArgumentDecl");
+    if (std::get<3>(v.t).has_value()) {
+      dump(std::get<3>(v.t).value(), "Suffix");
+    }
+  })
   DUMP_NODE(Fortran::parser::FunctionSubprogram, {})
   DUMP_NODE(Fortran::parser::GenericSpec, {})
   DUMP_NODE(Fortran::parser::GenericSpec::Assignment, {})
