@@ -181,6 +181,10 @@ template <> void dump(const std::uint64_t &v, const char *property_name) {
   DUMP_PROPERTY(property_name, v);
 }
 
+template <> void dump(const std::int64_t &v, const char *property_name) {
+  DUMP_PROPERTY(property_name, v);
+}
+
 template <> void dump(const int &v, const char *property_name) {
   DUMP_PROPERTY(property_name, v);
 }
@@ -321,6 +325,35 @@ public:
     })
   }
 
+  std::string controlEditDesc_toString(Fortran::format::ControlEditDesc::Kind k) {
+    using Kind = Fortran::format::ControlEditDesc::Kind;
+    switch (k) {
+        case Kind::T:         return "T";
+        case Kind::TL:        return "TL";
+        case Kind::TR:        return "TR";
+        case Kind::X:         return "X";
+        case Kind::Slash:     return "Slash";
+        case Kind::Colon:     return "Colon";
+        case Kind::SS:        return "SS";
+        case Kind::SP:        return "SP";
+        case Kind::S:         return "S";
+        case Kind::P:         return "P";
+        case Kind::BN:        return "BN";
+        case Kind::BZ:        return "BZ";
+        case Kind::RU:        return "RU";
+        case Kind::RD:        return "RD";
+        case Kind::RZ:        return "RZ";
+        case Kind::RN:        return "RN";
+        case Kind::RC:        return "RC";
+        case Kind::RP:        return "RP";
+        case Kind::DC:        return "DC";
+        case Kind::DP:        return "DP";
+        case Kind::Dollar:    return "Dollar";
+        case Kind::Backslash: return "Backslash";
+        default:              return "Unknown";
+    }
+}
+
   // See "flang/Parser/dump-parse-tree.h" for complete list of nodes and enums to dump
   DUMP_ENUM(Fortran::common, CUDADataAttr)
   DUMP_ENUM(Fortran::common, CUDASubprogramAttrs)
@@ -328,8 +361,11 @@ public:
   DUMP_ENUM(Fortran::common, OmpDependenceKind)
   DUMP_ENUM(Fortran::common, OmpMemoryOrderType)
   DUMP_ENUM(Fortran::common, OpenACCDeviceType)
-  DUMP_NODE(Fortran::format::ControlEditDesc, {})
-  DUMP_NODE(Fortran::format::ControlEditDesc::Kind, {})
+  DUMP_NODE_MANUAL(Fortran::format::ControlEditDesc, {
+    dump(controlEditDesc_toString(v.kind), "kind");
+    dump(v.count, "count");
+  })
+  //DUMP_NODE(Fortran::format::ControlEditDesc::Kind, {})
   DUMP_NODE(Fortran::format::DerivedTypeDataEditDesc, {})
   DUMP_NODE(Fortran::format::FormatItem, {dump(v.repeatCount, "repeatCount"); dump(v.u, "value");})
   DUMP_NODE(Fortran::format::FormatSpecification, {dump(v.items, "items"); dump(v.unlimitedItems, "unlimitedItems");})
