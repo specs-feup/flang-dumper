@@ -42,6 +42,8 @@ std::string escape_quotes(std::string_view sv);
 template <>
 void dump(const std::uint64_t &v, const char *property_name);
 template <>
+void dump(const std::int64_t &v, const char *property_name);
+template <>
 void dump(const std::string &v, const char *property_name);
 template <>
 void dump(const Fortran::parser::CharBlock &v, const char *property_name);
