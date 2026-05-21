@@ -1174,7 +1174,11 @@ public:
   DUMP_NODE(Fortran::parser::StatusExpr, {})
   DUMP_NODE(Fortran::parser::StmtFunctionStmt, {})
   DUMP_NODE(Fortran::parser::StopCode, {})
-  DUMP_NODE(Fortran::parser::StopStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::StopStmt, {
+    dump(std::get<0>(v.t), "kind");
+    dump(std::get<1>(v.t), "code");
+    dump(std::get<2>(v.t), "quiet");
+  })
   DUMP_ENUM(Fortran::parser::StopStmt, Kind)
   DUMP_NODE(Fortran::parser::StructureComponent, {})
   DUMP_NODE(Fortran::parser::StructureConstructor, {})
