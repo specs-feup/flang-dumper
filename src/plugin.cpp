@@ -628,10 +628,10 @@ public:
     dump(upper_bound, "upper_bound");
   })
   DUMP_NODE(Fortran::parser::Expr, {})
-  DUMP_NODE(Fortran::parser::Expr::Parentheses, {})
-  DUMP_NODE(Fortran::parser::Expr::UnaryPlus, {})
-  DUMP_NODE(Fortran::parser::Expr::Negate, {})
-  DUMP_NODE(Fortran::parser::Expr::NOT, {})
+  DUMP_NODE(Fortran::parser::Expr::Parentheses, { dump("PARENTHESES", "op"); })
+  DUMP_NODE(Fortran::parser::Expr::UnaryPlus, { dump("UNARY_PLUS", "op"); })
+  DUMP_NODE(Fortran::parser::Expr::Negate, { dump("NEGATE", "op"); })
+  DUMP_NODE(Fortran::parser::Expr::NOT, { dump("NOT", "op"); })
   DUMP_NODE(Fortran::parser::Expr::PercentLoc, {})
   DUMP_NODE(Fortran::parser::Expr::DefinedUnary, {})
   DUMP_NODE(Fortran::parser::Expr::Power, {})
@@ -731,7 +731,7 @@ public:
   DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::DoubleComplex, {})
   DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::DoublePrecision, {})
   DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::Logical, {})
-  DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::Real, {})
+  DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::Real, { dump(v.v, "KindSelector"); })
   DUMP_NODE(Fortran::parser::IoControlSpec, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::Asynchronous, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::CharExpr, {dump(Fortran::parser::IoControlSpec::CharExpr::EnumToString(std::get<0>(v.t)), "kind");})
@@ -1174,7 +1174,11 @@ public:
   DUMP_NODE(Fortran::parser::StatusExpr, {})
   DUMP_NODE(Fortran::parser::StmtFunctionStmt, {})
   DUMP_NODE(Fortran::parser::StopCode, {})
-  DUMP_NODE(Fortran::parser::StopStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::StopStmt, {
+    dump(std::get<0>(v.t), "kind");
+    dump(std::get<1>(v.t), "code");
+    dump(std::get<2>(v.t), "quiet");
+  })
   DUMP_ENUM(Fortran::parser::StopStmt, Kind)
   DUMP_NODE(Fortran::parser::StructureComponent, {})
   DUMP_NODE(Fortran::parser::StructureConstructor, {})
