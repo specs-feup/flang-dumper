@@ -1190,7 +1190,11 @@ public:
   DUMP_NODE(Fortran::parser::SubmoduleStmt, {})
   DUMP_NODE(Fortran::parser::SubroutineStmt, {})
   DUMP_NODE(Fortran::parser::SubroutineSubprogram, {})
-  DUMP_NODE(Fortran::parser::SubscriptTriplet, {})
+  DUMP_NODE_MANUAL(Fortran::parser::SubscriptTriplet, {
+    dump(std::get<0>(v.t), "start");
+    dump(std::get<1>(v.t), "end");
+    dump(std::get<2>(v.t), "stride");
+  })
   DUMP_NODE(Fortran::parser::Substring, {})
   DUMP_NODE(Fortran::parser::SubstringInquiry, {})
   DUMP_NODE(Fortran::parser::SubstringRange, {})
