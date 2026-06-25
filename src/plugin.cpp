@@ -41,6 +41,8 @@ template <typename T> const char *getNodeName(const T &v) {
     return "DefaultChar";
   } else if constexpr (std::is_same_v<T, Fortran::parser::CharBlock>) {
     return "CharBlock";
+  } else if constexpr (std::is_same_v<T, Fortran::parser::CommonStmt::Block>) {
+    return "CommonStmtBlock";  // To prevent name conflicts with the other AST Block nodes
   } else {
     if constexpr (std::is_same_v<
                       decltype(Fortran::parser::ParseTreeDumper::GetNodeName(
