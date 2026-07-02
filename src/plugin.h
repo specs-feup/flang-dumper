@@ -97,10 +97,17 @@ void dumpTuple(const T &v) { dump(v.t); }
 template <typename T>
 void dumpConstraint(const T &v) { dump(v.thing); }
 
+#define DUMP_POST(CLASS)      \
+  void Post(const CLASS &) {  \
+    nodeStack.pop_back();     \
+  }
+
 #define DUMP_PROPERTY(KEY, VALUE) \
   llvm::outs() << ",\n\"" << KEY << "\": \"" << VALUE << "\"";
 
 #define DUMP_BARE_NODE(CONTENT)                                 \
+  std::string id = getId(v);                                    \
+  nodeStack.push_back(id);                                      \
   if (!firstNodeDump)                                           \
   {                                                             \
     llvm::outs() << ",\n";                                      \
@@ -110,7 +117,7 @@ void dumpConstraint(const T &v) { dump(v.thing); }
     firstNodeDump = false;                                      \
   }                                                             \
   llvm::outs() << "{\n";                                        \
-  llvm::outs() << "\"" << "id" << "\": \"" << getId(v) << "\""; \
+  llvm::outs() << "\"" << "id" << "\": \"" << id << "\"";       \
   CONTENT;                                                      \
   llvm::outs() << "\n}";                                        \
   return true;
@@ -142,7 +149,8 @@ void dumpConstraint(const T &v) { dump(v.thing); }
                                                                     \
       CONTENTS;                                                     \
     })                                                              \
-  }
+  }                                                                 \
+  DUMP_POST(CLASS)
 
 #define DUMP_NODE_MANUAL(CLASS, CONTENTS)                                  \
   bool Pre(const CLASS &v)                                          \
@@ -150,7 +158,8 @@ void dumpConstraint(const T &v) { dump(v.thing); }
     DUMP_BARE_NODE({                                                \
       CONTENTS;                                                     \
     })                                                              \
-  }
+  }                                                                 \
+  DUMP_POST(CLASS)
 
 
 #define CONCATENATE_(X, Y) X##Y

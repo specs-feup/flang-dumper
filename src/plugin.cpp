@@ -287,6 +287,7 @@ struct ParseTreeVisitor {
 public:
   using ThisClass = ParseTreeVisitor;
   bool firstNodeDump = true;
+  std::vector<std::string> nodeStack;
 
   template <typename A> bool Pre(const A &) { return true; }
   template <typename A> void Post(const A &) { return; }
@@ -1272,6 +1273,7 @@ class DumpAST : public Fortran::frontend::PluginParseTreeAction {
     const Fortran::parser::AllCookedSources &allCooked = getParsing().allCooked();
     const Fortran::parser::AllSources &allSources = allCooked.allSources();
 
+    // Extract comments
     std::vector<Comment> rawComments;
     if (auto maybeFirst = allSources.GetFirstFileProvenance()) {
       if (const auto *sourceFile = allSources.GetSourceFile(maybeFirst->start())) {
