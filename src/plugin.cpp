@@ -286,8 +286,14 @@ template <typename... T> void dump(const std::tuple<T...> &v) {
 struct ParseTreeVisitor {
 public:
   using ThisClass = ParseTreeVisitor;
-  bool firstNodeDump = true;
-  std::vector<std::string> nodeStack;
+
+  ParseTreeVisitor(
+    const Fortran::parser::AllSources &allSources,
+    const Fortran::parser::AllCookedSources &allCooked,
+    std::vector<RawComment> &&rawComments
+  ) : allSources(allSources), allCooked(allCooked), rawComments(rawComments) {}
+
+  std::vector<Comment> &getComments() { return comments; }
 
   template <typename A> bool Pre(const A &) { return true; }
   template <typename A> void Post(const A &) { return; }
@@ -1265,6 +1271,16 @@ public:
     dump(v.controls, "controls");
     dump(v.items, "items");
   })
+
+private:
+  bool firstNodeDump = true;
+  std::vector<std::string> nodeStack;
+  std::vector<Comment> comments;
+  size_t commentIndex = 0;
+
+  const Fortran::parser::AllCookedSources& allCooked;
+  const Fortran::parser::AllSources& allSources;
+  std::vector<RawComment> rawComments;
 };
 
 class DumpAST : public Fortran::frontend::PluginParseTreeAction {
@@ -1274,7 +1290,7 @@ class DumpAST : public Fortran::frontend::PluginParseTreeAction {
     const Fortran::parser::AllSources &allSources = allCooked.allSources();
 
     // Extract comments
-    std::vector<Comment> rawComments;
+    std::vector<RawComment> rawComments;
     if (auto maybeFirst = allSources.GetFirstFileProvenance()) {
       if (const auto *sourceFile = allSources.GetSourceFile(maybeFirst->start())) {
         rawComments = extractComments(*sourceFile);
@@ -1282,11 +1298,11 @@ class DumpAST : public Fortran::frontend::PluginParseTreeAction {
     }
 
     llvm::outs() << "{\"nodes\": [\n";
-    ParseTreeVisitor visitor;
+    ParseTreeVisitor visitor(allSources, allCooked, std::move(rawComments));
     Fortran::parser::Walk(getParsing().parseTree(), visitor);
     llvm::outs() << "],\n";
     llvm::outs() << "\"comments\": [\n";
-    for (const auto &comment : rawComments) {
+    for (const auto &comment : visitor.getComments()) {
       llvm::outs() << toString(comment) << ",\n";
     }
     llvm::outs() << "],\n";

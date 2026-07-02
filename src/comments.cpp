@@ -37,9 +37,9 @@ std::optional<std::string> extractCommentFromLine(std::string_view line) {
     }
 }
 
-std::vector<Comment> extractComments(const Fortran::parser::SourceFile &file) {
+std::vector<RawComment> extractComments(const Fortran::parser::SourceFile &file) {
     llvm::ArrayRef<char> content = file.content();
-    std::vector<Comment> comments;
+    std::vector<RawComment> comments;
 
     for (size_t i = 1; i <= file.lines(); i++) {
         std::size_t start = file.GetLineStartOffset(i);
@@ -51,15 +51,25 @@ std::vector<Comment> extractComments(const Fortran::parser::SourceFile &file) {
         std::optional<std::string> line = extractCommentFromLine(std::string_view(content.data() + start, end - start));
 
         if (line.has_value()) {
-            comments.push_back(Comment{i, start + 1, line.value()});
+            comments.push_back(RawComment{i, start + 1, line.value()});
         }
     }
 
     return comments;
 }
 
+Comment processComment(const RawComment &rawComment, const std::string &parentId, const std::string &beforeId) {
+    return Comment {
+        rawComment.line,
+        rawComment.text,
+        parentId,
+        beforeId
+    };
+}
+
 std::string toString(const Comment &comment) {
     return "{\"line\": " + std::to_string(comment.line) +
-           ", \"column\": " + std::to_string(comment.column) +
-           ", \"text\": \"" + comment.text + "\"}";
+           ", \"text\": \"" + comment.text + "\"," +
+           ", \"parentId\": \"" + comment.parentId + "\"," +
+           ", \"beforeId\": \"" + comment.beforeId + "\"}";
 }
