@@ -9,8 +9,8 @@
 
 struct Comment {
     size_t line;
-    size_t column;
-    std::string_view text;
+    size_t column;  // TODO(Process-ing): See if this is necessary
+    std::string text;
 };
 
 std::vector<Comment> extractComments(const Fortran::parser::SourceFile &file);
