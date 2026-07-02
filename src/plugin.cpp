@@ -10,8 +10,10 @@
 #include "flang/Parser/dump-parse-tree.h"
 #include "flang/Parser/parse-tree.h"
 #include "flang/Parser/parsing.h"
+#include "flang/Parser/provenance.h"
 
 #include "plugin.h"
+#include "comments.h"
 
 template <typename T, template <typename...> class Template>
 struct is_specialization : std::false_type {};
@@ -289,10 +291,6 @@ public:
   template <typename A> bool Pre(const A &) { return true; }
   template <typename A> void Post(const A &) { return; }
 
-  template <typename T> static void dump_enum() {
-    // llvm::outs() << T::name() << ": " << T::value() << '\n';
-  }
-
   // Function to dump all registered enums as JSON
   static void dumpEnumValues() {
     const auto &reg = Collector<ThisClass>::get_registry();
@@ -305,6 +303,11 @@ public:
       first = false;
     }
     llvm::outs() << "\n";
+  }
+
+
+  template <typename T> static void dump_enum() {
+    // llvm::outs() << T::name() << ": " << T::value() << '\n';
   }
 
   template <typename T> bool Pre(const Fortran::parser::Statement<T> &v) {
@@ -1266,9 +1269,24 @@ public:
 class DumpAST : public Fortran::frontend::PluginParseTreeAction {
 
   void executeAction() override {
+    const Fortran::parser::AllCookedSources &allCooked = getParsing().allCooked();
+    const Fortran::parser::AllSources &allSources = allCooked.allSources();
+
+    std::vector<Comment> rawComments;
+    if (auto maybeFirst = allSources.GetFirstFileProvenance()) {
+      if (const auto *sourceFile = allSources.GetSourceFile(maybeFirst->start())) {
+        rawComments = extractComments(*sourceFile);
+      }
+    }
+
     llvm::outs() << "{\"nodes\": [\n";
     ParseTreeVisitor visitor;
     Fortran::parser::Walk(getParsing().parseTree(), visitor);
+    llvm::outs() << "],\n";
+    llvm::outs() << "\"comments\": [\n";
+    for (const auto &comment : rawComments) {
+      llvm::outs() << toString(comment) << ",\n";
+    }
     llvm::outs() << "],\n";
 
     llvm::outs() << "\"enums\": {\n";
