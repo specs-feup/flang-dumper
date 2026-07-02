@@ -317,7 +317,36 @@ public:
     // llvm::outs() << T::name() << ": " << T::value() << '\n';
   }
 
-  template <typename T> bool Pre(const Fortran::parser::Statement<T> &v) {
+  std::optional<size_t> getLine(const Fortran::parser::CharBlock &block) {
+    auto range = allCooked.GetSourcePositionRange(block);
+    return range.has_value()
+      ? std::optional<size_t>(range->first.line)
+      : std::nullopt;
+  }
+
+  void flushComments(const std::string &beforeId, const std::string &parentId) {
+    while (commentIndex < rawComments.size()) {
+      Comment comment = processComment(rawComments[commentIndex], beforeId, parentId);
+      comments.push_back(comment);
+      commentIndex++;
+    }
+  }
+
+  void flushComments(size_t beforeLine, const std::string &beforeId, const std::string &parentId) {
+    while (commentIndex < rawComments.size() && rawComments[commentIndex].line < beforeLine) {
+      Comment comment = processComment(rawComments[commentIndex], beforeId, parentId);
+      comments.push_back(comment);
+      commentIndex++;
+    }
+  }
+
+  template <typename T>
+  bool Pre(const Fortran::parser::Statement<T> &v) {
+    std::string parentId = nodeStack.back();  // The stack will never be empty, since the statement must be inside a program unit
+    if (auto line = getLine(v.source)) {
+      flushComments(*line, getId(v), parentId);
+    }
+
     DUMP_BARE_NODE({
       dump(v.statement, "statement");
       dump(v.label, "label");
@@ -326,11 +355,26 @@ public:
   }
 
   template <typename T>
+  void Post(const Fortran::parser::Statement<T> &v) {
+    nodeStack.pop_back();
+  }
+
+  template <typename T>
   bool Pre(const Fortran::parser::UnlabeledStatement<T> &v) {
+    std::string parentId = nodeStack.back();  // Same thing as for labeled statements
+    if (auto line = getLine(v.source)) {
+      flushComments(*line, getId(v), parentId);
+    }
+
     DUMP_BARE_NODE({
       dump(v.statement, "statement");
       dump(v.source, "source");
     })
+  }
+
+  template <typename T>
+  void Post(const Fortran::parser::UnlabeledStatement<T> &v) {
+    nodeStack.pop_back();
   }
 
   // See "flang/Parser/dump-parse-tree.h" for complete list of nodes and enums to dump

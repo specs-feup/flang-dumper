@@ -14,7 +14,6 @@ struct RawComment {
 };
 
 struct Comment {
-    size_t line;
     std::string text;
     std::string parentId;
     std::string beforeId;

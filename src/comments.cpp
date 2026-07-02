@@ -60,7 +60,6 @@ std::vector<RawComment> extractComments(const Fortran::parser::SourceFile &file)
 
 Comment processComment(const RawComment &rawComment, const std::string &parentId, const std::string &beforeId) {
     return Comment {
-        rawComment.line,
         rawComment.text,
         parentId,
         beforeId
@@ -68,8 +67,7 @@ Comment processComment(const RawComment &rawComment, const std::string &parentId
 }
 
 std::string toString(const Comment &comment) {
-    return "{\"line\": " + std::to_string(comment.line) +
-           ", \"text\": \"" + comment.text + "\"," +
+    return "{\"text\": \"" + comment.text + "\"," +
            ", \"parentId\": \"" + comment.parentId + "\"," +
            ", \"beforeId\": \"" + comment.beforeId + "\"}";
 }
