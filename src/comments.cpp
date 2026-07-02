@@ -8,7 +8,8 @@ inline std::string_view trim(const std::string_view& s)
 {
     size_t start = s.find_first_not_of(" \t");
     size_t end = s.find_last_not_of(" \t") + 1;
-    return s.substr(start, end - start);
+
+    return start < end ? s.substr(start, end - start) : std::string_view();
 }
 
 inline std::string escapeComment(const std::string_view& s)
