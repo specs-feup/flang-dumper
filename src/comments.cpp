@@ -68,7 +68,7 @@ Comment processComment(const RawComment &rawComment, const std::string &parentId
 }
 
 std::string toString(const Comment &comment) {
-    return "{\"text\": \"" + comment.text + "\"," +
-           ", \"parentId\": \"" + comment.parentId + "\"," +
-           ", \"beforeId\": \"" + comment.beforeId + "\"}";
+    return "{\"text\": \"" + comment.text +
+           "\", \"parentId\": \"" + comment.parentId +
+           "\", \"beforeId\": \"" + comment.beforeId + "\"}";
 }

@@ -1345,9 +1345,13 @@ class DumpAST : public Fortran::frontend::PluginParseTreeAction {
     ParseTreeVisitor visitor(allSources, allCooked, std::move(rawComments));
     Fortran::parser::Walk(getParsing().parseTree(), visitor);
     llvm::outs() << "],\n";
+
     llvm::outs() << "\"comments\": [\n";
     for (const auto &comment : visitor.getComments()) {
-      llvm::outs() << toString(comment) << ",\n";
+      llvm::outs() << toString(comment);
+      if (&comment != &visitor.getComments().back()) {
+        llvm::outs() << ",\n";
+      }
     }
     llvm::outs() << "],\n";
 
