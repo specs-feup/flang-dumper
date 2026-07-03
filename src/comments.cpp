@@ -59,16 +59,14 @@ std::vector<RawComment> extractComments(const Fortran::parser::SourceFile &file)
     return comments;
 }
 
-Comment processComment(const RawComment &rawComment, const std::string &parentId, const std::string &beforeId) {
+Comment processComment(const RawComment &rawComment, const std::string &lastStmtId) {
     return Comment {
         rawComment.text,
-        parentId,
-        beforeId
+        lastStmtId
     };
 }
 
 std::string toString(const Comment &comment) {
     return "{\"text\": \"" + comment.text +
-           "\", \"parentId\": \"" + comment.parentId +
-           "\", \"beforeId\": \"" + comment.beforeId + "\"}";
+           "\", \"stmtId\": \"" + comment.stmtId + "\"}";
 }

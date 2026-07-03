@@ -324,17 +324,17 @@ public:
       : std::nullopt;
   }
 
-  void flushComments(const std::string &beforeId, const std::string &parentId) {
+  void flushComments() {
     while (commentIndex < rawComments.size()) {
-      Comment comment = processComment(rawComments[commentIndex], beforeId, parentId);
+      Comment comment = processComment(rawComments[commentIndex], lastStmtId);
       comments.push_back(comment);
       commentIndex++;
     }
   }
 
-  void flushComments(size_t beforeLine, const std::string &beforeId, const std::string &parentId) {
-    while (commentIndex < rawComments.size() && rawComments[commentIndex].line < beforeLine) {
-      Comment comment = processComment(rawComments[commentIndex], beforeId, parentId);
+  void flushComments(size_t beforeLine) {
+    while (commentIndex < rawComments.size() && rawComments[commentIndex].line <= beforeLine) {
+      Comment comment = processComment(rawComments[commentIndex], lastStmtId);
       comments.push_back(comment);
       commentIndex++;
     }
@@ -342,9 +342,9 @@ public:
 
   template <typename T>
   bool Pre(const Fortran::parser::Statement<T> &v) {
-    std::string parentId = nodeStack.back();  // The stack will never be empty, since the statement must be inside a program unit
+    lastStmtId = getId(v);
     if (auto line = getLine(v.source)) {
-      flushComments(*line, getId(v), parentId);
+      flushComments(*line);
     }
 
     DUMP_BARE_NODE({
@@ -355,26 +355,11 @@ public:
   }
 
   template <typename T>
-  void Post(const Fortran::parser::Statement<T> &v) {
-    nodeStack.pop_back();
-  }
-
-  template <typename T>
   bool Pre(const Fortran::parser::UnlabeledStatement<T> &v) {
-    std::string parentId = nodeStack.back();  // Same thing as for labeled statements
-    if (auto line = getLine(v.source)) {
-      flushComments(*line, getId(v), parentId);
-    }
-
     DUMP_BARE_NODE({
       dump(v.statement, "statement");
       dump(v.source, "source");
     })
-  }
-
-  template <typename T>
-  void Post(const Fortran::parser::UnlabeledStatement<T> &v) {
-    nodeStack.pop_back();
   }
 
   // See "flang/Parser/dump-parse-tree.h" for complete list of nodes and enums to dump
@@ -1318,7 +1303,7 @@ public:
 
 private:
   bool firstNodeDump = true;
-  std::vector<std::string> nodeStack;
+  std::string lastStmtId;
   std::vector<Comment> comments;
   size_t commentIndex = 0;
 
@@ -1344,6 +1329,7 @@ class DumpAST : public Fortran::frontend::PluginParseTreeAction {
     llvm::outs() << "{\"nodes\": [\n";
     ParseTreeVisitor visitor(allSources, allCooked, std::move(rawComments));
     Fortran::parser::Walk(getParsing().parseTree(), visitor);
+    visitor.flushComments();
     llvm::outs() << "],\n";
 
     llvm::outs() << "\"comments\": [\n";

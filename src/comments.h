@@ -15,12 +15,11 @@ struct RawComment {
 
 struct Comment {
     std::string text;
-    std::string parentId;
-    std::string beforeId;
+    std::string stmtId;
 };
 
 std::vector<RawComment> extractComments(const Fortran::parser::SourceFile &file);
-Comment processComment(const RawComment &rawComment, const std::string &parentId, const std::string &beforeId);
+Comment processComment(const RawComment &rawComment, const std::string &stmtId);
 std::string toString(const Comment& comment);
 
 #endif  // __COMMENTS_H__
