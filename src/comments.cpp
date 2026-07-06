@@ -1,6 +1,7 @@
 #include "comments.h"
 
 #include <optional>
+#include <unordered_set>
 
 #include "flang/Parser/parse-tree.h"
 
@@ -39,11 +40,16 @@ inline std::string toUppercase(const std::string_view& s)
 }
 
 std::optional<std::string> extractCommentFromLine(std::string_view line) {
+    // Add more if needed
+    static const std::unordered_set<std::string> DIRECTIVE_PREFIXES = {
+        "$OMP", "$ACC", "DIR$", "DEC$", "GCC$"
+    };
+
     std::string_view trimmedLine = trim(line);
 
     if (trimmedLine.size() > 0 && trimmedLine[0] == '!') {
-        // Ignore OpenMP directives
-        if (trimmedLine.size() >= 5 && toUppercase(trimmedLine.substr(1, 4)) == "$OMP") {
+        // Ignore directives
+        if (trimmedLine.size() >= 5 && DIRECTIVE_PREFIXES.count(toUppercase(trimmedLine.substr(1, 4))) == 1) {
             return std::nullopt;
         }
 
