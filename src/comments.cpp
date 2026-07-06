@@ -32,6 +32,11 @@ std::optional<std::string> extractCommentFromLine(std::string_view line) {
     std::string_view trimmedLine = trim(line);
 
     if (trimmedLine.size() > 0 && trimmedLine[0] == '!') {
+        // Ignore OpenMP directives
+        if (trimmedLine.size() >= 5 && trimmedLine.substr(1, 5) == "$OMP") {
+            return std::nullopt;
+        }
+
         return escapeComment(trimmedLine);
     } else {
         return std::nullopt;
