@@ -28,12 +28,22 @@ inline std::string escapeComment(const std::string_view& s)
     return result;
 }
 
+inline std::string toUppercase(const std::string_view& s)
+{
+    std::string result;
+    result.reserve(s.size());
+    for (char c : s) {
+        result += std::toupper(c);
+    }
+    return result;
+}
+
 std::optional<std::string> extractCommentFromLine(std::string_view line) {
     std::string_view trimmedLine = trim(line);
 
     if (trimmedLine.size() > 0 && trimmedLine[0] == '!') {
         // Ignore OpenMP directives
-        if (trimmedLine.size() >= 5 && trimmedLine.substr(1, 5) == "$OMP") {
+        if (trimmedLine.size() >= 5 && toUppercase(trimmedLine.substr(1, 4)) == "$OMP") {
             return std::nullopt;
         }
 
