@@ -5,16 +5,6 @@
 
 #include "flang/Parser/parse-tree.h"
 
-inline std::string toUppercase(const std::string_view& s)
-{
-    std::string result;
-    result.reserve(s.size());
-    for (char c : s) {
-        result += std::toupper(c);
-    }
-    return result;
-}
-
 // Extracts a comment from a line, using a state machine
 std::optional<std::string> extractCommentFromLine(std::string_view line) {
     // Add more if needed
@@ -23,15 +13,20 @@ std::optional<std::string> extractCommentFromLine(std::string_view line) {
     };
 
     std::string comment;
+    std::string uppercaseComment;  // For checking directives
     bool inComment = false;
     char quote = '\0';
 
     for (char c: line) {
         if (inComment) {
             // Escape JSON special characters
-            if (c == '"' || c == '\\')
+            if (c == '"' || c == '\\') {
                 comment += '\\';
+                uppercaseComment += '\\';
+            }
             comment += c;
+            uppercaseComment += std::toupper(c);
+
         } else if (quote == '\0' && (c == '\'' || c == '"')) {
             quote = c;
         } else if (quote != '\0' && c == quote) {
@@ -39,11 +34,13 @@ std::optional<std::string> extractCommentFromLine(std::string_view line) {
         } else if (c == '!' && quote == '\0') {
             inComment = true;
             comment += '!';
+            uppercaseComment += '!';
         }
 
         // Ignore directives
-        if (DIRECTIVE_PREFIXES.count(comment) > 0) {
+        if (DIRECTIVE_PREFIXES.count(uppercaseComment) > 0) {
             comment.clear();
+            uppercaseComment.clear();
             inComment = false;
         }
     }
