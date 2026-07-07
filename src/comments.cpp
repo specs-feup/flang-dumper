@@ -73,21 +73,24 @@ std::vector<RawComment> extractComments(const Fortran::parser::SourceFile &file)
         std::optional<std::string> line = extractCommentFromLine(std::string_view(content.data() + start, end - start));
 
         if (line.has_value()) {
-            comments.push_back(RawComment{i, start + 1, line.value()});
+            comments.push_back(RawComment{i, line.value()});
         }
     }
 
     return comments;
 }
 
-Comment processComment(const RawComment &rawComment, const std::string &lastStmtId) {
+Comment processComment(const RawComment &rawComment, const std::string &stmtId, std::size_t stmtLine) {
     return Comment {
         rawComment.text,
-        lastStmtId
+        stmtId,
+        stmtLine == rawComment.line
     };
 }
 
 std::string toString(const Comment &comment) {
     return "{\"text\": \"" + comment.text +
-           "\", \"stmtId\": \"" + comment.stmtId + "\"}";
+           "\", \"stmtId\": \"" + comment.stmtId +
+           "\", \"trailing\": " + (comment.trailing ? "true" : "false") +
+           "}";
 }

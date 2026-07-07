@@ -326,15 +326,15 @@ public:
 
   void flushComments() {
     while (commentIndex < rawComments.size()) {
-      Comment comment = processComment(rawComments[commentIndex], lastStmtId);
+      Comment comment = processComment(rawComments[commentIndex], programId, 0);
       comments.push_back(comment);
       commentIndex++;
     }
   }
 
-  void flushComments(size_t beforeLine) {
-    while (commentIndex < rawComments.size() && rawComments[commentIndex].line <= beforeLine) {
-      Comment comment = processComment(rawComments[commentIndex], lastStmtId);
+  void flushComments(const std::string &stmtId, std::size_t stmtLine) {
+    while (commentIndex < rawComments.size() && rawComments[commentIndex].line <= stmtLine) {
+      Comment comment = processComment(rawComments[commentIndex], stmtId, stmtLine);
       comments.push_back(comment);
       commentIndex++;
     }
@@ -342,9 +342,9 @@ public:
 
   template <typename T>
   bool Pre(const Fortran::parser::Statement<T> &v) {
-    lastStmtId = getId(v);
+    std::string stmtId = getId(v);
     if (auto line = getLine(v.source)) {
-      flushComments(*line);
+      flushComments(stmtId, *line);
     }
 
     DUMP_BARE_NODE({
@@ -1166,7 +1166,9 @@ public:
   DUMP_NODE(Fortran::parser::ProcedureDesignator, {})
   DUMP_NODE(Fortran::parser::ProcedureStmt, {})
   DUMP_ENUM(Fortran::parser::ProcedureStmt, Kind)
-  DUMP_NODE(Fortran::parser::Program, {})
+  DUMP_NODE(Fortran::parser::Program, {
+    programId = getId(v);
+  })
   DUMP_NODE(Fortran::parser::ProgramStmt, {})
   DUMP_NODE(Fortran::parser::ProgramUnit, {})
   DUMP_NODE(Fortran::parser::Protected, { dump("Protected", "keyword"); })
@@ -1303,7 +1305,7 @@ public:
 
 private:
   bool firstNodeDump = true;
-  std::string lastStmtId;
+  std::string programId;
   std::vector<Comment> comments;
   size_t commentIndex = 0;
 
