@@ -5,30 +5,6 @@
 
 #include "flang/Parser/parse-tree.h"
 
-inline std::string_view trim(const std::string_view& s)
-{
-    size_t start = s.find_first_not_of(" \t");
-    size_t end = s.find_last_not_of(" \t") + 1;
-
-    return start < end ? s.substr(start, end - start) : std::string_view();
-}
-
-inline std::string escapeComment(const std::string_view& s)
-{
-    std::string result;
-    result.reserve(s.size());
-    for (char c : s) {
-        if (c == '"') {
-            result += "\\\"";
-        } else if (c == '\\') {
-            result += "\\\\";
-        } else {
-            result += c;
-        }
-    }
-    return result;
-}
-
 inline std::string toUppercase(const std::string_view& s)
 {
     std::string result;
@@ -39,24 +15,39 @@ inline std::string toUppercase(const std::string_view& s)
     return result;
 }
 
+// Extracts a comment from a line, using a state machine
 std::optional<std::string> extractCommentFromLine(std::string_view line) {
     // Add more if needed
     static const std::unordered_set<std::string> DIRECTIVE_PREFIXES = {
-        "$OMP", "$ACC", "DIR$", "DEC$", "GCC$"
+        "!$OMP", "!$ACC", "!DIR$", "!DEC$", "!GCC$"
     };
 
-    std::string_view trimmedLine = trim(line);
+    std::string comment;
+    bool inComment = false;
+    bool inQuote = false;
+    bool charEscaped = false;
 
-    if (trimmedLine.size() > 0 && trimmedLine[0] == '!') {
-        // Ignore directives
-        if (trimmedLine.size() >= 5 && DIRECTIVE_PREFIXES.count(toUppercase(trimmedLine.substr(1, 4))) == 1) {
-            return std::nullopt;
+    for (char c: line) {
+        if (inComment) {
+            // Escape JSON special characters
+            if (c == '"' || c == '\\')
+                comment += '\\';
+            comment += c;
+        } else if (c == '"' && !charEscaped) {
+            inQuote = !inQuote;
+        } else if (c == '!' && !inQuote) {
+            inComment = true;
+            comment += '!';
         }
 
-        return escapeComment(trimmedLine);
-    } else {
-        return std::nullopt;
+        if (DIRECTIVE_PREFIXES.count(comment) > 0) {
+            comment.clear();
+        }
+
+        charEscaped = c == '\\';
     }
+
+    return comment.empty() ? std::nullopt : std::optional<std::string>(comment);
 }
 
 std::vector<RawComment> extractComments(const Fortran::parser::SourceFile &file) {
