@@ -24,8 +24,7 @@ std::optional<std::string> extractCommentFromLine(std::string_view line) {
 
     std::string comment;
     bool inComment = false;
-    bool inQuote = false;
-    bool charEscaped = false;
+    char quote = '\0';
 
     for (char c: line) {
         if (inComment) {
@@ -33,9 +32,11 @@ std::optional<std::string> extractCommentFromLine(std::string_view line) {
             if (c == '"' || c == '\\')
                 comment += '\\';
             comment += c;
-        } else if (c == '"' && !charEscaped) {
-            inQuote = !inQuote;
-        } else if (c == '!' && !inQuote) {
+        } else if (quote == '\0' && (c == '\'' || c == '"')) {
+            quote = c;
+        } else if (quote != '\0' && c == quote) {
+            quote = '\0';
+        } else if (c == '!' && quote == '\0') {
             inComment = true;
             comment += '!';
         }
@@ -43,8 +44,6 @@ std::optional<std::string> extractCommentFromLine(std::string_view line) {
         if (DIRECTIVE_PREFIXES.count(comment) > 0) {
             comment.clear();
         }
-
-        charEscaped = c == '\\';
     }
 
     return comment.empty() ? std::nullopt : std::optional<std::string>(comment);
