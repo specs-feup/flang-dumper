@@ -41,8 +41,10 @@ std::optional<std::string> extractCommentFromLine(std::string_view line) {
             comment += '!';
         }
 
+        // Ignore directives
         if (DIRECTIVE_PREFIXES.count(comment) > 0) {
             comment.clear();
+            inComment = false;
         }
     }
 
