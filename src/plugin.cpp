@@ -291,7 +291,7 @@ public:
     const Fortran::parser::AllSources &allSources,
     const Fortran::parser::AllCookedSources &allCooked,
     std::vector<RawComment> &&rawComments
-  ) : allSources(allSources), allCooked(allCooked), rawComments(rawComments) {}
+) : allCooked(allCooked), allSources(allSources), rawComments(std::move(rawComments)) {}
 
   std::vector<Comment> &getComments() { return comments; }
 
