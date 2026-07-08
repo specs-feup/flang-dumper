@@ -25,7 +25,7 @@ std::optional<std::string> extractCommentFromLine(std::string_view line) {
                 uppercaseComment += '\\';
             }
             comment += c;
-            uppercaseComment += std::toupper(c);
+            uppercaseComment += static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
 
         } else if (quote == '\0' && (c == '\'' || c == '"')) {
             quote = c;
