@@ -10,6 +10,7 @@
 struct RawComment {
     size_t line;
     std::string text;
+    size_t sepsBefore;  // Number of semicolons before the comment on the same line
 };
 
 struct Comment {

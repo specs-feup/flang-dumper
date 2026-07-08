@@ -6,7 +6,7 @@
 #include "flang/Parser/parse-tree.h"
 
 // Extracts a comment from a line, using a state machine
-std::optional<std::string> extractCommentFromLine(std::string_view line) {
+std::tuple<std::optional<std::string>, size_t> extractCommentFromLine(std::string_view line) {
     // Add more if needed
     static const std::unordered_set<std::string> DIRECTIVE_PREFIXES = {
         "!$OMP", "!$ACC", "!DIR$", "!DEC$", "!GCC$"
@@ -16,6 +16,7 @@ std::optional<std::string> extractCommentFromLine(std::string_view line) {
     std::string uppercaseComment;  // For checking directives
     bool inComment = false;
     char quote = '\0';
+    size_t sepsBefore = 0;
 
     for (char c: line) {
         if (inComment) {
@@ -27,14 +28,18 @@ std::optional<std::string> extractCommentFromLine(std::string_view line) {
             comment += c;
             uppercaseComment += static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
 
-        } else if (quote == '\0' && (c == '\'' || c == '"')) {
-            quote = c;
+        } else if (quote == '\0') {
+            if (c == '!') {
+                inComment = true;
+                comment += '!';
+                uppercaseComment += '!';
+            } else if (c == ';') {
+                sepsBefore++;
+            } else if (c == '"' || c == '\'') {
+                quote = c;
+            }
         } else if (quote != '\0' && c == quote) {
             quote = '\0';
-        } else if (c == '!' && quote == '\0') {
-            inComment = true;
-            comment += '!';
-            uppercaseComment += '!';
         }
 
         // Ignore directives
@@ -45,7 +50,8 @@ std::optional<std::string> extractCommentFromLine(std::string_view line) {
         }
     }
 
-    return comment.empty() ? std::nullopt : std::optional<std::string>(comment);
+    auto commentOpt = comment.empty() ? std::nullopt : std::optional<std::string>(comment);
+    return std::make_tuple(commentOpt, sepsBefore);
 }
 
 std::vector<RawComment> extractComments(const Fortran::parser::SourceFile &file) {
@@ -59,10 +65,10 @@ std::vector<RawComment> extractComments(const Fortran::parser::SourceFile &file)
         while (end < content.size() && content[end] != '\n')
             end++;
 
-        std::optional<std::string> line = extractCommentFromLine(std::string_view(content.data() + start, end - start));
+        auto [commentOpt, sepsBefore] = extractCommentFromLine(std::string_view(content.data() + start, end - start));
 
-        if (line.has_value()) {
-            comments.push_back(RawComment{i, line.value()});
+        if (commentOpt.has_value()) {
+            comments.push_back(RawComment{i, commentOpt.value(), sepsBefore});
         }
     }
 

@@ -325,7 +325,9 @@ public:
   }
 
   void flushComments() {
-    while (commentIndex < rawComments.size()) {
+    while (comments.size() < rawComments.size()) {
+      size_t commentIndex = comments.size();
+
       Comment comment = processComment(rawComments[commentIndex], programId, 0);
       comments.push_back(comment);
       commentIndex++;
@@ -333,10 +335,19 @@ public:
   }
 
   void flushComments(const std::string &stmtId, std::size_t stmtLine) {
-    while (commentIndex < rawComments.size() && rawComments[commentIndex].line <= stmtLine) {
-      Comment comment = processComment(rawComments[commentIndex], stmtId, stmtLine);
-      comments.push_back(comment);
-      commentIndex++;
+    while (comments.size() < rawComments.size()) {
+      size_t commentIndex = comments.size();
+
+      if (rawComments[commentIndex].line < stmtLine
+        || (rawComments[commentIndex].line == stmtLine && rawComments[commentIndex].sepsBefore == 0)) {
+        Comment comment = processComment(rawComments[commentIndex], stmtId, stmtLine);
+        comments.push_back(comment);
+      } else if (rawComments[commentIndex].line == stmtLine && rawComments[commentIndex].sepsBefore > 0) {
+        rawComments[commentIndex].sepsBefore--;
+        break;
+      } else {
+        break;
+      }
     }
   }
 
@@ -1307,7 +1318,6 @@ private:
   bool firstNodeDump = true;
   std::string programId;
   std::vector<Comment> comments;
-  size_t commentIndex = 0;
 
   const Fortran::parser::AllCookedSources& allCooked;
   const Fortran::parser::AllSources& allSources;
