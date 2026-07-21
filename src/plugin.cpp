@@ -1334,20 +1334,29 @@ private:
 };
 
 class DumpAST : public Fortran::frontend::PluginParseTreeAction {
+  static std::string getExtension(const std::string& path) {
+    size_t dotPos = path.rfind('.');
+    return dotPos != std::string::npos ? path.substr(dotPos + 1) : "";
+  }
 
   void executeAction() override {
     const Fortran::parser::AllCookedSources &allCooked = getParsing().allCooked();
     const Fortran::parser::AllSources &allSources = allCooked.allSources();
 
     // Extract comments
+    std::string fileExtension = "f90";  // Default file extension
     std::vector<RawComment> rawComments;
+
     if (auto maybeFirst = allSources.GetFirstFileProvenance()) {
       if (const auto *sourceFile = allSources.GetSourceFile(maybeFirst->start())) {
-        rawComments = extractComments(*sourceFile);
+        fileExtension = getExtension(sourceFile->path());
+        rawComments = extractComments(*sourceFile, fileExtension);
       }
     }
 
-    llvm::outs() << "{\"nodes\": [\n";
+    llvm::outs() << "{\"fileExtension\": \"" << fileExtension << "\",\n";
+
+    llvm::outs() << "\"nodes\": [\n";
     ParseTreeVisitor visitor(allSources, allCooked, std::move(rawComments));
     Fortran::parser::Walk(getParsing().parseTree(), visitor);
     visitor.flushComments();
