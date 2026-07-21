@@ -9,7 +9,7 @@
 std::tuple<std::optional<std::string>, size_t> extractCommentFromLine(std::string_view line, bool isFixedForm) {
     // Add more if needed
     static const std::unordered_set<std::string> DIRECTIVE_PREFIXES = {
-        "!$OMP", "!$ACC", "!DIR$", "!DEC$", "!GCC$"
+        "$OMP", "$ACC", "DIR$", "DEC$", "GCC$"
     };
 
     if (isFixedForm) {
