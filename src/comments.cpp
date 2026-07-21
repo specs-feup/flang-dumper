@@ -55,7 +55,7 @@ std::tuple<std::optional<std::string>, size_t> extractCommentFromLine(std::strin
         }
     }
 
-    auto commentOpt = comment.empty() ? std::nullopt : std::optional<std::string>(comment);
+    auto commentOpt = inComment ? std::optional<std::string>(comment) : std::nullopt;
     return std::make_tuple(commentOpt, sepsBefore);
 }
 
