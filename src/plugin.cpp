@@ -175,10 +175,10 @@ void dump(const Fortran::parser::DefaultChar<T> &v, const char *property_name) {
 void dump(const Fortran::parser::Sign &v, const char *property_name) {
     switch(v) {
         case Fortran::parser::Sign::Positive:
-            dump("positive", property_name);
+            dump("+", property_name);
             break;
         case Fortran::parser::Sign::Negative:
-            dump("negative", property_name);
+            dump("-", property_name);
             break;
     }
 }
@@ -817,12 +817,7 @@ public:
   DUMP_NODE(Fortran::parser::LocalitySpec::Shared, {})
   DUMP_NODE(Fortran::parser::LockStmt, {})
   DUMP_NODE(Fortran::parser::LockStmt::LockStat, {})
-  DUMP_NODE(Fortran::parser::LogicalLiteralConstant, {
-      // TODO: This has not been tested yet
-      if(std::get<1>(v.t).has_value()){
-          dump(std::get<1>(v.t).value(), "kind");
-      }
-  })
+  DUMP_NODE(Fortran::parser::LogicalLiteralConstant, {})
   DUMP_NODE_MANUAL(Fortran::parser::LoopControl::Bounds, {dump(v.name.thing, "var"); dump(v.lower.thing, "lower"); dump(v.upper.thing, "upper"); if(v.step.has_value()) dump(v.step.value().thing, "step");})
   DUMP_NODE_MANUAL(Fortran::parser::AcImpliedDoControl::Bounds, {
       dump(v.name.thing, "var");
@@ -1194,14 +1189,13 @@ public:
   DUMP_NODE(Fortran::parser::Protected, { dump("Protected", "keyword"); })
   DUMP_NODE(Fortran::parser::ProtectedStmt, {})
   DUMP_NODE(Fortran::parser::ReadStmt, {})
-  DUMP_NODE(Fortran::parser::RealLiteralConstant, {
-      dump(v.real, "real");
-      // TODO: This has not been tested yet
-      if(v.kind.has_value()){
-          dump(v.kind.value(), "kind");
-      }
+  DUMP_NODE_MANUAL(Fortran::parser::RealLiteralConstant, {
+    dump(v.real, "real");
+    dump(v.kind, "kind");
   })
-  DUMP_NODE(Fortran::parser::RealLiteralConstant::Real, {dump(v.source, "source");})
+  DUMP_NODE_MANUAL(Fortran::parser::RealLiteralConstant::Real, {
+    dump(v.source, "source");
+  })
   DUMP_NODE(Fortran::parser::Rename, {})
   DUMP_NODE(Fortran::parser::Rename::Names, {})
   DUMP_NODE(Fortran::parser::Rename::Operators, {})
@@ -1224,9 +1218,10 @@ public:
   DUMP_NODE(Fortran::parser::Selector, {})
   DUMP_NODE(Fortran::parser::SeparateModuleSubprogram, {})
   DUMP_NODE(Fortran::parser::SequenceStmt, {})
-  DUMP_NODE(Fortran::parser::Sign, {})
   DUMP_NODE(Fortran::parser::SignedComplexLiteralConstant, {})
-  DUMP_NODE(Fortran::parser::SignedIntLiteralConstant, {})
+  DUMP_NODE(Fortran::parser::SignedIntLiteralConstant, {
+    dump(v.source, "source");
+  })
   DUMP_NODE(Fortran::parser::SignedRealLiteralConstant, {})
   DUMP_NODE(Fortran::parser::SpecificationConstruct, {})
   DUMP_NODE(Fortran::parser::SpecificationExpr, {})
