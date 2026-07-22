@@ -1296,7 +1296,19 @@ public:
   DUMP_NODE(Fortran::parser::UnlockStmt, {})
   DUMP_NODE(Fortran::parser::UnsignedLiteralConstant, {})
   DUMP_NODE(Fortran::parser::UnsignedTypeSpec, {})
-  DUMP_NODE(Fortran::parser::UseStmt, { dump(v.moduleName, "moduleName"); })
+  DUMP_NODE_MANUAL(Fortran::parser::UseStmt, {
+    dump(v.nature, "nature");
+    dump(v.moduleName, "moduleName");
+
+    switch (v.u.index()) {
+      case 0:
+        dump(std::get<0>(v.u), "renameList");
+        break;
+      case 1:
+        dump(std::get<1>(v.u), "onlyList");
+        break;
+    }
+  })
   DUMP_ENUM(Fortran::parser::UseStmt, ModuleNature)
   DUMP_NODE(Fortran::parser::Value, { dump("Value", "keyword"); })
   DUMP_NODE(Fortran::parser::ValueStmt, {})
