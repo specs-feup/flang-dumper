@@ -1197,8 +1197,14 @@ public:
     dump(v.source, "source");
   })
   DUMP_NODE(Fortran::parser::Rename, {})
-  DUMP_NODE(Fortran::parser::Rename::Names, {})
-  DUMP_NODE(Fortran::parser::Rename::Operators, {})
+  DUMP_NODE_MANUAL(Fortran::parser::Rename::Names, {
+    dump(std::get<0>(v.t), "local");
+    dump(std::get<1>(v.t), "global");
+  })
+  DUMP_NODE_MANUAL(Fortran::parser::Rename::Operators, {
+    dump(std::get<0>(v.t), "local");
+    dump(std::get<1>(v.t), "global");
+  })
   DUMP_NODE(Fortran::parser::ReturnStmt, {})
   DUMP_NODE(Fortran::parser::RewindStmt, {})
   DUMP_NODE(Fortran::parser::Save, { dump("Save", "keyword"); })
