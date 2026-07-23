@@ -1261,7 +1261,10 @@ public:
   })
   DUMP_NODE(Fortran::parser::Substring, {})
   DUMP_NODE(Fortran::parser::SubstringInquiry, {})
-  DUMP_NODE(Fortran::parser::SubstringRange, {})
+  DUMP_NODE_MANUAL(Fortran::parser::SubstringRange, {
+    dump(std::get<0>(v.t), "lower");
+    dump(std::get<1>(v.t), "upper");
+  })
   DUMP_NODE(Fortran::parser::Suffix, {})
   DUMP_NODE(Fortran::parser::SyncAllStmt, {})
   DUMP_NODE(Fortran::parser::SyncImagesStmt, {})
