@@ -704,9 +704,9 @@ public:
   DUMP_NODE_MANUAL(Fortran::parser::Expr::GE, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("GE", "op"); })
   DUMP_NODE_MANUAL(Fortran::parser::Expr::GT, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("GT", "op"); })
   DUMP_NODE_MANUAL(Fortran::parser::Expr::AND, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("AND", "op"); })
-  DUMP_NODE(Fortran::parser::Expr::OR, {})
-  DUMP_NODE(Fortran::parser::Expr::EQV, {})
-  DUMP_NODE(Fortran::parser::Expr::NEQV, {})
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::OR, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("OR", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::EQV, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("EQV", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::NEQV, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("NEQV", "op"); })
   DUMP_NODE(Fortran::parser::Expr::DefinedBinary, {})
   DUMP_NODE(Fortran::parser::Expr::ComplexConstructor, {})
   DUMP_NODE(Fortran::parser::External, { dump("External", "keyword"); })
@@ -1303,13 +1303,12 @@ public:
     dump(v.nature, "nature");
     dump(v.moduleName, "moduleName");
 
-    switch (v.u.index()) {
-      case 0:
-        dump(std::get<0>(v.u), "renameList");
-        break;
-      case 1:
-        dump(std::get<1>(v.u), "onlyList");
-        break;
+    if (v.u.index() == 0) {
+      dump("Rename", "variantKey");
+      dump(std::get<0>(v.u), "Rename");
+    } else if (v.u.index() == 1) {
+      dump("Only", "variantKey");
+      dump(std::get<1>(v.u), "Only");
     }
   })
   DUMP_ENUM(Fortran::parser::UseStmt, ModuleNature)
