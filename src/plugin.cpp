@@ -1190,7 +1190,12 @@ public:
   DUMP_NODE(Fortran::parser::ProgramUnit, {})
   DUMP_NODE(Fortran::parser::Protected, { dump("Protected", "keyword"); })
   DUMP_NODE(Fortran::parser::ProtectedStmt, {})
-  DUMP_NODE(Fortran::parser::ReadStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::ReadStmt, {
+    dump(v.iounit, "iounit");
+    dump(v.format, "format");
+    dump(v.controls, "controls");
+    dump(v.items, "items");
+  })
   DUMP_NODE_MANUAL(Fortran::parser::RealLiteralConstant, {
     dump(v.real, "real");
     dump(v.kind, "kind");
@@ -1333,7 +1338,12 @@ public:
   DUMP_NODE(Fortran::parser::WhereConstruct::MaskedElsewhere, {})
   DUMP_NODE(Fortran::parser::WhereConstructStmt, {})
   DUMP_NODE(Fortran::parser::WhereStmt, {})
-  DUMP_NODE(Fortran::parser::WriteStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::WriteStmt, {
+    dump(v.iounit, "iounit");
+    dump(v.format, "format");
+    dump(v.controls, "controls");
+    dump(v.items, "items");
+  })
 
 private:
   bool firstNodeDump = true;
