@@ -38,11 +38,9 @@ template <typename T> const char *getNodeName(const T &v) {
   } else if constexpr (is_specialization<T, Fortran::parser::Scalar>::value
                     || is_specialization<T, Fortran::parser::Constant>::value
                     || is_specialization<T, Fortran::parser::Integer>::value
-                    || is_specialization<T, Fortran::parser::Logical>::value) {
+                    || is_specialization<T, Fortran::parser::Logical>::value
+                    || is_specialization<T, Fortran::parser::DefaultChar>::value) {
     return getNodeName(v.thing);
-  } else if constexpr (is_specialization<T,
-                                         Fortran::parser::DefaultChar>::value) {
-    return "DefaultChar";
   } else if constexpr (std::is_same_v<T, Fortran::parser::CharBlock>) {
     return "CharBlock";
   } else if constexpr (std::is_same_v<T, Fortran::parser::CommonStmt::Block>) {
