@@ -846,7 +846,10 @@ public:
   DUMP_NODE(Fortran::parser::NamedConstant, {})
   DUMP_NODE(Fortran::parser::NamedConstantDef, {})
   DUMP_NODE(Fortran::parser::NamelistStmt, {})
-  DUMP_NODE(Fortran::parser::NamelistStmt::Group, {})
+  DUMP_NODE_MANUAL(Fortran::parser::NamelistStmt::Group, {
+    dump(std::get<0>(v.t), "groupName");
+    dump(std::get<1>(v.t), "objectNames");
+  })
   DUMP_NODE(Fortran::parser::NonLabelDoStmt, {})
   DUMP_NODE(Fortran::parser::NoPass, {})
   DUMP_NODE(Fortran::parser::NotifyWaitStmt, {})
