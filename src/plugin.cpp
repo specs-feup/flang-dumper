@@ -39,7 +39,7 @@ template <typename T> const char *getNodeName(const T &v) {
                     || is_specialization<T, Fortran::parser::Constant>::value
                     || is_specialization<T, Fortran::parser::Integer>::value
                     || is_specialization<T, Fortran::parser::Logical>::value) {
-    return "Expr";
+    return getNodeName(v.thing);
   } else if constexpr (is_specialization<T,
                                          Fortran::parser::DefaultChar>::value) {
     return "DefaultChar";
@@ -48,16 +48,17 @@ template <typename T> const char *getNodeName(const T &v) {
   } else if constexpr (std::is_same_v<T, Fortran::parser::CommonStmt::Block>) {
     return "CommonStmtBlock";  // To prevent name conflicts with the other AST Block nodes
   } else {
-    if constexpr (std::is_same_v<
-                      decltype(Fortran::parser::ParseTreeDumper::GetNodeName(
-                          v)),
-                      std::string>) {
-      static std::string name =
-          Fortran::parser::ParseTreeDumper::GetNodeName(v);
-      return name.c_str();
-    } else {
-      return Fortran::parser::ParseTreeDumper::GetNodeName(v);
+    static std::string name = Fortran::parser::ParseTreeDumper::GetNodeName(v);
+
+    // The following step is needed for correctly processing enum types, which
+    // are returned as "EnumType = EnumValue" by GetNodeName(), so that their name
+    // appears as "EnumType" in the dump output.
+    std::size_t spacePos = name.find(' ');
+    if (spacePos != std::string::npos) {
+      name = name.substr(0, spacePos);
     }
+
+    return name.c_str();
   }
 }
 
@@ -791,7 +792,7 @@ public:
   DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::Real, { dump(v.v, "KindSelector"); })
   DUMP_NODE(Fortran::parser::IoControlSpec, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::Asynchronous, {})
-  DUMP_NODE(Fortran::parser::IoControlSpec::CharExpr, {dump(Fortran::parser::IoControlSpec::CharExpr::EnumToString(std::get<0>(v.t)), "kind");})
+  DUMP_NODE(Fortran::parser::IoControlSpec::CharExpr, {})
   DUMP_ENUM(Fortran::parser::IoControlSpec::CharExpr, Kind)
   DUMP_NODE(Fortran::parser::IoControlSpec::Pos, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::Rec, {})
@@ -1331,12 +1332,7 @@ public:
   DUMP_NODE(Fortran::parser::WhereConstruct::MaskedElsewhere, {})
   DUMP_NODE(Fortran::parser::WhereConstructStmt, {})
   DUMP_NODE(Fortran::parser::WhereStmt, {})
-  DUMP_NODE_MANUAL(Fortran::parser::WriteStmt, {
-    dump(v.iounit, "iounit");
-    dump(v.format, "format");
-    dump(v.controls, "controls");
-    dump(v.items, "items");
-  })
+  DUMP_NODE(Fortran::parser::WriteStmt, {})
 
 private:
   bool firstNodeDump = true;
