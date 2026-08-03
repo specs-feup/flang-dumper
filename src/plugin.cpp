@@ -727,7 +727,7 @@ public:
   DUMP_NODE_MANUAL(Fortran::parser::FunctionStmt, {
     dump(std::get<0>(v.t), "prefix");
     dump(std::get<1>(v.t), "functionName");
-    dump(std::get<2>(v.t), "argNames");
+    dump(std::get<2>(v.t), "paramNames");
     dump(std::get<3>(v.t), "suffix");
   })
   DUMP_NODE(Fortran::parser::FunctionSubprogram, {})
