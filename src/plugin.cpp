@@ -724,7 +724,12 @@ public:
   DUMP_NODE(Fortran::parser::Format, {})
   DUMP_NODE(Fortran::parser::FormatStmt, {})
   DUMP_NODE(Fortran::parser::FunctionReference, {})
-  DUMP_NODE(Fortran::parser::FunctionStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::FunctionStmt, {
+    dump(std::get<0>(v.t), "prefix");
+    dump(std::get<1>(v.t), "functionName");
+    dump(std::get<2>(v.t), "argNames");
+    dump(std::get<3>(v.t), "suffix");
+  })
   DUMP_NODE(Fortran::parser::FunctionSubprogram, {})
   DUMP_NODE(Fortran::parser::GenericSpec, {})
   DUMP_NODE(Fortran::parser::GenericSpec::Assignment, {})
