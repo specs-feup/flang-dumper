@@ -1277,7 +1277,10 @@ public:
     dump(std::get<0>(v.t), "lower");
     dump(std::get<1>(v.t), "upper");
   })
-  DUMP_NODE(Fortran::parser::Suffix, {})
+  DUMP_NODE_MANUAL(Fortran::parser::Suffix, {
+    dump(v.binding, "binding");
+    dump(v.resultName, "resultName");
+  })
   DUMP_NODE(Fortran::parser::SyncAllStmt, {})
   DUMP_NODE(Fortran::parser::SyncImagesStmt, {})
   DUMP_NODE(Fortran::parser::SyncImagesStmt::ImageSet, {})
