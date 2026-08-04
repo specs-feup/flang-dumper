@@ -10,10 +10,12 @@
 #include "flang/Parser/dump-parse-tree.h"
 #include "flang/Parser/parse-tree.h"
 #include "flang/Parser/parsing.h"
+#include "flang/Parser/provenance.h"
 #include "flang/Semantics/symbol.h"
 #include "flang/Semantics/scope.h"
 
 #include "plugin.h"
+#include "comments.h"
 
 template <typename T, template <typename...> class Template>
 struct is_specialization : std::false_type {};
@@ -289,14 +291,17 @@ template <typename... T> void dump(const std::tuple<T...> &v) {
 struct ParseTreeVisitor {
 public:
   using ThisClass = ParseTreeVisitor;
-  bool firstNodeDump = true;
+
+  ParseTreeVisitor(
+    const Fortran::parser::AllSources &allSources,
+    const Fortran::parser::AllCookedSources &allCooked,
+    std::vector<RawComment> &&rawComments
+) : allCooked(allCooked), allSources(allSources), rawComments(std::move(rawComments)) {}
+
+  std::vector<Comment> &getComments() { return comments; }
 
   template <typename A> bool Pre(const A &) { return true; }
   template <typename A> void Post(const A &) { return; }
-
-  template <typename T> static void dump_enum() {
-    // llvm::outs() << T::name() << ": " << T::value() << '\n';
-  }
 
   // Function to dump all registered enums as JSON
   static void dumpEnumValues() {
@@ -312,7 +317,52 @@ public:
     llvm::outs() << "\n";
   }
 
-  template <typename T> bool Pre(const Fortran::parser::Statement<T> &v) {
+
+  template <typename T> static void dump_enum() {
+    // llvm::outs() << T::name() << ": " << T::value() << '\n';
+  }
+
+  std::optional<size_t> getLine(const Fortran::parser::CharBlock &block) {
+    auto range = allCooked.GetSourcePositionRange(block);
+    return range.has_value()
+      ? std::optional<size_t>(range->first.line)
+      : std::nullopt;
+  }
+
+  void flushComments() {
+    while (comments.size() < rawComments.size()) {
+      size_t commentIndex = comments.size();
+
+      Comment comment = processComment(rawComments[commentIndex], programId, 0);
+      comments.push_back(comment);
+      commentIndex++;
+    }
+  }
+
+  void flushComments(const std::string &stmtId, std::size_t stmtLine) {
+    while (comments.size() < rawComments.size()) {
+      size_t commentIndex = comments.size();
+
+      if (rawComments[commentIndex].line < stmtLine
+        || (rawComments[commentIndex].line == stmtLine && rawComments[commentIndex].sepsBefore == 0)) {
+        Comment comment = processComment(rawComments[commentIndex], stmtId, stmtLine);
+        comments.push_back(comment);
+      } else if (rawComments[commentIndex].line == stmtLine && rawComments[commentIndex].sepsBefore > 0) {
+        rawComments[commentIndex].sepsBefore--;
+        break;
+      } else {
+        break;
+      }
+    }
+  }
+
+  template <typename T>
+  bool Pre(const Fortran::parser::Statement<T> &v) {
+    std::string stmtId = getId(v);
+    if (auto line = getLine(v.source)) {
+      flushComments(stmtId, *line);
+    }
+
     DUMP_BARE_NODE({
       dump(v.statement, "statement");
       dump(v.label, "label");
@@ -1136,7 +1186,9 @@ public:
   DUMP_NODE(Fortran::parser::ProcedureDesignator, {})
   DUMP_NODE(Fortran::parser::ProcedureStmt, {})
   DUMP_ENUM(Fortran::parser::ProcedureStmt, Kind)
-  DUMP_NODE(Fortran::parser::Program, {})
+  DUMP_NODE(Fortran::parser::Program, {
+    programId = getId(v);
+  })
   DUMP_NODE(Fortran::parser::ProgramStmt, {})
   DUMP_NODE(Fortran::parser::ProgramUnit, {})
   DUMP_NODE(Fortran::parser::Protected, { dump("Protected", "keyword"); })
@@ -1270,14 +1322,44 @@ public:
     dump(v.controls, "controls");
     dump(v.items, "items");
   })
+
+private:
+  bool firstNodeDump = true;
+  std::string programId;
+  std::vector<Comment> comments;
+
+  const Fortran::parser::AllCookedSources& allCooked;
+  const Fortran::parser::AllSources& allSources;
+  std::vector<RawComment> rawComments;
 };
 
 class DumpAST : public Fortran::frontend::PluginParseTreeAction {
 
   void executeAction() override {
+    const Fortran::parser::AllCookedSources &allCooked = getParsing().allCooked();
+    const Fortran::parser::AllSources &allSources = allCooked.allSources();
+
+    // Extract comments
+    std::vector<RawComment> rawComments;
+    if (auto maybeFirst = allSources.GetFirstFileProvenance()) {
+      if (const auto *sourceFile = allSources.GetSourceFile(maybeFirst->start())) {
+        rawComments = extractComments(*sourceFile);
+      }
+    }
+
     llvm::outs() << "{\"nodes\": [\n";
-    ParseTreeVisitor visitor;
+    ParseTreeVisitor visitor(allSources, allCooked, std::move(rawComments));
     Fortran::parser::Walk(getParsing().parseTree(), visitor);
+    visitor.flushComments();
+    llvm::outs() << "],\n";
+
+    llvm::outs() << "\"comments\": [\n";
+    for (const auto &comment : visitor.getComments()) {
+      llvm::outs() << toString(comment);
+      if (&comment != &visitor.getComments().back()) {
+        llvm::outs() << ",\n";
+      }
+    }
     llvm::outs() << "],\n";
 
     llvm::outs() << "\"enums\": {\n";

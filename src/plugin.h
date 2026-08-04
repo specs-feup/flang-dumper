@@ -101,6 +101,7 @@ void dumpConstraint(const T &v) { dump(v.thing); }
   llvm::outs() << ",\n\"" << KEY << "\": \"" << VALUE << "\"";
 
 #define DUMP_BARE_NODE(CONTENT)                                 \
+  std::string id = getId(v);                                    \
   if (!firstNodeDump)                                           \
   {                                                             \
     llvm::outs() << ",\n";                                      \
@@ -110,7 +111,7 @@ void dumpConstraint(const T &v) { dump(v.thing); }
     firstNodeDump = false;                                      \
   }                                                             \
   llvm::outs() << "{\n";                                        \
-  llvm::outs() << "\"" << "id" << "\": \"" << getId(v) << "\""; \
+  llvm::outs() << "\"" << "id" << "\": \"" << id << "\"";       \
   CONTENT;                                                      \
   llvm::outs() << "\n}";                                        \
   return true;
