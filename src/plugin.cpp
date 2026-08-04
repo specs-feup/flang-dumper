@@ -11,6 +11,8 @@
 #include "flang/Parser/parse-tree.h"
 #include "flang/Parser/parsing.h"
 #include "flang/Parser/provenance.h"
+#include "flang/Semantics/symbol.h"
+#include "flang/Semantics/scope.h"
 
 #include "plugin.h"
 #include "comments.h"
@@ -275,6 +277,9 @@ void dump(const std::optional<T> &v, const char *property_name) {
   }
 }
 
+void dump(const Fortran::semantics::Scope &scope, const char *property_name) {
+  dump(Fortran::semantics::Scope::EnumToString(scope.kind()), property_name);
+}
 
 
 template <typename... T> void dump(const std::tuple<T...> &v) {
@@ -839,7 +844,11 @@ public:
   DUMP_NODE(Fortran::parser::ModuleSubprogramPart, {})
   DUMP_NODE(Fortran::parser::MpSubprogramStmt, {})
   DUMP_NODE(Fortran::parser::MsgVariable, {})
-  DUMP_NODE(Fortran::parser::Name, { dump(v.source, "source"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Name, {
+    dump(v.source, "source");
+    if (v.symbol != nullptr)
+      dump(v.symbol->owner(), "scope");
+  })
   DUMP_NODE(Fortran::parser::NamedConstant, {})
   DUMP_NODE(Fortran::parser::NamedConstantDef, {})
   DUMP_NODE(Fortran::parser::NamelistStmt, {})
