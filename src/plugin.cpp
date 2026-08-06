@@ -740,7 +740,13 @@ public:
   DUMP_NODE(Fortran::parser::ImplicitPart, {})
   DUMP_NODE(Fortran::parser::ImplicitPartStmt, {})
   DUMP_NODE(Fortran::parser::ImplicitSpec, {})
-  DUMP_NODE(Fortran::parser::ImplicitStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::ImplicitStmt, {
+    if (v.u.index() == 0) {
+      dump(std::get<0>(v.u), "ImplicitSpec");
+    } else {
+      dump(std::get<1>(v.u), "ImplicitNoneNameSpec");
+    }
+  })
   DUMP_ENUM(Fortran::parser::ImplicitStmt, ImplicitNoneNameSpec)
   DUMP_NODE(Fortran::parser::ImpliedShapeSpec, {})
   DUMP_NODE(Fortran::parser::ImportStmt, {})
