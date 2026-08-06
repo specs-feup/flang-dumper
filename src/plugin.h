@@ -136,7 +136,7 @@ void dumpConstraint(const T &v) { dump(v.thing); }
       {                                                             \
         dumpConstraint(v);                                          \
       }                                                             \
-      else                                                          \
+      else if constexpr (!EmptyTrait<CLASS>)                        \
       {                                                             \
         llvm::errs() << "Not implemented for " << getId(v) << "\n"; \
       }                                                             \
@@ -145,7 +145,7 @@ void dumpConstraint(const T &v) { dump(v.thing); }
     })                                                              \
   }
 
-#define DUMP_NODE_MANUAL(CLASS, CONTENTS)                                  \
+#define DUMP_NODE_MANUAL(CLASS, CONTENTS)                           \
   bool Pre(const CLASS &v)                                          \
   {                                                                 \
     DUMP_BARE_NODE({                                                \
