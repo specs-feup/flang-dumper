@@ -31,10 +31,14 @@ struct is_indirection<Fortran::common::Indirection<T, COPY>> : std::true_type {
 
 template <typename T> const char *getNodeName(const T &v) {
   if constexpr (is_specialization<T, Fortran::parser::Statement>::value) {
-    return "Statement";
+    static std::string name = "Statement<" + std::string(getNodeName(v.statement)) + ">";
+    return name.c_str();
+
   } else if constexpr (is_specialization<
                            T, Fortran::parser::UnlabeledStatement>::value) {
-    return "UnlabeledStatement";
+    static std::string name = "UnlabeledStatement<" + std::string(getNodeName(v.statement)) + ">";
+    return name.c_str();
+
   } else if constexpr (is_specialization<T, Fortran::parser::Scalar>::value
                     || is_specialization<T, Fortran::parser::Constant>::value
                     || is_specialization<T, Fortran::parser::Integer>::value
@@ -224,30 +228,6 @@ void dump(const std::list<T> &v, const char *property_name) {
     llvm::outs() << "\"" << getId(item) << "\"";
   }
   llvm::outs() << "]";
-}
-
-template <typename T>
-void dump(const Fortran::parser::Statement<T> &v, const char *property_name) {
-  DUMP_PROPERTY(property_name << "<" << getNodeName(v.statement) << ">",
-                getId(v));
-}
-
-template <typename T> void dump(const Fortran::parser::Statement<T> &v) {
-  DUMP_PROPERTY(getNodeName(v) << "<" << getNodeName(v.statement) << ">",
-                getId(v));
-}
-
-template <typename T>
-void dump(const Fortran::parser::UnlabeledStatement<T> &v,
-          const char *property_name) {
-  DUMP_PROPERTY(property_name << "<" << getNodeName(v.statement) << ">",
-                getId(v));
-}
-
-template <typename T>
-void dump(const Fortran::parser::UnlabeledStatement<T> &v) {
-  DUMP_PROPERTY(getNodeName(v) << "<" << getNodeName(v.statement) << ">",
-                getId(v));
 }
 
 template <typename... T>

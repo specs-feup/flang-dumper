@@ -49,15 +49,6 @@ template <>
 void dump(const std::nullopt_t &v, const char *property_name);
 template <typename T>
 void dump(const std::list<T> &v, const char *property_name);
-template <typename T>
-void dump(const Fortran::parser::Statement<T> &v, const char *property_name);
-template <typename T>
-void dump(const Fortran::parser::Statement<T> &v);
-template <typename T>
-void dump(const Fortran::parser::UnlabeledStatement<T> &v,
-          const char *property_name);
-template <typename T>
-void dump(const Fortran::parser::UnlabeledStatement<T> &v);
 template <typename... T>
 void dump(const std::variant<T...> &v, const char *property_name = "value");
 template <typename T>
