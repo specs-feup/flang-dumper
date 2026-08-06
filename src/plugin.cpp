@@ -742,8 +742,10 @@ public:
   DUMP_NODE(Fortran::parser::ImplicitSpec, {})
   DUMP_NODE_MANUAL(Fortran::parser::ImplicitStmt, {
     if (v.u.index() == 0) {
+      dump("ImplicitSpec", "variantKey");
       dump(std::get<0>(v.u), "ImplicitSpec");
     } else {
+      dump("ImplicitNoneNameSpec", "variantKey");
       dump(std::get<1>(v.u), "ImplicitNoneNameSpec");
     }
   })
