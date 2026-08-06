@@ -126,7 +126,11 @@ void dump(const char *v, const char *property_name) {
 }
 
 void dump(const bool v, const char *property_name) {
-    DUMP_PROPERTY(property_name, v);
+  DUMP_PROPERTY(property_name, v);
+}
+
+void dump(const char v, const char *property_name) {
+  DUMP_PROPERTY(property_name, v);
 }
 
 void dump(std::string_view v, const char *property_name) {
@@ -808,7 +812,14 @@ public:
   DUMP_NODE(Fortran::parser::LabelDoStmt, {})
   DUMP_NODE(Fortran::parser::LanguageBindingSpec, {})
   DUMP_NODE(Fortran::parser::LengthSelector, {})
-  DUMP_NODE(Fortran::parser::LetterSpec, {})
+  DUMP_NODE_MANUAL(Fortran::parser::LetterSpec, {
+    // Letters are stored as "const char *" pointers, so we need to dereference
+    // them to avoid interpreting them as c-strings.
+    dump(*std::get<0>(v.t), "firstLetter");
+    if (std::get<1>(v.t).has_value()) {
+      dump(**std::get<1>(v.t), "lastLetter");
+    }
+  })
   DUMP_NODE(Fortran::parser::LiteralConstant, {})
   DUMP_NODE(Fortran::parser::IntLiteralConstant, {})
   DUMP_NODE(Fortran::parser::ReductionOperator, {})
