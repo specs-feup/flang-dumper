@@ -611,7 +611,11 @@ public:
   DUMP_ENUM(Fortran::parser::DefinedOperator, IntrinsicOperator)
   DUMP_NODE(Fortran::parser::DerivedTypeDef, {})
   DUMP_NODE(Fortran::parser::DerivedTypeSpec, {})
-  DUMP_NODE(Fortran::parser::DerivedTypeStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::DerivedTypeStmt, {
+    dump(std::get<0>(v.t), "TypeAttrSpec");
+    dump(std::get<1>(v.t), "TypeName");
+    dump(std::get<2>(v.t), "ParamNames");
+  })
   DUMP_NODE(Fortran::parser::Designator, {})
   DUMP_NODE(Fortran::parser::DimensionStmt, {})
   DUMP_NODE(Fortran::parser::DimensionStmt::Declaration, {})
