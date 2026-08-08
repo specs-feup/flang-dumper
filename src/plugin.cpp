@@ -777,7 +777,18 @@ public:
   DUMP_NODE(Fortran::parser::InterfaceBody::Function, {})
   DUMP_NODE(Fortran::parser::InterfaceBody::Subroutine, {})
   DUMP_NODE(Fortran::parser::InterfaceSpecification, {})
-  DUMP_NODE(Fortran::parser::InterfaceStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::InterfaceStmt, {
+    switch (v.u.index()) {
+      case 0:
+        dump("GenericSpec", "variantKey");
+        dump(std::get<0>(v.u), "GenericSpec");
+        break;
+      case 1:
+        dump("Abstract", "variantKey");
+        dump(std::get<1>(v.u), "Abstract");
+        break;
+    };
+  })
   DUMP_NODE(Fortran::parser::InternalSubprogram, {})
   DUMP_NODE(Fortran::parser::InternalSubprogramPart, {})
   DUMP_NODE(Fortran::parser::Intrinsic, { dump("Intrinsic", "keyword"); })
