@@ -468,7 +468,7 @@ public:
   DUMP_NODE(Fortran::parser::AltReturnSpec, {})
   DUMP_NODE(Fortran::parser::ArithmeticIfStmt, {})
   DUMP_NODE(Fortran::parser::ArrayConstructor, {})
-  DUMP_NODE(Fortran::parser::ArrayElement, { dump(v.base, "base"); dump(v.subscripts, "subscripts"); })
+  DUMP_NODE_MANUAL(Fortran::parser::ArrayElement, { dump(v.base, "base"); dump(v.subscripts, "subscripts"); })
   DUMP_NODE(Fortran::parser::ArraySpec, {})
   DUMP_NODE(Fortran::parser::AssignStmt, {})
   DUMP_NODE(Fortran::parser::AssignedGotoStmt, {})
@@ -1172,7 +1172,17 @@ public:
   DUMP_NODE(Fortran::parser::Pass, {})
   DUMP_NODE(Fortran::parser::PauseStmt, {})
   DUMP_NODE(Fortran::parser::Pointer, { dump("Pointer", "keyword"); })
-  DUMP_NODE(Fortran::parser::PointerAssignmentStmt, {})
+  DUMP_NODE(Fortran::parser::PointerAssignmentStmt, {
+    const Fortran::parser::PointerAssignmentStmt::Bounds &bounds = std::get<1>(v.t);
+
+    if (bounds.u.index() == 0) {
+      dump("BoundsRemapping", "variantKey");
+      dump(std::get<0>(bounds.u), "BoundsRemapping");
+    } else {
+      dump("BoundsSpec", "variantKey");
+      dump(std::get<1>(bounds.u), "BoundsSpec");
+    }
+  })
   DUMP_NODE(Fortran::parser::PointerAssignmentStmt::Bounds, {})
   DUMP_NODE(Fortran::parser::PointerDecl, {})
   DUMP_NODE(Fortran::parser::PointerObject, {})
