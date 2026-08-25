@@ -499,7 +499,10 @@ public:
   DUMP_NODE(Fortran::parser::BlockDataStmt, {})
   DUMP_NODE(Fortran::parser::BlockSpecificationPart, {})
   DUMP_NODE(Fortran::parser::BlockStmt, {})
-  DUMP_NODE(Fortran::parser::BoundsRemapping, {})
+  DUMP_NODE_MANUAL(Fortran::parser::BoundsRemapping, {
+    dump(std::get<0>(v.t), "lower");
+    dump(std::get<1>(v.t), "upper");
+  })
   DUMP_NODE(Fortran::parser::BoundsSpec, {})
   DUMP_NODE(Fortran::parser::Call, {})
   DUMP_NODE(Fortran::parser::CallStmt, {dump(v.call, "call");})
