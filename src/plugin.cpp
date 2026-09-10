@@ -1283,7 +1283,10 @@ public:
     dump(std::get<2>(v.t), "quiet");
   })
   DUMP_ENUM(Fortran::parser::StopStmt, Kind)
-  DUMP_NODE(Fortran::parser::StructureComponent, {})
+  DUMP_NODE_MANUAL(Fortran::parser::StructureComponent, {
+    dump(v.base, "base");
+    dump(v.component, "component");
+  })
   DUMP_NODE(Fortran::parser::StructureConstructor, {})
   DUMP_NODE(Fortran::parser::StructureDef, {})
   DUMP_NODE(Fortran::parser::StructureDef::EndStructureStmt, {})
