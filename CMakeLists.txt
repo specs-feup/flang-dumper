@@ -94,7 +94,7 @@ endif()
 # Build plugin
 #add_library(plugin MODULE ${SOURCE_FILES} src/plugin.cpp)
 
-add_library(DumpASTPlugin MODULE src/plugin.cpp)
+add_library(DumpASTPlugin MODULE src/comments.cpp src/plugin.cpp)
 
 # Avoid lib prefix so that Flang finds the plugin as `DumpParseTreePlugin.so`, not `libDumpParseTreePlugin.so`
 set_target_properties(DumpASTPlugin PROPERTIES PREFIX "")

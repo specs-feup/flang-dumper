@@ -30,12 +30,19 @@ The CMakeLists.txt has two targets, `plugin` and `tool`, use `<MAKE_CMD> <target
 
 The target `tool` has been successfully built in Ubuntu, make sure the executable flang-<VERSION> is in the path, as well as the path `/usr/lib/llvm-<VERSION>`.
 
-```
+<!--
 ## WSL Support
 
-Flang 20 requires at least Ubuntu 25.04. If this distribuition is not available in WSL, you can follow these steps:
+Flang 22 requires at least Ubuntu 25.10. If this distribuition is not available in WSL, you can follow these steps:
 
 - Get the [WSL image](https://releases.ubuntu.com/plucky/)
 - Import the downloaded image, e.g., `wsl --import "Ubuntu25.04" <install_path> ubuntu-25.04-wsl-amd64.wsl`
 - You can check if it is installed with `wsl -l -v`
 - Execute the distribution with `wsl -d Ubuntu25.04`
+-->
+
+# Acknowledgments
+
+This work was supported by EU funds through the [Digital Autonomy with RISC-V in Europe (DARE)](https://dare-riscv.eu/home/) Specific Grant Agreement 1 (SGA1) Project under European High-Performance Computing Joint Undertaking (JU) under Agreement 101202459. 
+
+This work was developed in the context of research activities conducted at [INESC TEC](https://www.inesctec.pt/en) and the [Faculty of Engineering of the University of Porto (FEUP)](https://www.up.pt/feup/en/).
