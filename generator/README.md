@@ -35,6 +35,13 @@ generated `flang_ast.pb.h` from the probe schema. It demonstrates scalar,
 optional scalar, nested message, and manually mapped enum handling; it has no
 stream framing, node identity, visitor registry, or Flang coverage.
 
+To run analysis, schema generation, and `protoc` from one Clava process, use
+`clava_driver/run.sh` with `--clava`, `--query-module`, `--header`,
+`--header-root`, `--metadata`, `--output-dir`, and `--protoc`. The driver
+imports this analyzer into Clava, invokes the generator with its saved model,
+then invokes `protoc`. Each phase fails the command if it fails. This driver
+currently uses Clava's full AST parser, so it is validated on the fixture only.
+
 The Python generator can be checked without Clava by passing a saved inventory
 with `--model path/to/declarations.json`; it rejects an inventory whose header
 digest no longer matches the header on disk. The standard-library regression
