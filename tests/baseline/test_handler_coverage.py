@@ -184,6 +184,16 @@ class HandlerCoverageTests(unittest.TestCase):
         self.assertFalse(mismatch_report["ok"])
         self.assertEqual(mismatch_report["summary"]["kind_mismatch_count"], 1)
 
+    def test_node_handler_can_visit_enum_without_enum_catalog_registration(self) -> None:
+        inventory = {
+            "schema_version": 1,
+            "registrations": [registration("demo::Sign", "DUMP_NODE")],
+        }
+        model = declarations(("demo::Sign", "enum"))
+        report = audit_coverage(inventory, model)
+        self.assertTrue(report["ok"])
+        self.assertEqual(report["summary"]["kind_mismatch_count"], 0)
+
     def test_cli_emits_report_and_returns_nonzero_for_unignored_gaps(self) -> None:
         inventory, model = sample_inputs()
         with tempfile.TemporaryDirectory(prefix="handler-coverage-") as temporary:

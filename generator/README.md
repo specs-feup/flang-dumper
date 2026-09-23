@@ -35,6 +35,36 @@ generated `flang_ast.pb.h` from the probe schema. It demonstrates scalar,
 optional scalar, nested message, and manually mapped enum handling; it has no
 stream framing, node identity, visitor registry, or Flang coverage.
 
+## Explicit Clang JSON inventory mode
+
+`generator/analyze_clang.py` is a separate inventory command for headers the
+Clava reader cannot parse. It invokes the selected Clang compiler with
+`-Xclang -ast-dump=json`; it never switches to this mode automatically. The
+command writes the same normalized `declarations.json` format, but does not
+generate a schema or producer fragment. The current Flang inventory still has
+unmapped declarations, so it is an input for review and mapping work only.
+
+For an extracted Flang/LLVM 22 development package, use a common header root
+that contains both the Flang header and LLVM headers referenced by macro
+expansions:
+
+```sh
+python3 generator/analyze_clang.py \
+  --header /path/to/extracted/usr/lib/llvm-22/include/flang/Parser/parse-tree.h \
+  --header-root /path/to/extracted/usr \
+  --include-dir /path/to/extracted/usr/lib/llvm-22/include \
+  --clang-command clang++-21 \
+  --ast-filter Fortran::parser \
+  --qualified-prefix Fortran \
+  --output /tmp/parse-tree.inventory.json
+```
+
+Repeat `--include-dir` for additional include roots and `--clang-arg` for other
+compiler options. `--ast-filter` is useful for large headers; when set,
+`--qualified-prefix` supplies the parent namespace Clang omits from filtered
+AST roots. Parse failures, unresolved source locations, duplicate declarations,
+and records with missing field names or types stop the command.
+
 To run analysis, schema generation, and `protoc` from one Clava process, use
 `clava_driver/run.sh` with `--clava`, `--query-module`, `--header`,
 `--header-root`, `--metadata`, `--output-dir`, and `--protoc`. The driver

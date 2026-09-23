@@ -223,8 +223,12 @@ def audit_coverage(
 
     kind_mismatches = []
     for name in sorted(matched_names):
-        expected_kind = "enum" if by_type[name][0]["handler_kind"] == "enum" else "record"
-        if declarations[name] != expected_kind:
+        handler_kind = by_type[name][0]["handler_kind"]
+        # DUMP_NODE can visit an enum directly (Fortran::parser::Sign does).
+        # DUMP_ENUM specifically requires an enum for its EnumToString loop.
+        expected_kind = "enum" if handler_kind == "enum" else "record or enum"
+        mismatch = declarations[name] != "enum" if handler_kind == "enum" else declarations[name] not in {"record", "enum"}
+        if mismatch:
             kind_mismatches.append(
                 {
                     "fully_qualified_type": name,
