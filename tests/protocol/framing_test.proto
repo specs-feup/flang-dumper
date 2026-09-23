@@ -1,0 +1,8 @@
+syntax = "proto2";
+
+package flang_dumper.protocol.test;
+
+message TinyRecord {
+  required uint32 id = 1;
+  optional string text = 2;
+}
