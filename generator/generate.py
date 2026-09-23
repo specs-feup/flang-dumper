@@ -127,6 +127,87 @@ def declaration_index(model: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return result
 
 
+def model_source_files(model: dict[str, Any], *, require_locations: bool) -> set[str]:
+    declarations = require_list(model.get("declarations"), "model.declarations")
+    referenced: set[str] = set()
+
+    def add_location(value: Any, description: str) -> None:
+        if value is None and not require_locations:
+            return
+        location = require_object(value, description)
+        source_file = location.get("file")
+        if source_file is None and not require_locations:
+            return
+        referenced.add(required_string(source_file, f"{description}.file"))
+
+    for declaration in declarations:
+        item = require_object(declaration, "model declaration")
+        name = required_string(item.get("qualified_name"), "declaration.qualified_name")
+        add_location(item.get("location"), f"{name}.location")
+        if item.get("kind") == "record":
+            for member in require_list(item.get("members"), f"{name}.members"):
+                entry = require_object(member, f"{name} member")
+                add_location(entry.get("location"), f"{name}.{entry.get('name', '<member>')}.location")
+        elif item.get("kind") == "enum":
+            for constant in require_list(item.get("constants"), f"{name}.constants"):
+                entry = require_object(constant, f"{name} enumerator")
+                add_location(entry.get("location"), f"{name}::{entry.get('name', '<enumerator>')}.location")
+    return referenced
+
+
+def validate_model_source_files(model: dict[str, Any], header_root: Path) -> None:
+    source_header = require_object(model.get("source_header"), "model.source_header")
+    header_file = required_string(source_header.get("file"), "model.source_header.file")
+    if "source_files" not in model:
+        referenced = model_source_files(model, require_locations=False)
+        extra = referenced - {header_file}
+        if extra:
+            fail("Multi-file model is missing model.source_files for: " + ", ".join(sorted(extra)))
+        return
+
+    files = require_list(model.get("source_files"), "model.source_files")
+    header_root = header_root.resolve()
+    referenced = model_source_files(model, require_locations=True)
+    covered: set[str] = set()
+    previous_file: str | None = None
+    for value in files:
+        entry = require_object(value, "model source file")
+        relative_file = required_string(entry.get("file"), "model source file.file")
+        relative_path = Path(relative_file)
+        if (
+            not relative_file
+            or "\\" in relative_file
+            or relative_path.as_posix() != relative_file
+            or relative_path.is_absolute()
+            or re.match(r"^[A-Za-z]:", relative_file)
+            or ".." in relative_path.parts
+            or "." in relative_path.parts
+        ):
+            fail(f"model source file path must be a normalized relative path: {relative_file!r}")
+        if previous_file is not None and relative_file <= previous_file:
+            fail("model.source_files must be sorted by unique relative path")
+        previous_file = relative_file
+        digest = required_string(entry.get("sha256"), f"model.source_files[{relative_file!r}].sha256")
+        if not SHA256.fullmatch(digest):
+            fail(f"model.source_files[{relative_file!r}].sha256 must be a lowercase SHA-256 digest")
+        source_path = (header_root / relative_path).resolve()
+        try:
+            source_path.relative_to(header_root)
+        except ValueError:
+            fail(f"model source file escapes --header-root: {relative_file!r}")
+        try:
+            actual_digest = hashlib.sha256(source_path.read_bytes()).hexdigest()
+        except OSError as error:
+            fail(f"Cannot read model source file {relative_file!r}: {error}")
+        if actual_digest != digest:
+            fail(f"Clava model is stale for source file {relative_file!r}: SHA-256 differs")
+        covered.add(relative_file)
+
+    missing = sorted(referenced - covered)
+    if missing:
+        fail("model.source_files is missing declaration source files: " + ", ".join(missing))
+
+
 def validate_manifest(model: dict[str, Any], metadata: dict[str, Any]) -> dict[str, Any]:
     if metadata.get("format_version") != 1:
         fail("metadata.format_version must be 1")
@@ -463,22 +544,23 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         metadata = require_object(read_json(args.metadata, "metadata"), "metadata")
+        header = args.header.resolve()
+        header_root = args.header_root.resolve()
+        if not header_root.is_dir():
+            fail(f"Header root does not exist or is not a directory: {header_root}")
         with tempfile.TemporaryDirectory(prefix="flang-generator-") as temporary_directory:
             raw_model_path = args.model.resolve() if args.model else Path(temporary_directory) / MODEL_FILENAME
             if not args.model:
-                header = args.header.resolve()
-                header_root = args.header_root.resolve()
-                if not header_root.is_dir():
-                    fail(f"Header root does not exist or is not a directory: {header_root}")
                 run_clava(header, header_root, raw_model_path, args.clava_command, args.query_module)
             model = require_object(read_json(raw_model_path, "Clava model"), "Clava model")
             try:
-                header_digest = hashlib.sha256(args.header.read_bytes()).hexdigest()
+                header_digest = hashlib.sha256(header.read_bytes()).hexdigest()
             except OSError as error:
-                fail(f"Cannot read analyzed header {args.header}: {error}")
+                fail(f"Cannot read analyzed header {header}: {error}")
             source_header = require_object(model.get("source_header"), "model.source_header")
             if source_header.get("sha256") != header_digest:
-                fail(f"Clava model is stale for header {args.header}: SHA-256 differs")
+                fail(f"Clava model is stale for header {header}: SHA-256 differs")
+            validate_model_source_files(model, header_root)
             plan = validate_manifest(model, metadata)
             digest_source = {"model": model, "metadata": metadata}
             input_digest = hashlib.sha256(canonical_json(digest_source)).hexdigest()

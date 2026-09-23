@@ -43,6 +43,8 @@ Clava reader cannot parse. It invokes the selected Clang compiler with
 command writes the same normalized `declarations.json` format, but does not
 generate a schema or producer fragment. The current Flang inventory still has
 unmapped declarations, so it is an input for review and mapping work only.
+Its inventory hashes every file used as a declaration or member location;
+the generator rejects a saved inventory when one of those files changes.
 
 For an extracted Flang/LLVM 22 development package, use a common header root
 that contains both the Flang header and LLVM headers referenced by macro

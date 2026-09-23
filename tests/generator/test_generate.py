@@ -108,6 +108,52 @@ class GeneratorTest(unittest.TestCase):
             self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
             self.assertIn("Clava model is stale", result.stderr)
 
+    def test_saved_multifile_model_with_changed_included_file_is_rejected(self):
+        inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory(prefix="flang-generator-included-stale-") as temporary:
+            root = Path(temporary)
+            header_path = root / "fixtures" / "parse_tree_fixture.hpp"
+            included_path = root / "includes" / "omp.inc"
+            header_path.parent.mkdir(parents=True)
+            included_path.parent.mkdir(parents=True)
+            header_path.write_bytes(HEADER.read_bytes())
+            included_path.write_text("struct IncludedMarker {};\n", encoding="utf-8")
+
+            inventory["declarations"][0]["members"][0]["location"]["file"] = "includes/omp.inc"
+            inventory["source_files"] = [
+                {
+                    "file": "fixtures/parse_tree_fixture.hpp",
+                    "sha256": hashlib.sha256(header_path.read_bytes()).hexdigest(),
+                },
+                {
+                    "file": "includes/omp.inc",
+                    "sha256": hashlib.sha256(included_path.read_bytes()).hexdigest(),
+                },
+            ]
+            model_path = root / "inventory.json"
+            model_path.write_text(json.dumps(inventory), encoding="utf-8")
+
+            command = [
+                sys.executable,
+                str(GENERATOR),
+                "--header",
+                str(header_path),
+                "--header-root",
+                str(root),
+                "--metadata",
+                str(METADATA),
+                "--model",
+                str(model_path),
+                "--output-dir",
+                str(root / "generated"),
+            ]
+            fresh = subprocess.run(command, capture_output=True, text=True, check=False)
+            self.assertEqual(fresh.returncode, 0, fresh.stdout + fresh.stderr)
+
+            included_path.write_text("struct ChangedMarker {};\n", encoding="utf-8")
+            stale = subprocess.run(command, capture_output=True, text=True, check=False)
+            self.assertEqual(stale.returncode, 2, stale.stdout + stale.stderr)
+            self.assertIn("stale for source file 'includes/omp.inc'", stale.stderr)
 
 if __name__ == "__main__":
     unittest.main()

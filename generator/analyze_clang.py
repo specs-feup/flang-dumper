@@ -613,12 +613,35 @@ def build_inventory(
         by_name[name] = declaration
 
     declarations.sort(key=lambda item: item["qualified_name"])
+    referenced_files: set[str] = set()
+    for declaration in declarations:
+        referenced_files.add(declaration["location"]["file"])
+        for member in declaration.get("members", []):
+            referenced_files.add(member["location"]["file"])
+        for constant in declaration.get("constants", []):
+            referenced_files.add(constant["location"]["file"])
+    source_files = []
+    for relative_file in sorted(referenced_files):
+        source_path = (header_root / relative_file).resolve()
+        try:
+            source_path.relative_to(header_root)
+        except ValueError as error:
+            raise AnalyzerError(f"Declaration source file escapes --header-root: {relative_file}") from error
+        try:
+            file_bytes = source_path.read_bytes()
+        except OSError as error:
+            raise AnalyzerError(f"Cannot read declaration source file {relative_file}: {error}") from error
+        source_files.append({
+            "file": relative_file,
+            "sha256": hashlib.sha256(file_bytes).hexdigest(),
+        })
     return {
         "format": "clava-declaration-inventory/v1",
         "source_header": {
             "file": relative_header,
             "sha256": hashlib.sha256(source).hexdigest(),
         },
+        "source_files": source_files,
         "declarations": declarations,
     }
 
