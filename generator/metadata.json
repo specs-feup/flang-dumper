@@ -1,0 +1,50 @@
+{
+  "format_version": 1,
+  "proto_package": "flang.dumper.generator_probe",
+  "source_header": "fixtures/parse_tree_fixture.hpp",
+  "nodes": [
+    {
+      "cpp_type": "generator_fixture::ComplexPair",
+      "proto_name": "ComplexValue",
+      "kind_name": "NODE_KIND_COMPLEX_VALUE",
+      "kind_number": 1,
+      "fields": [
+        { "name": "real", "number": 1, "source_member": "lane_0", "proto_type": "float" },
+        { "name": "imaginary", "number": 2, "source_member": "lane_1", "proto_type": "float" }
+      ],
+      "ignored_members": {}
+    },
+    {
+      "cpp_type": "generator_fixture::OptionalFloat",
+      "proto_name": "OptionalFloatValue",
+      "kind_name": "NODE_KIND_OPTIONAL_FLOAT_VALUE",
+      "kind_number": 2,
+      "fields": [
+        { "name": "value", "number": 1, "source_member": "value", "presence_member": "has_value", "proto_type": "float" }
+      ],
+      "ignored_members": {}
+    },
+    {
+      "cpp_type": "generator_fixture::Expression",
+      "proto_name": "ExpressionNode",
+      "kind_name": "NODE_KIND_EXPRESSION_NODE",
+      "kind_number": 3,
+      "fields": [
+        { "name": "operation", "number": 1, "source_member": "operation", "proto_type": "ExpressionOperation" },
+        { "name": "operands", "number": 2, "source_member": "operands", "proto_type": "ComplexValue" }
+      ],
+      "ignored_members": {}
+    }
+  ],
+  "enums": [
+    {
+      "cpp_type": "generator_fixture::ExpressionOperation",
+      "proto_name": "ExpressionOperation",
+      "zero_name": "EXPRESSION_OPERATION_UNSPECIFIED",
+      "values": [
+        { "cpp_name": "Add", "proto_name": "EXPRESSION_OPERATION_ADD", "number": 1 },
+        { "cpp_name": "Multiply", "proto_name": "EXPRESSION_OPERATION_MULTIPLY", "number": 2 }
+      ]
+    }
+  ]
+}

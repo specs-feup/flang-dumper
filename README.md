@@ -2,6 +2,12 @@
 
 Dumper of flang's AST into a JSON format.
 
+The protobuf automation design and migration gates are in
+[docs/generation-plan.md](docs/generation-plan.md). The first Clava header
+analysis and code-generation probe is documented in
+[generator/README.md](generator/README.md); it does not replace this plugin's
+current JSON output.
+
 ## Installing dependencies
 
 There is a [script](https://github.com/specs-feup/flang-dumper/blob/main/scripts/install-dependencies.sh) for installing the required dependecies.
