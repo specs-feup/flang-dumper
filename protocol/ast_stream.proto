@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package flang_dumper.protocol;
+
+// One framed stream record. The oneof keeps node data, comments, and enum
+// metadata distinct while allowing all of them to share the framing layer.
+message StreamRecord {
+  oneof record {
+    NodeRecord node = 1;
+    CommentRecord comment = 2;
+    EnumCatalog enum_catalog = 3;
+  }
+}
+
+message NodeRecord {
+  uint64 node_id = 1;
+  uint32 kind_id = 2;
+  string kind_name = 3;
+  // Repeated entries preserve source order. Keys are exact, case-sensitive
+  // strings and duplicate keys are retained as separate entries.
+  repeated Attribute attributes = 4;
+}
+
+message Attribute {
+  string key = 1;
+  AttributeValue value = 2;
+}
+
+// The selected oneof case records both the value's type and its presence.
+// In particular, list_value being set to an empty ValueList is distinct from
+// no value case being set.
+message AttributeValue {
+  oneof value {
+    string string_value = 1;
+    sint64 integer_value = 2;
+    bool bool_value = 3;
+    uint64 node_reference = 4;
+    ValueList list_value = 5;
+    NullValue null_value = 6;
+    double double_value = 7;
+    bytes bytes_value = 8;
+  }
+}
+
+// Values inside lists use a separate oneof-bearing message. This permits
+// nested lists and keeps each list item's variant explicit.
+message Value {
+  oneof value {
+    string string_value = 1;
+    sint64 integer_value = 2;
+    bool bool_value = 3;
+    uint64 node_reference = 4;
+    ValueList list_value = 5;
+    NullValue null_value = 6;
+    double double_value = 7;
+    bytes bytes_value = 8;
+  }
+}
+
+message ValueList {
+  repeated Value items = 1;
+}
+
+// An empty message represents explicit null when selected in a oneof.
+message NullValue {}
+
+message CommentRecord {
+  string text = 1;
+  uint64 stmt_node_id = 2;
+  bool trailing = 3;
+}
+
+message EnumCatalog {
+  string enum_type_name = 1;
+  repeated EnumEntry entries = 2;
+}
+
+message EnumEntry {
+  string name = 1;
+  sint64 number = 2;
+}
