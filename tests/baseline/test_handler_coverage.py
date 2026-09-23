@@ -194,6 +194,111 @@ class HandlerCoverageTests(unittest.TestCase):
         self.assertTrue(report["ok"])
         self.assertEqual(report["summary"]["kind_mismatch_count"], 0)
 
+    def test_inline_namespace_elision_preserves_nested_suffix_and_other_segments(self) -> None:
+        inventory = {
+            "schema_version": 1,
+            "registrations": [
+                registration("demo::Outer::Nested"),
+                registration("demo::Outer::arguments::Inner"),
+            ],
+        }
+        model = declarations(
+            ("demo::arguments::Outer::Nested", "record"),
+            ("demo::Outer::arguments::Inner", "record"),
+        )
+        model["declarations"][0]["location"] = {
+            "file": "include/demo.hpp",
+            "line": 10,
+        }
+        model["declarations"][1]["location"] = {
+            "file": "include/other.hpp",
+            "line": 20,
+        }
+
+        report = audit_coverage(
+            inventory,
+            model,
+            inline_namespaces=["demo::arguments"],
+        )
+
+        self.assertTrue(report["ok"])
+        self.assertEqual(report["inline_namespaces"], ["demo::arguments"])
+        self.assertEqual(
+            [row["fully_qualified_type"] for row in report["matched"]],
+            ["demo::Outer::Nested", "demo::Outer::arguments::Inner"],
+        )
+        self.assertEqual(
+            report["matched"][1]["declaration_qualified_name"],
+            "demo::Outer::arguments::Inner",
+        )
+        self.assertEqual(report["matched"][1]["declaration_path"], "include/other.hpp")
+
+    def test_inline_namespace_collision_fails_with_both_names_and_paths(self) -> None:
+        inventory = {"schema_version": 1, "registrations": []}
+        model = declarations(
+            ("demo::Thing", "record"),
+            ("demo::arguments::Thing", "record"),
+        )
+        model["declarations"][0]["location"] = {"file": "plain.hpp", "line": 1}
+        model["declarations"][1]["location"] = {"file": "inline.hpp", "line": 2}
+
+        with self.assertRaisesRegex(
+            AuditInputError,
+            r"canonicalization collision.*demo::Thing \(plain\.hpp\).*demo::arguments::Thing \(inline\.hpp\)",
+        ):
+            audit_coverage(
+                inventory,
+                model,
+                inline_namespaces=["demo::arguments"],
+            )
+
+    def test_repeatable_inline_namespace_cli_emits_original_declaration_paths(self) -> None:
+        inventory = {
+            "schema_version": 1,
+            "registrations": [
+                registration("demo::Thing::Nested"),
+                registration("other::Thing::Nested"),
+            ],
+        }
+        model = declarations(
+            ("demo::arguments::Thing::Nested", "record"),
+            ("other::modifier::Thing::Nested", "record"),
+        )
+        model["declarations"][0]["location"] = {"file": "demo.hpp", "line": 1}
+        model["declarations"][1]["location"] = {"file": "other.hpp", "line": 2}
+        with tempfile.TemporaryDirectory(prefix="handler-coverage-inline-") as temporary:
+            root = Path(temporary)
+            inventory_path = root / "registrations.json"
+            model_path = root / "declarations.json"
+            inventory_path.write_text(json.dumps(inventory), encoding="utf-8")
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            result = run(
+                [
+                    sys.executable,
+                    str(REPO_ROOT / "scripts" / "audit_handler_coverage.py"),
+                    str(inventory_path),
+                    str(model_path),
+                    "--inline-namespace",
+                    "demo::arguments",
+                    "--inline-namespace",
+                    "other::modifier",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        report = json.loads(result.stdout)
+        self.assertEqual(
+            report["inline_namespaces"], ["demo::arguments", "other::modifier"]
+        )
+        self.assertEqual(report["summary"]["matched_type_count"], 2)
+        self.assertEqual(
+            [row["declaration_path"] for row in report["matched"]],
+            ["demo.hpp", "other.hpp"],
+        )
+
     def test_cli_emits_report_and_returns_nonzero_for_unignored_gaps(self) -> None:
         inventory, model = sample_inputs()
         with tempfile.TemporaryDirectory(prefix="handler-coverage-") as temporary:

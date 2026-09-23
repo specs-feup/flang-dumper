@@ -24,6 +24,7 @@ REGISTRATION_KINDS = {
     "DUMP_ENUM": ("enum", False),
 }
 QUALIFIED_NAME = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*(?:::[A-Za-z_][A-Za-z_0-9]*)*(?:\s*<.*>)?$")
+NAMESPACE_NAME = re.compile(r"^[A-Za-z_][A-Za-z_0-9]*(?:::[A-Za-z_][A-Za-z_0-9]*)*$")
 ELABORATED_PREFIX = re.compile(r"^(?:(?:struct|class)\s+|enum(?:\s+(?:class|struct))?\s+)")
 
 
@@ -100,7 +101,41 @@ def _read_registrations(document: Any) -> list[dict[str, Any]]:
     return registrations
 
 
-def _read_declarations(document: Any) -> tuple[dict[str, str], dict[str, str]]:
+def _normalize_inline_namespaces(values: list[str] | tuple[str, ...]) -> list[str]:
+    namespaces: list[str] = []
+    seen: set[str] = set()
+    for index, value in enumerate(values):
+        namespace = normalize_qualified_name(value, f"inline namespace {index + 1}")
+        if not NAMESPACE_NAME.fullmatch(namespace):
+            raise AuditInputError(
+                f"inline namespace {index + 1} must be a qualified namespace name: {value!r}"
+            )
+        if namespace in seen:
+            raise AuditInputError(f"duplicate inline namespace option: {namespace}")
+        seen.add(namespace)
+        namespaces.append(namespace)
+    return namespaces
+
+
+def _canonicalize_declaration_name(name: str, inline_namespaces: list[str]) -> str:
+    """Remove configured inline namespace segments at their qualified prefix."""
+    components = name.split("::")
+    remove_indexes: set[int] = set()
+    for namespace in inline_namespaces:
+        namespace_components = namespace.split("::")
+        if (
+            len(components) > len(namespace_components)
+            and components[: len(namespace_components)] == namespace_components
+        ):
+            remove_indexes.add(len(namespace_components) - 1)
+    return "::".join(
+        component for index, component in enumerate(components) if index not in remove_indexes
+    )
+
+
+def _read_declarations(
+    document: Any, inline_namespaces: list[str]
+) -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
     root = _require_object(document, "Clava declarations model")
     if root.get("format") != MODEL_FORMAT:
         raise AuditInputError(f"Clava model format must be {MODEL_FORMAT!r}")
@@ -111,18 +146,43 @@ def _read_declarations(document: Any) -> tuple[dict[str, str], dict[str, str]]:
         raise AuditInputError("model.source_header.file must be a non-empty string")
     if not isinstance(source_digest, str) or not re.fullmatch(r"[0-9a-f]{64}", source_digest):
         raise AuditInputError("model.source_header.sha256 must be a lowercase SHA-256 digest")
-    declarations: dict[str, str] = {}
+    declarations: dict[str, dict[str, Any]] = {}
     for index, raw in enumerate(_require_list(root.get("declarations"), "model.declarations")):
         item = _require_object(raw, f"model.declarations[{index}]")
-        type_name = normalize_qualified_name(
-            item.get("qualified_name"), f"model.declarations[{index}].qualified_name"
+        original_name = item.get("qualified_name")
+        normalized_name = normalize_qualified_name(
+            original_name, f"model.declarations[{index}].qualified_name"
         )
+        type_name = _canonicalize_declaration_name(normalized_name, inline_namespaces)
         kind = item.get("kind")
         if kind not in {"record", "enum"}:
             raise AuditInputError(f"model.declarations[{index}].kind must be 'record' or 'enum'")
         if type_name in declarations:
-            raise AuditInputError(f"duplicate Clava declaration after name normalization: {type_name}")
-        declarations[type_name] = kind
+            previous = declarations[type_name]
+            if previous["normalized_name"] == normalized_name:
+                raise AuditInputError(
+                    f"duplicate Clava declaration after name normalization: {type_name}"
+                )
+            previous_path = previous.get("path") or "<path unavailable>"
+            location = item.get("location")
+            current_path = (
+                location.get("file", "<path unavailable>")
+                if isinstance(location, dict)
+                else "<path unavailable>"
+            )
+            raise AuditInputError(
+                f"inline namespace canonicalization collision for {type_name}: "
+                f"{previous['original_name']} ({previous_path}) and "
+                f"{original_name} ({current_path})"
+            )
+        location = item.get("location")
+        path = location.get("file") if isinstance(location, dict) else None
+        declarations[type_name] = {
+            "kind": kind,
+            "normalized_name": normalized_name,
+            "original_name": original_name,
+            "path": path if isinstance(path, str) else None,
+        }
     return declarations, {"file": source_file, "sha256": source_digest}
 
 
@@ -175,9 +235,16 @@ def audit_coverage(
     registration_document: Any,
     model_document: Any,
     ignore_document: Any | None = None,
+    inline_namespaces: list[str] | tuple[str, ...] = (),
 ) -> dict[str, Any]:
+    normalized_inline_namespaces = _normalize_inline_namespaces(inline_namespaces)
     registrations = _read_registrations(registration_document)
-    declarations, source_header = _read_declarations(model_document)
+    declaration_info, source_header = _read_declarations(
+        model_document, normalized_inline_namespaces
+    )
+    declarations = {
+        name: info["kind"] for name, info in declaration_info.items()
+    }
     ignores = _read_ignores(ignore_document)
 
     by_type: dict[str, list[dict[str, Any]]] = {}
@@ -272,7 +339,16 @@ def audit_coverage(
         or unused_ignores
     )
 
-    return {
+    def declaration_trace(name: str) -> dict[str, Any]:
+        if not normalized_inline_namespaces:
+            return {}
+        info = declaration_info[name]
+        return {
+            "declaration_qualified_name": info["original_name"],
+            "declaration_path": info["path"],
+        }
+
+    report = {
         "format": "flang-handler-coverage-report/v1",
         "ok": ok,
         "source_header": source_header,
@@ -297,15 +373,22 @@ def audit_coverage(
                 "fully_qualified_type": name,
                 "registration_kind": by_type[name][0]["handler_kind"],
                 "declaration_kind": declarations[name],
+                **declaration_trace(name),
             }
             for name in sorted(matched_names)
         ],
         "missing_from_header": missing_from_header,
-        "unregistered_header_declarations": unregistered_header,
+        "unregistered_header_declarations": [
+            {**item, **declaration_trace(item["fully_qualified_type"])}
+            for item in unregistered_header
+        ],
         "duplicate_registrations": duplicates,
         "kind_mismatches": kind_mismatches,
         "unused_ignores": unused_ignores,
     }
+    if normalized_inline_namespaces:
+        report["inline_namespaces"] = normalized_inline_namespaces
+    return report
 
 
 def _read_json(path: Path, description: str) -> Any:
@@ -322,12 +405,24 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("registrations", type=Path, help="JSON from inventory_dump_handlers.py")
     parser.add_argument("declarations", type=Path, help="Clava declarations.json model")
     parser.add_argument("--ignore-list", type=Path, help="reviewed exact-name gap exceptions")
+    parser.add_argument(
+        "--inline-namespace",
+        action="append",
+        default=[],
+        metavar="QUALIFIED_NAMESPACE",
+        help="elide this inline namespace from declaration names (repeatable)",
+    )
     args = parser.parse_args(argv)
     try:
         registration_document = _read_json(args.registrations, "registration inventory")
         model_document = _read_json(args.declarations, "Clava declarations model")
         ignore_document = _read_json(args.ignore_list, "coverage ignore list") if args.ignore_list else None
-        report = audit_coverage(registration_document, model_document, ignore_document)
+        report = audit_coverage(
+            registration_document,
+            model_document,
+            ignore_document,
+            inline_namespaces=args.inline_namespace,
+        )
     except AuditInputError as error:
         print(f"coverage audit error: {error}", file=sys.stderr)
         return 2
