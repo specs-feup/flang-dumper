@@ -19,7 +19,7 @@ The checked-in metadata owns stable node kinds, field tags, names, access expres
 
 The first slice must prove the Clava header-analysis entry point and generator interface with a tiny fixture header, plus a machine-readable inventory of current handlers and a normalized baseline comparison tool. It should cover one ordinary tuple/wrapper and one manual semantic case. A prototype is not the cutover: it must not replace the current visitor until it covers all registrations and the consumer is integrated.
 
-The current slice lives in `generator/`, `scripts/inventory_dump_handlers.py`, and `tests/baseline/`. Run `python3 scripts/inventory_dump_handlers.py -o /tmp/flang-handlers.json` to capture the registration inventory. Run `python3 tests/baseline/compare_graphs.py expected.json actual.json` to compare two dumps while normalizing pointer IDs. The fixture generator and its checks are described in `generator/README.md`.
+The current slice lives in `generator/`, `scripts/`, and `tests/baseline/`. Run `python3 scripts/inventory_dump_handlers.py -o /tmp/flang-handlers.json` to capture the registration inventory. Given a Clava declaration model, run `python3 scripts/audit_handler_coverage.py /tmp/flang-handlers.json declarations.json` to identify missing registrations, undiscovered types, duplicates, and kind mismatches; the command exits nonzero on unresolved gaps. Run `python3 tests/baseline/compare_graphs.py expected.json actual.json` to compare two dumps while normalizing pointer IDs. The fixture generator and its checks are described in `generator/README.md`.
 
 ## Acceptance criteria
 
@@ -29,3 +29,24 @@ The current slice lives in `generator/`, `scripts/inventory_dump_handlers.py`, a
 - The decoded graph matches the normalized baseline on the fixture set.
 - The real downstream reader consumes the binary stream; no production text fallback remains after cutover.
 - Build, corpus, and performance evidence is reported separately, with missing tools or unrun gates stated plainly.
+
+## Wire and migration details
+
+The stream should start with a fixed magic and a versioned header, followed by bounded length-delimited protobuf records. The reader must reject unsupported major versions, records larger than its configured limit, truncation, duplicate node IDs, and references to missing nodes. A record carries one node, comment, or auxiliary enum catalog item so the reader can process stdout incrementally. The node payload must identify its kind independently of its ID. The generator assigns stable kind and field numbers from reviewed metadata, not alphabetic order or C++ source order; deleted numbers are reserved.
+
+For the first compatible reader, preserve the **effective old graph contract**: first emitted node is the root; each node has a unique identity, its exact dynamic attribute keys, omitted optional fields versus present empty lists, ordered child lists, variant discriminant and active arm, enum value records, and raw source text. Comments remain ordered records with statement identity and trailing status. Pointer values themselves are not part of the contract. The current consumer converts all node attributes to `FlangData`, walks wrapper and variant chains after reading the whole graph, and then constructs the Fortran AST. The binary reader may decode one protobuf record at a time, but it must retain the attribute index until that construction completes.
+
+The producer should assign dense IDs during one parse-tree walk. The first consumer adapter can translate each numeric ID into a stable synthetic string with the existing `-<kind>` suffix and reconstruct the old attribute map. This is a temporary compatibility layer for `FortranJsonResult`, `FlangData`, and processors that still inspect ID text. It must be tested on scalar values that look numeric, because the existing `isIdInteger()` check uses the final character. A later consumer change may replace those string conventions with typed IDs and kinds.
+
+## Deliverables by stage
+
+| Stage | Files and outputs | Gate |
+| --- | --- | --- |
+| Inventory | Registration inventory, normalized graph comparator, fixture dumps | Every current registration accounted for; graph comparison rejects changed edges, values, comments, and order |
+| Header model | Clava analyzer, pinned Flang header/flags, normalized declaration inventory | Every registration maps to one discovered type or a reviewed exception; unknown declarations fail |
+| Generator | Reviewed mapping manifest, deterministic schema and C++ producer/visitor, `protoc` outputs | Clean regeneration is byte identical; all fields and enum values mapped; generated C++ compiles |
+| Native stream | One binary runtime path with bounded framing and numeric IDs | Fixture graphs decode equivalently; malformed streams fail; no missing/duplicate references |
+| Metafor consumer | Record-at-a-time reader feeding existing graph construction | Existing parser/code-generation fixtures and cross-run graph identity pass |
+| Cutover | CI freshness check, representative corpus and workload measurements | Full coverage, identity, runtime, peak memory, and compressed-size evidence reviewed; production JSON removed |
+
+The fixture probe in `generator/` completes only part of the header-model and generator stages. Its schema and producer fragment are deliberately not the production protocol.
