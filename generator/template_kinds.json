@@ -1,0 +1,15 @@
+{
+  "format": "flang-template-kinds/v1",
+  "template_kinds": [
+    {
+      "id": 1000001,
+      "cpp_type": "Fortran::parser::Statement",
+      "kind_name": "Statement"
+    },
+    {
+      "id": 1000002,
+      "cpp_type": "Fortran::parser::UnlabeledStatement",
+      "kind_name": "UnlabeledStatement"
+    }
+  ]
+}
