@@ -1,0 +1,26 @@
+{
+  "format": "flang-handler-coverage-ignore/v1",
+  "reviewed": true,
+  "entries": [
+    {
+      "category": "missing_from_header",
+      "fully_qualified_type": "Fortran::parser::Block",
+      "reason": "Block is a type alias for std::list<ExecutionPartConstruct>, not a record or enum declaration in the Clava model. This exception does not claim generated coverage; its list serialization needs a separately reviewed adapter."
+    },
+    {
+      "category": "missing_from_header",
+      "fully_qualified_type": "Fortran::parser::AcImpliedDoControl::Bounds",
+      "reason": "Bounds is an alias for LoopBounds<DoVariable, ScalarIntExpr>; the model inventories only the LoopBounds primary template, not this alias or specialization. This exception does not claim generated coverage."
+    },
+    {
+      "category": "missing_from_header",
+      "fully_qualified_type": "Fortran::parser::DataImpliedDo::Bounds",
+      "reason": "Bounds is an alias for LoopBounds<DoVariable, ScalarIntConstantExpr>; the model inventories only the LoopBounds primary template, not this alias or specialization. This exception does not claim generated coverage."
+    },
+    {
+      "category": "missing_from_header",
+      "fully_qualified_type": "Fortran::parser::LoopControl::Bounds",
+      "reason": "Bounds is an alias for LoopBounds<ScalarName, ScalarExpr>; the model inventories only the LoopBounds primary template, not this alias or specialization. This exception does not claim generated coverage."
+    }
+  ]
+}

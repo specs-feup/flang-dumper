@@ -65,6 +65,14 @@ def sample_inputs() -> tuple[dict[str, object], dict[str, object]]:
     return inventory, model
 
 
+ALIAS_REGISTRATION_NAMES = {
+    "Fortran::parser::Block",
+    "Fortran::parser::AcImpliedDoControl::Bounds",
+    "Fortran::parser::DataImpliedDo::Bounds",
+    "Fortran::parser::LoopControl::Bounds",
+}
+
+
 class HandlerCoverageTests(unittest.TestCase):
     def test_reports_name_matches_gaps_and_handler_counts(self) -> None:
         inventory, model = sample_inputs()
@@ -297,6 +305,94 @@ class HandlerCoverageTests(unittest.TestCase):
         self.assertEqual(
             [row["declaration_path"] for row in report["matched"]],
             ["demo.hpp", "other.hpp"],
+        )
+
+    def test_checked_in_alias_exceptions_are_exact_and_do_not_claim_matches(self) -> None:
+        ignore_path = REPO_ROOT / "tests" / "baseline" / "handler_coverage_ignores.json"
+        ignore_document = json.loads(ignore_path.read_text(encoding="utf-8"))
+        self.assertTrue(ignore_document["reviewed"])
+        entries = ignore_document["entries"]
+        self.assertEqual(
+            {item["fully_qualified_type"] for item in entries}, ALIAS_REGISTRATION_NAMES
+        )
+        self.assertTrue(all(item["category"] == "missing_from_header" for item in entries))
+        self.assertTrue(all(item["reason"].strip() for item in entries))
+        reason_by_name = {item["fully_qualified_type"]: item["reason"] for item in entries}
+        self.assertIn(
+            "std::list<ExecutionPartConstruct>",
+            reason_by_name["Fortran::parser::Block"],
+        )
+        for alias, target in {
+            "Fortran::parser::AcImpliedDoControl::Bounds": (
+                "LoopBounds<DoVariable, ScalarIntExpr>"
+            ),
+            "Fortran::parser::DataImpliedDo::Bounds": (
+                "LoopBounds<DoVariable, ScalarIntConstantExpr>"
+            ),
+            "Fortran::parser::LoopControl::Bounds": "LoopBounds<ScalarName, ScalarExpr>",
+        }.items():
+            self.assertIn(target, reason_by_name[alias])
+        self.assertTrue(
+            all("does not claim generated coverage" in reason for reason in reason_by_name.values())
+        )
+
+        inventory = {
+            "schema_version": 1,
+            "registrations": [
+                *(registration(name) for name in sorted(ALIAS_REGISTRATION_NAMES)),
+                registration("Fortran::parser::LoopBounds"),
+            ],
+        }
+        model = declarations(("Fortran::parser::LoopBounds", "record"))
+        report = audit_coverage(inventory, model, ignore_document)
+
+        self.assertTrue(report["ok"])
+        self.assertEqual(
+            [row["fully_qualified_type"] for row in report["matched"]],
+            ["Fortran::parser::LoopBounds"],
+        )
+        self.assertEqual(
+            {row["fully_qualified_type"] for row in report["missing_from_header"]},
+            ALIAS_REGISTRATION_NAMES,
+        )
+        self.assertTrue(all(row["ignored"] for row in report["missing_from_header"]))
+        self.assertEqual(report["summary"]["ignored_gap_count"], 4)
+
+        with tempfile.TemporaryDirectory(prefix="handler-coverage-aliases-") as temporary:
+            root = Path(temporary)
+            inventory_path = root / "registrations.json"
+            model_path = root / "declarations.json"
+            inventory_path.write_text(json.dumps(inventory), encoding="utf-8")
+            model_path.write_text(json.dumps(model), encoding="utf-8")
+            result = run(
+                [
+                    sys.executable,
+                    str(REPO_ROOT / "scripts" / "audit_handler_coverage.py"),
+                    str(inventory_path),
+                    str(model_path),
+                    "--ignore-list",
+                    str(ignore_path),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        cli_report = json.loads(result.stdout)
+        self.assertEqual(cli_report["summary"]["matched_type_count"], 1)
+        self.assertEqual(cli_report["summary"]["ignored_gap_count"], 4)
+
+        extra_registration = registration("Fortran::parser::UnexpectedAlias")
+        inventory_with_gap = {
+            **inventory,
+            "registrations": inventory["registrations"] + [extra_registration],
+        }
+        report_with_gap = audit_coverage(inventory_with_gap, model, ignore_document)
+        self.assertFalse(report_with_gap["ok"])
+        self.assertEqual(
+            [row["fully_qualified_type"] for row in report_with_gap["missing_from_header"] if not row["ignored"]],
+            ["Fortran::parser::UnexpectedAlias"],
         )
 
     def test_cli_emits_report_and_returns_nonzero_for_unignored_gaps(self) -> None:
