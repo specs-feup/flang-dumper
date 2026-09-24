@@ -151,6 +151,35 @@ void TestWriteAndRoundTrip() {
   Check(!ReadRecord(input, record), "EOF between records should be clean");
 }
 
+void TestDuplicateAttributeKeysRoundTrip() {
+  auto owned_output = std::make_unique<std::ostringstream>(std::ios::binary);
+  auto* captured_output = owned_output.get();
+  std::string bytes;
+  {
+    AstWriter writer(std::move(owned_output));
+    AttributeSpec second_value;
+    second_value.key = "same";
+    second_value.value.set_integer_value(42);
+    Check(writer.WriteNode(1, "Kind",
+                           {StringAttribute("same", "first"), second_value}) == 1,
+          "duplicate-key node should be written");
+    bytes = captured_output->str();
+  }
+
+  std::istringstream input(bytes, std::ios::binary);
+  ReadHeader(input);
+  StreamRecord record;
+  Check(ReadRecord(input, record) && record.has_node(),
+        "duplicate-key node record should be present");
+  const auto& attributes = record.node().attributes();
+  Check(attributes.size() == 2 && attributes[0].key() == "same" &&
+            attributes[0].value().string_value() == "first" &&
+            attributes[1].key() == "same" &&
+            attributes[1].value().integer_value() == 42,
+        "duplicate attribute keys and source order must round-trip");
+  Check(!ReadRecord(input, record), "EOF after duplicate-key node should be clean");
+}
+
 void TestRejectsInvalidInputWithoutConsumingIDs() {
   auto owned_output = std::make_unique<std::ostringstream>(std::ios::binary);
   auto* captured_output = owned_output.get();
@@ -161,11 +190,8 @@ void TestRejectsInvalidInputWithoutConsumingIDs() {
   ExpectThrows<std::invalid_argument>(
       [&] { writer.WriteNode(1, "", {}); }, "empty kind name");
   ExpectThrows<std::invalid_argument>(
-      [&] {
-        writer.WriteNode(1, "Kind", {StringAttribute("same", "a"),
-                                      StringAttribute("same", "b")});
-      },
-      "duplicate attribute keys");
+      [&] { writer.WriteNode(1, "Kind", {StringAttribute("", "value")}); },
+      "empty attribute key");
   ExpectThrows<std::invalid_argument>(
       [&] { writer.WriteNode(1, "Kind", {ReferenceAttribute("zero", 0)}); },
       "zero node reference");
@@ -267,6 +293,7 @@ void TestRejectsNullOutput() {
 int main() {
   try {
     TestWriteAndRoundTrip();
+    TestDuplicateAttributeKeysRoundTrip();
     TestRejectsInvalidInputWithoutConsumingIDs();
     TestForwardReferencesPassThrough();
     TestRejectsNullOutput();

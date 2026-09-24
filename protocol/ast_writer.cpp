@@ -35,10 +35,9 @@ std::uint64_t AstWriter::WriteNode(
   }
 
   const std::uint64_t node_id = next_node_id_;
-  std::unordered_set<std::string> keys;
   for (const auto& attribute : attributes) {
-    if (!keys.insert(attribute.key).second) {
-      throw std::invalid_argument("duplicate node attribute key: " + attribute.key);
+    if (attribute.key.empty()) {
+      throw std::invalid_argument("node attribute key must be nonempty");
     }
     ValidateValue(attribute.value);
   }

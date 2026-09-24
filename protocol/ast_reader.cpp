@@ -61,13 +61,9 @@ void AstReader::ValidateRecord(const StreamRecord& record) {
       throw ProtocolError("node kind name must be nonempty");
     }
 
-    std::unordered_set<std::string> keys;
     for (const auto& attribute : node.attributes()) {
       if (attribute.key().empty()) {
         throw ProtocolError("node attribute key must be nonempty");
-      }
-      if (!keys.insert(attribute.key()).second) {
-        throw ProtocolError("duplicate node attribute key");
       }
       ValidateAttributeValue(attribute.value(), references);
     }

@@ -119,6 +119,30 @@ void TestDuplicateNodeIDs() {
   ExpectBadStream(Encode({Node(1), Node(1)}), "duplicate node IDs");
 }
 
+void TestDuplicateAttributeKeysAreAcceptedInOrder() {
+  StreamRecord duplicate_keys = Node(1);
+  auto* first = duplicate_keys.mutable_node()->add_attributes();
+  first->set_key("same");
+  first->mutable_value()->set_string_value("first");
+  auto* second = duplicate_keys.mutable_node()->add_attributes();
+  second->set_key("same");
+  second->mutable_value()->set_integer_value(42);
+
+  std::istringstream input(Encode({duplicate_keys}), std::ios::binary);
+  AstReader reader(input);
+  StreamRecord output;
+  Check(reader.ReadNext(output) && output.has_node() &&
+            output.node().attributes_size() == 2,
+        "reader should accept both duplicate-key attributes");
+  Check(output.node().attributes(0).key() == "same" &&
+            output.node().attributes(0).value().string_value() == "first" &&
+            output.node().attributes(1).key() == "same" &&
+            output.node().attributes(1).value().integer_value() == 42,
+        "reader should preserve duplicate attribute keys and source order");
+  Check(!reader.ReadNext(output), "reader should reach clean EOF");
+  reader.Finish();
+}
+
 void TestMissingReferences() {
   StreamRecord root = Node(1);
   auto* attribute = root.mutable_node()->add_attributes();
@@ -184,14 +208,6 @@ void TestMalformedValuesAndKeys() {
   zero_ref_attr->mutable_value()->set_node_reference(0);
   ExpectBadStream(Encode({zero_reference}), "zero direct node reference");
 
-  StreamRecord duplicate_keys = Node(1);
-  for (int i = 0; i < 2; ++i) {
-    auto* attribute = duplicate_keys.mutable_node()->add_attributes();
-    attribute->set_key("same");
-    attribute->mutable_value()->set_bool_value(false);
-  }
-  ExpectBadStream(Encode({duplicate_keys}), "duplicate attribute keys");
-
   StreamRecord empty_key = Node(1);
   auto* empty_attr = empty_key.mutable_node()->add_attributes();
   empty_attr->mutable_value()->set_string_value("value");
@@ -242,6 +258,7 @@ int main() {
     TestFinishRequiresCleanEof();
     TestBadHeaders();
     TestDuplicateNodeIDs();
+    TestDuplicateAttributeKeysAreAcceptedInOrder();
     TestMissingReferences();
     TestCommentReferences();
     TestNoRootNode();
