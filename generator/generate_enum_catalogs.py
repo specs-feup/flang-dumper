@@ -1,0 +1,195 @@
+#!/usr/bin/env python3
+"""Generate binary enum catalog emission calls from registration metadata."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import re
+import sys
+from pathlib import Path
+from typing import Any, Sequence
+
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+REGISTRATION_KINDS = {
+    "DUMP_NODE": "node",
+    "DUMP_NODE_MANUAL": "manual_node",
+    "DUMP_ENUM": "enum",
+}
+EXPECTED_KEYS = {
+    "fully_qualified_type",
+    "registration",
+    "handler_kind",
+    "source_line",
+    "manual",
+    "has_explicit_content",
+}
+IDENTIFIER = re.compile(r"[A-Za-z_][A-Za-z_0-9]*\Z", re.ASCII)
+
+
+class EnumCatalogError(ValueError):
+    """Enum catalog calls cannot be generated from these inputs."""
+
+
+def _object(value: Any, description: str) -> dict[str, Any]:
+    if not isinstance(value, dict):
+        raise EnumCatalogError(f"{description} must be a JSON object")
+    return value
+
+
+def _array(value: Any, description: str) -> list[Any]:
+    if not isinstance(value, list):
+        raise EnumCatalogError(f"{description} must be a JSON array")
+    return value
+
+
+def _qualified_type(value: Any, description: str) -> str:
+    if not isinstance(value, str) or not value or value != value.strip():
+        raise EnumCatalogError(f"{description} must be a fully qualified C++ type name")
+    segments = value.split("::")
+    if len(segments) < 2 or any(IDENTIFIER.fullmatch(part) is None for part in segments):
+        raise EnumCatalogError(f"{description} must be a fully qualified C++ type name")
+    return value
+
+
+def _read_registrations(document: Any) -> list[dict[str, Any]]:
+    root = _object(document, "registration inventory")
+    schema_version = root.get("schema_version")
+    if (
+        set(root) != {"schema_version", "registrations"}
+        or isinstance(schema_version, bool)
+        or schema_version != 1
+    ):
+        raise EnumCatalogError(
+            "registration inventory must use schema_version 1 and contain registrations"
+        )
+
+    entries = _array(root.get("registrations"), "registration inventory registrations")
+    registrations: list[dict[str, Any]] = []
+    names: set[str] = set()
+    for index, raw in enumerate(entries):
+        item = _object(raw, f"registrations[{index}]")
+        if set(item) != EXPECTED_KEYS:
+            raise EnumCatalogError(
+                f"registrations[{index}] must contain exactly {sorted(EXPECTED_KEYS)}"
+            )
+
+        cpp_type = _qualified_type(
+            item.get("fully_qualified_type"),
+            f"registrations[{index}].fully_qualified_type",
+        )
+        if cpp_type in names:
+            raise EnumCatalogError(f"duplicate inventory registration for {cpp_type}")
+        names.add(cpp_type)
+
+        registration = item.get("registration")
+        if not isinstance(registration, str) or registration not in REGISTRATION_KINDS:
+            raise EnumCatalogError(
+                f"registrations[{index}].registration is unsupported: {registration!r}"
+            )
+        expected_kind = REGISTRATION_KINDS[registration]
+        if item.get("handler_kind") != expected_kind:
+            raise EnumCatalogError(
+                f"handler_kind mismatch for {cpp_type}: "
+                f"{item.get('handler_kind')!r} does not match {registration}"
+            )
+
+        source_line = item.get("source_line")
+        if isinstance(source_line, bool) or not isinstance(source_line, int) or source_line < 1:
+            raise EnumCatalogError(
+                f"registrations[{index}].source_line must be a positive integer"
+            )
+        if item.get("manual") is not (registration == "DUMP_NODE_MANUAL"):
+            raise EnumCatalogError(
+                f"manual flag mismatch for {cpp_type} and {registration}"
+            )
+        explicit = item.get("has_explicit_content")
+        if not isinstance(explicit, bool):
+            raise EnumCatalogError(
+                f"registrations[{index}].has_explicit_content must be a boolean"
+            )
+        if registration == "DUMP_ENUM" and explicit:
+            raise EnumCatalogError(f"enum registration {cpp_type} cannot have a body")
+
+        registrations.append(
+            {
+                "fully_qualified_type": cpp_type,
+                "registration": registration,
+            }
+        )
+    return registrations
+
+
+def render_include(document: Any) -> str:
+    """Validate registration metadata and return generated catalog calls."""
+    registrations = _read_registrations(document)
+    enum_types = [
+        item["fully_qualified_type"]
+        for item in registrations
+        if item["registration"] == "DUMP_ENUM"
+    ]
+    canonical_names = json.dumps(
+        enum_types, ensure_ascii=False, separators=(",", ":")
+    ).encode("utf-8")
+    digest = hashlib.sha256(canonical_names).hexdigest()
+
+    lines = [
+        "// Generated by generator/generate_enum_catalogs.py.",
+        f"// Filtered DUMP_ENUM names/order SHA-256: {digest}",
+        "",
+    ]
+    for cpp_type in enum_types:
+        namespace, enum_type = cpp_type.rsplit("::", 1)
+        lines.append(f"EMIT_ENUM_CATALOG({namespace}, {enum_type})")
+    return "\n".join(lines) + "\n"
+
+
+def _read_json(path: Path) -> Any:
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except OSError as error:
+        raise EnumCatalogError(f"cannot read registration inventory {path}: {error}") from error
+    except (UnicodeError, json.JSONDecodeError) as error:
+        raise EnumCatalogError(f"invalid registration inventory {path}: {error}") from error
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--input",
+        type=Path,
+        default=REPO_ROOT / "generator" / "registrations.json",
+        help="registration inventory JSON (default: generator/registrations.json)",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=REPO_ROOT / "src" / "generated_binary_enum_catalogs.inc",
+        help="include to write or check",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="fail if --output differs from generated content",
+    )
+    args = parser.parse_args(argv)
+
+    try:
+        rendered = render_include(_read_json(args.input))
+        if args.check:
+            actual = args.output.read_text(encoding="utf-8")
+            if actual != rendered:
+                print(f"binary enum catalog include is stale: {args.output}", file=sys.stderr)
+                return 1
+        else:
+            args.output.write_text(rendered, encoding="utf-8")
+    except (OSError, UnicodeError, ValueError) as error:
+        print(f"binary enum catalog generation error: {error}", file=sys.stderr)
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
