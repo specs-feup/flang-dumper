@@ -110,6 +110,8 @@ def _legacy_scalar(kind: str, value: Any, where: str) -> Any:
         return value
     if kind == "integer_value":
         return str(value)
+    if kind == "uint64_value":
+        return str(value)
     if kind == "bool_value":
         # The legacy C++ dumper writes bool attributes as 0 or 1 inside strings.
         return "1" if value else "0"

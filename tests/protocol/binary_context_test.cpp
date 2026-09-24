@@ -1,6 +1,8 @@
 #include "protocol/binary_context.hpp"
 
+#include <cstdint>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <sstream>
 #include <stdexcept>
@@ -65,6 +67,7 @@ void TestPrewalkAndEmission() {
   context.AddReferenceList("children", {&child});
   context.AddReferenceList("empty", {});
   context.AddNull("nothing");
+  context.AddUnsigned("unsigned", std::numeric_limits<std::uint64_t>::max());
   context.EndNode();
 
   context.BeginNode(&child, 12, "Child");
@@ -91,7 +94,7 @@ void TestPrewalkAndEmission() {
             parent_node.kind_name() == "Parent",
         "parent must retain its reserved identity and kind");
   const auto& attributes = parent_node.attributes();
-  Check(attributes.size() == 9, "all parent attributes should be retained");
+  Check(attributes.size() == 10, "all parent attributes should be retained");
   Check(attributes[0].key() == "child" &&
             attributes[0].value().node_reference() == 2,
         "forward reference should use the child's reserved ID");
@@ -115,6 +118,11 @@ void TestPrewalkAndEmission() {
   Check(attributes[8].key() == "nothing" &&
             attributes[8].value().has_null_value(),
         "null value should remain present");
+  Check(attributes[9].key() == "unsigned" &&
+            attributes[9].value().has_uint64_value() &&
+            attributes[9].value().uint64_value() ==
+                std::numeric_limits<std::uint64_t>::max(),
+        "UINT64_MAX should round-trip as an unsigned scalar");
   for (const auto& attribute : attributes) {
     Check(attribute.key() != "absent",
           "an attribute that was never added should remain absent");

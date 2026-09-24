@@ -194,6 +194,7 @@ class AstStreamSchemaTest(unittest.TestCase):
             "null_value": (6, field_type["message"]),
             "double_value": (7, field_type["double"]),
             "bytes_value": (8, field_type["bytes"]),
+            "uint64_value": (9, field_type["uint64"]),
         }
         for message_name in ("AttributeValue", "Value"):
             descriptor = messages[message_name]

@@ -32,6 +32,7 @@ public:
                  std::string kind_name);
   void AddString(std::string key, std::string value);
   void AddInteger(std::string key, std::int64_t value);
+  void AddUnsigned(std::string key, std::uint64_t value);
   void AddBool(std::string key, bool value);
   void AddDouble(std::string key, double value);
   void AddBytes(std::string key, std::string value);

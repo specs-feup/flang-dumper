@@ -56,6 +56,10 @@ void BinaryContext::AddInteger(std::string key, std::int64_t value) {
   NewAttributeValue(std::move(key)).set_integer_value(value);
 }
 
+void BinaryContext::AddUnsigned(std::string key, std::uint64_t value) {
+  NewAttributeValue(std::move(key)).set_uint64_value(value);
+}
+
 void BinaryContext::AddBool(std::string key, bool value) {
   NewAttributeValue(std::move(key)).set_bool_value(value);
 }

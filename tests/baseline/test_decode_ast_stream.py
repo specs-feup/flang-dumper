@@ -71,7 +71,9 @@ class DecodeAstStreamTests(unittest.TestCase):
         nested = root.attributes.add(key="items").value.list_value.items
         nested.add().string_value = "x"
         nested.add().list_value.items.add().integer_value = 5
+        nested.add().uint64_value = 0xFFFFFFFFFFFFFFFF
         root.attributes.add(key="integer").value.integer_value = -7
+        root.attributes.add(key="unsigned").value.uint64_value = 0xFFFFFFFFFFFFFFFF
         root.attributes.add(key="enabled").value.bool_value = True
         root.attributes.add(key="ratio").value.double_value = 1.25
 
@@ -102,8 +104,9 @@ class DecodeAstStreamTests(unittest.TestCase):
                                 ("label", "first"),
                                 ("label", "second"),
                                 ("empty", []),
-                                ("items", ["x", ["5"]]),
+                                ("items", ["x", ["5"], "18446744073709551615"]),
                                 ("integer", "-7"),
+                                ("unsigned", "18446744073709551615"),
                                 ("enabled", "1"),
                                 ("ratio", "1.25"),
                             ]

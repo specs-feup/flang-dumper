@@ -127,6 +127,7 @@ void AstWriter::ValidateValue(const AttributeValue& value) const {
   case AttributeValue::kNullValue:
   case AttributeValue::kDoubleValue:
   case AttributeValue::kBytesValue:
+  case AttributeValue::kUint64Value:
     return;
   }
   throw std::invalid_argument("node attribute has an unknown value case");
@@ -161,6 +162,7 @@ void AstWriter::ValidateList(const ValueList& values) const {
     case Value::kNullValue:
     case Value::kDoubleValue:
     case Value::kBytesValue:
+    case Value::kUint64Value:
       break;
     }
   }

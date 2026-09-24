@@ -127,6 +127,7 @@ void AstReader::ValidateAttributeValue(
   case AttributeValue::kNullValue:
   case AttributeValue::kDoubleValue:
   case AttributeValue::kBytesValue:
+  case AttributeValue::kUint64Value:
     return;
   }
   throw ProtocolError("attribute value has an unknown case");
@@ -165,6 +166,7 @@ void AstReader::ValidateList(
     case Value::kNullValue:
     case Value::kDoubleValue:
     case Value::kBytesValue:
+    case Value::kUint64Value:
       break;
     }
   }

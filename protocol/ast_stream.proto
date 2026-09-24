@@ -39,6 +39,7 @@ message AttributeValue {
     NullValue null_value = 6;
     double double_value = 7;
     bytes bytes_value = 8;
+    uint64 uint64_value = 9;
   }
 }
 
@@ -54,6 +55,7 @@ message Value {
     NullValue null_value = 6;
     double double_value = 7;
     bytes bytes_value = 8;
+    uint64 uint64_value = 9;
   }
 }
 
