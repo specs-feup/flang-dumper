@@ -1,0 +1,491 @@
+{
+  "format": "flang-handler-bodies/v1",
+  "handlers": [
+    {
+      "fully_qualified_type": "Fortran::format::ControlEditDesc",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 421,
+      "body": "dump(controlEditDesc_toString(v.kind), \"kind\");\n    dump(v.count, \"count\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::format::FormatItem",
+      "registration": "DUMP_NODE",
+      "source_line": 427,
+      "body": "dump(v.repeatCount, \"repeatCount\"); dump(v.u, \"value\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::format::FormatSpecification",
+      "registration": "DUMP_NODE",
+      "source_line": 428,
+      "body": "dump(v.items, \"items\"); dump(v.unlimitedItems, \"unlimitedItems\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::format::IntrinsicTypeDataEditDesc",
+      "registration": "DUMP_NODE",
+      "source_line": 429,
+      "body": "dump(v.kind, \"kind\"); dump(v.width, \"width\"); dump(v.digits, \"digits\"); dump(v.exponentWidth, \"exponentWidth\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AcImpliedDoControl",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 482,
+      "body": "if(std::get<0>(v.t).has_value()){\n        dump(std::get<0>(v.t).value(), \"type\");\n    }\n    dump(std::get<1>(v.t), \"value\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AcImpliedDoControl::Bounds",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 870,
+      "body": "dump(v.name.thing, \"var\");\n      dump(v.lower.thing, \"lower\");\n      dump(v.upper.thing, \"upper\");\n      if(v.step.has_value()) dump(v.step.value().thing, \"step\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AcSpec",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 493,
+      "body": "dump(std::get<0>(v.t), \"type\");\n    dump(std::get<1>(v.t), \"values\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccBeginCombinedDirective",
+      "registration": "DUMP_NODE",
+      "source_line": 439,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccBeginLoopDirective",
+      "registration": "DUMP_NODE",
+      "source_line": 441,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccBindClause",
+      "registration": "DUMP_NODE",
+      "source_line": 445,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccBlockDirective",
+      "registration": "DUMP_NODE",
+      "source_line": 443,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccClauseList",
+      "registration": "DUMP_NODE",
+      "source_line": 447,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccCombinedDirective",
+      "registration": "DUMP_NODE",
+      "source_line": 448,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccDataModifier",
+      "registration": "DUMP_NODE",
+      "source_line": 450,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccDeclarativeDirective",
+      "registration": "DUMP_NODE",
+      "source_line": 452,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccDefaultClause",
+      "registration": "DUMP_NODE",
+      "source_line": 446,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccDeviceTypeExpr",
+      "registration": "DUMP_NODE",
+      "source_line": 474,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccEndBlockDirective",
+      "registration": "DUMP_NODE",
+      "source_line": 455,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccEndCombinedDirective",
+      "registration": "DUMP_NODE",
+      "source_line": 457,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccGangArg",
+      "registration": "DUMP_NODE",
+      "source_line": 460,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccSelfClause",
+      "registration": "DUMP_NODE",
+      "source_line": 471,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AccStandaloneDirective",
+      "registration": "DUMP_NODE",
+      "source_line": 472,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Allocatable",
+      "registration": "DUMP_NODE",
+      "source_line": 508,
+      "body": "dump(\"Allocatable\", \"keyword\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::AllocateShapeSpec",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 512,
+      "body": "auto &lower_bound = std::get<0>(v.t);\n    auto &upper_bound = std::get<1>(v.t);\n\n    dump(lower_bound, \"lower_bound\");\n    dump(upper_bound, \"upper_bound\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::ArrayElement",
+      "registration": "DUMP_NODE",
+      "source_line": 524,
+      "body": "dump(v.base, \"base\"); dump(v.subscripts, \"subscripts\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Asynchronous",
+      "registration": "DUMP_NODE",
+      "source_line": 536,
+      "body": "dump(\"Asynchronous\", \"keyword\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::CallStmt",
+      "registration": "DUMP_NODE",
+      "source_line": 558,
+      "body": "dump(v.call, \"call\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::CaseValueRange::Range",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 566,
+      "body": "dump(std::get<0>(v.t), \"lower\");\n    dump(std::get<1>(v.t), \"upper\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::ComplexLiteralConstant",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 606,
+      "body": "dump(std::get<0>(v.t), \"real\"); dump(std::get<1>(v.t), \"imaginary\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::ConcurrentControl",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 617,
+      "body": "dump(std::get<0>(v.t), \"var\"); dump(std::get<1>(v.t).thing, \"lower\"); dump(std::get<2>(v.t).thing, \"upper\"); if(std::get<3>(v.t).has_value()) dump(std::get<3>(v.t).value().thing, \"step\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Contiguous",
+      "registration": "DUMP_NODE",
+      "source_line": 625,
+      "body": "dump(\"Contiguous\", \"keyword\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::DefinedOperator",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 659,
+      "body": "if (v.u.index() == 1) {\n      dump(Fortran::parser::DefinedOperator::EnumToString(std::get<1>(v.u)), \"op\");\n    }"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::ExplicitShapeSpec",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 716,
+      "body": "auto &lower_bound = std::get<0>(v.t);\n    auto &upper_bound = std::get<1>(v.t);\n\n    dump(lower_bound, \"lower_bound\");\n    dump(upper_bound, \"upper_bound\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::AND",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 742,
+      "body": "dump(std::get<0>(v.t), \"left\"); dump(std::get<1>(v.t), \"right\"); dump(\"AND\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::Add",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 733,
+      "body": "dump(std::get<0>(v.t), \"left\"); dump(std::get<1>(v.t), \"right\"); dump(\"ADD\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::Divide",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 732,
+      "body": "dump(std::get<0>(v.t), \"left\"); dump(std::get<1>(v.t), \"right\"); dump(\"DIVIDE\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::EQ",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 738,
+      "body": "dump(std::get<0>(v.t), \"left\"); dump(std::get<1>(v.t), \"right\"); dump(\"EQ\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::GE",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 740,
+      "body": "dump(std::get<0>(v.t), \"left\"); dump(std::get<1>(v.t), \"right\"); dump(\"GE\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::GT",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 741,
+      "body": "dump(std::get<0>(v.t), \"left\"); dump(std::get<1>(v.t), \"right\"); dump(\"GT\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::LE",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 737,
+      "body": "dump(std::get<0>(v.t), \"left\"); dump(std::get<1>(v.t), \"right\"); dump(\"LE\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::LT",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 736,
+      "body": "dump(std::get<0>(v.t), \"left\"); dump(std::get<1>(v.t), \"right\"); dump(\"LT\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::Multiply",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 731,
+      "body": "dump(std::get<0>(v.t), \"left\"); dump(std::get<1>(v.t), \"right\"); dump(\"MULTIPLY\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::NE",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 739,
+      "body": "dump(std::get<0>(v.t), \"left\"); dump(std::get<1>(v.t), \"right\"); dump(\"NE\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::NOT",
+      "registration": "DUMP_NODE",
+      "source_line": 727,
+      "body": "dump(\"NOT\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::Negate",
+      "registration": "DUMP_NODE",
+      "source_line": 726,
+      "body": "dump(\"NEGATE\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::Parentheses",
+      "registration": "DUMP_NODE",
+      "source_line": 724,
+      "body": "dump(\"PARENTHESES\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::Power",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 730,
+      "body": "dump(std::get<0>(v.t), \"left\"); dump(std::get<1>(v.t), \"right\"); dump(\"POWER\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::Subtract",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 734,
+      "body": "dump(std::get<0>(v.t), \"left\"); dump(std::get<1>(v.t), \"right\"); dump(\"SUBTRACT\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Expr::UnaryPlus",
+      "registration": "DUMP_NODE",
+      "source_line": 725,
+      "body": "dump(\"UNARY_PLUS\", \"op\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::External",
+      "registration": "DUMP_NODE",
+      "source_line": 748,
+      "body": "dump(\"External\", \"keyword\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::FunctionStmt",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 764,
+      "body": "dump(std::get<0>(v.t), \"PrefixSpec\");\n    dump(std::get<1>(v.t), \"Name\");\n    dump(std::get<2>(v.t), \"FunctionArgumentDecl\");\n    if (std::get<3>(v.t).has_value()) {\n      dump(std::get<3>(v.t).value(), \"Suffix\");\n    }"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::IntentSpec",
+      "registration": "DUMP_NODE",
+      "source_line": 815,
+      "body": "dump(Fortran::parser::IntentSpec::EnumToString(v.v), \"intent\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Intrinsic",
+      "registration": "DUMP_NODE",
+      "source_line": 826,
+      "body": "dump(\"Intrinsic\", \"keyword\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::IntrinsicTypeSpec::Real",
+      "registration": "DUMP_NODE",
+      "source_line": 834,
+      "body": "dump(v.v, \"KindSelector\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::IoControlSpec::CharExpr",
+      "registration": "DUMP_NODE",
+      "source_line": 837,
+      "body": "dump(Fortran::parser::IoControlSpec::CharExpr::EnumToString(std::get<0>(v.t)), \"kind\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::LogicalLiteralConstant",
+      "registration": "DUMP_NODE",
+      "source_line": 863,
+      "body": "// TODO: This has not been tested yet\n      if(std::get<1>(v.t).has_value()){\n          dump(std::get<1>(v.t).value(), \"kind\");\n      }"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::LoopControl::Bounds",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 869,
+      "body": "dump(v.name.thing, \"var\"); dump(v.lower.thing, \"lower\"); dump(v.upper.thing, \"upper\"); if(v.step.has_value()) dump(v.step.value().thing, \"step\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Name",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 890,
+      "body": "dump(v.source, \"source\");\n    if (v.symbol != nullptr)\n      dump(v.symbol->owner(), \"scope\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::OmpClause::Firstprivate",
+      "registration": "DUMP_NODE",
+      "source_line": 951,
+      "body": "dump(\"FIRST_PRIVATE\", \"kind\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::OmpClause::Nowait",
+      "registration": "DUMP_NODE",
+      "source_line": 953,
+      "body": "dump(\"NOWAIT\", \"kind\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::OmpClause::Ordered",
+      "registration": "DUMP_NODE",
+      "source_line": 954,
+      "body": "dump(\"ORDERED\", \"kind\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::OmpClause::Private",
+      "registration": "DUMP_NODE",
+      "source_line": 949,
+      "body": "dump(\"PRIVATE\", \"kind\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::OmpClause::Reduction",
+      "registration": "DUMP_NODE",
+      "source_line": 952,
+      "body": "dump(\"REDUCTION\", \"kind\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::OmpClause::Shared",
+      "registration": "DUMP_NODE",
+      "source_line": 950,
+      "body": "dump(\"SHARED\", \"kind\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::OmpDirectiveName",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 986,
+      "body": "dump(llvm::omp::getOpenMPDirectiveName(v.v).str(), \"directive\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::OmpDirectiveSpecification",
+      "registration": "DUMP_NODE",
+      "source_line": 989,
+      "body": "dump(llvm::omp::getOpenMPDirectiveName(v.DirId()).str(), \"directive\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Optional",
+      "registration": "DUMP_NODE",
+      "source_line": 1191,
+      "body": "dump(\"Optional\", \"keyword\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Parameter",
+      "registration": "DUMP_NODE",
+      "source_line": 1196,
+      "body": "dump(\"Parameter\", \"keyword\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Pointer",
+      "registration": "DUMP_NODE",
+      "source_line": 1201,
+      "body": "dump(\"Pointer\", \"keyword\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Program",
+      "registration": "DUMP_NODE",
+      "source_line": 1232,
+      "body": "programId = getId(v);"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Protected",
+      "registration": "DUMP_NODE",
+      "source_line": 1237,
+      "body": "dump(\"Protected\", \"keyword\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::RealLiteralConstant",
+      "registration": "DUMP_NODE",
+      "source_line": 1240,
+      "body": "dump(v.real, \"real\");\n      // TODO: This has not been tested yet\n      if(v.kind.has_value()){\n          dump(v.kind.value(), \"kind\");\n      }"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::RealLiteralConstant::Real",
+      "registration": "DUMP_NODE",
+      "source_line": 1247,
+      "body": "dump(v.source, \"source\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Save",
+      "registration": "DUMP_NODE",
+      "source_line": 1253,
+      "body": "dump(\"Save\", \"keyword\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::StopStmt",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 1283,
+      "body": "dump(std::get<0>(v.t), \"kind\");\n    dump(std::get<1>(v.t), \"code\");\n    dump(std::get<2>(v.t), \"quiet\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::SubscriptTriplet",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 1299,
+      "body": "dump(std::get<0>(v.t), \"start\");\n    dump(std::get<1>(v.t), \"end\");\n    dump(std::get<2>(v.t), \"stride\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Target",
+      "registration": "DUMP_NODE",
+      "source_line": 1313,
+      "body": "dump(\"Target\", \"keyword\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::UseStmt",
+      "registration": "DUMP_NODE",
+      "source_line": 1341,
+      "body": "dump(v.moduleName, \"moduleName\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Value",
+      "registration": "DUMP_NODE",
+      "source_line": 1343,
+      "body": "dump(\"Value\", \"keyword\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::Volatile",
+      "registration": "DUMP_NODE",
+      "source_line": 1352,
+      "body": "dump(\"Volatile\", \"keyword\");"
+    },
+    {
+      "fully_qualified_type": "Fortran::parser::WriteStmt",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 1362,
+      "body": "dump(v.iounit, \"iounit\");\n    dump(v.format, \"format\");\n    dump(v.controls, \"controls\");\n    dump(v.items, \"items\");"
+    }
+  ]
+}
