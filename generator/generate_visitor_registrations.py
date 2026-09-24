@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import hashlib
-import importlib.util
 import json
 import sys
 from pathlib import Path
@@ -13,8 +12,6 @@ from typing import Any, Sequence
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-SCRIPT_DIR = Path(__file__).resolve().parent
-SCRIPTS_DIR = REPO_ROOT / "scripts"
 KIND_FORMAT = "flang-kind-manifest/v1"
 BODY_FORMAT = "flang-handler-bodies/v1"
 REGISTRATION_KINDS = {
@@ -26,18 +23,6 @@ REGISTRATION_KINDS = {
 
 class VisitorRegistrationError(ValueError):
     """A visitor registration include cannot be generated from these inputs."""
-
-
-def _load_inventory_module():
-    parser_path = SCRIPTS_DIR / "inventory_dump_handlers.py"
-    spec = importlib.util.spec_from_file_location(
-        "visitor_registration_inventory", parser_path
-    )
-    if spec is None or spec.loader is None:
-        raise VisitorRegistrationError(f"cannot load inventory parser {parser_path}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
 
 
 def _read_json(path: Path, description: str) -> Any:
@@ -343,20 +328,10 @@ def render_include(
 
 
 def _default_inventory() -> dict[str, Any]:
-    parser = _load_inventory_module()
-    source_path = REPO_ROOT / "src" / "plugin.cpp"
-    document = parser.inventory(source_path)
-    if document["registrations"]:
-        return document
-
-    # Once plugin.cpp includes the generated file, read the registrations from
-    # that file. This keeps regeneration and --check usable after integration.
-    generated_path = REPO_ROOT / "src" / "generated_visitor_registrations.inc"
-    if generated_path.is_file():
-        generated = parser.inventory(generated_path)
-        if generated["registrations"]:
-            return generated
-    return document
+    return _read_json(
+        REPO_ROOT / "generator" / "registrations.json",
+        "pinned registration inventory",
+    )
 
 
 def _read_inventory_argument(path: Path | None) -> dict[str, Any]:
@@ -382,7 +357,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--inventory",
         type=Path,
-        help="registration inventory JSON from inventory_dump_handlers.py",
+        default=REPO_ROOT / "generator" / "registrations.json",
+        help="registration inventory JSON (default: generator/registrations.json)",
     )
     parser.add_argument(
         "--output",

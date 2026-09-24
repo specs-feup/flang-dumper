@@ -1,5 +1,31 @@
 # Clava declaration generator probe
 
+## Current JSON visitor registrations
+
+`src/plugin.cpp` includes `src/generated_visitor_registrations.inc` inside
+`ParseTreeVisitor`. The include is generated from three checked-in inputs:
+`generator/registrations.json`, `generator/kinds.json`, and
+`generator/handler_bodies.json`. The pinned registration manifest preserves
+the order and source lines from the former block in `plugin.cpp`; those
+`source_line` values are historical after integration. `handler_bodies.json`
+also retains source lines from that old block, so compare its handler type,
+macro, and body text when checking it against the generated include.
+
+Generate or verify the include from the repository root with:
+
+```sh
+python3 generator/generate_visitor_registrations.py
+python3 generator/generate_visitor_registrations.py --check
+```
+
+The generator reads `generator/registrations.json` by default. Its `--check`
+mode compares the include against that pinned manifest and the other checked-in
+inputs; it never derives its inventory from the generated include or
+`plugin.cpp`. To inspect the current include with the inventory scanner, run
+`python3 scripts/inventory_dump_handlers.py`; its default source is
+`src/generated_visitor_registrations.inc`. An explicit source path can be
+passed as the first argument.
+
 This slice checks that Clava can inventory declarations in a project-owned C++
 header and that an explicit manifest can produce stable protobuf and C++ files.
 It does not cover Flang declarations or define the production dumper protocol.

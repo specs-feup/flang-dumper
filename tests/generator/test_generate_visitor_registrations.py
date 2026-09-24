@@ -202,18 +202,20 @@ class GenerateVisitorRegistrationsTest(unittest.TestCase):
             self.assertEqual(status, 1)
             self.assertIn("visitor registration include is stale", stderr.getvalue())
 
-    def test_committed_include_is_fresh_and_matches_original_inventory(self):
+    def test_committed_include_is_fresh_and_matches_pinned_inventory(self):
         output_path = REPO / "src" / "generated_visitor_registrations.inc"
         with contextlib.redirect_stdout(io.StringIO()):
             status = GENERATOR.main(["--check"])
         self.assertEqual(status, 0)
 
-        original = INVENTORY.inventory(REPO / "src" / "plugin.cpp")["registrations"]
+        pinned_document = json.loads(
+            (REPO / "generator" / "registrations.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(GENERATOR._default_inventory(), pinned_document)
+        pinned = pinned_document["registrations"]
         generated = INVENTORY.inventory(output_path)["registrations"]
-        self.assertEqual(len(original), 864)
-        self.assertEqual(len(generated), len(original))
-        # Source lines naturally move into the generated include. All semantic
-        # inventory fields, source order, and explicit-content counts must match.
+        self.assertEqual(len(pinned), 864)
+        self.assertEqual(len(generated), len(pinned))
         fields = (
             "fully_qualified_type",
             "registration",
@@ -223,16 +225,25 @@ class GenerateVisitorRegistrationsTest(unittest.TestCase):
         )
         self.assertEqual(
             [[entry[field] for field in fields] for entry in generated],
-            [[entry[field] for field in fields] for entry in original],
+            [[entry[field] for field in fields] for entry in pinned],
         )
         self.assertEqual(
-            sum(item["has_explicit_content"] for item in original),
+            sum(item["has_explicit_content"] for item in pinned),
+            81,
+        )
+        self.assertEqual(
             sum(item["has_explicit_content"] for item in generated),
+            81,
+        )
+        self.assertTrue(
+            any(
+                current["source_line"] != saved["source_line"]
+                for current, saved in zip(generated, pinned)
+            )
         )
 
-        original_bodies = EXTRACTOR.extract_handler_bodies(
-            (REPO / "src" / "plugin.cpp").read_text(encoding="utf-8"),
-            {"schema_version": 1, "registrations": original},
+        stored_bodies = json.loads(
+            (REPO / "generator" / "handler_bodies.json").read_text(encoding="utf-8")
         )
         generated_bodies = EXTRACTOR.extract_handler_bodies(
             output_path.read_text(encoding="utf-8"),
@@ -251,7 +262,7 @@ class GenerateVisitorRegistrationsTest(unittest.TestCase):
                     item["registration"],
                     item["body"],
                 )
-                for item in original_bodies["handlers"]
+                for item in stored_bodies["handlers"]
             },
         )
 

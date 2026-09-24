@@ -223,7 +223,13 @@ def inventory(path: Path) -> dict[str, object]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("source", nargs="?", type=Path, default=Path("src/plugin.cpp"))
+    parser.add_argument(
+        "source",
+        nargs="?",
+        type=Path,
+        default=Path("src/generated_visitor_registrations.inc"),
+        help="source file to scan (default: src/generated_visitor_registrations.inc)",
+    )
     parser.add_argument("-o", "--output", type=Path, help="write JSON to this file instead of stdout")
     args = parser.parse_args(argv)
     try:

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import contextlib
+import io
+import json
 import sys
 import unittest
 from pathlib import Path
@@ -9,6 +12,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from inventory_dump_handlers import main as inventory_main  # noqa: E402
 from inventory_dump_handlers import parse_registrations  # noqa: E402
 from compare_graphs import compare_graphs  # noqa: E402
 
@@ -50,14 +54,29 @@ DUMP_ENUM(
         )
         self.assertEqual([item["source_line"] for item in registrations], [5, 11, 12])
 
-    def test_current_plugin_registrations_are_extracted(self) -> None:
-        source_file = REPO_ROOT / "src" / "plugin.cpp"
+    def test_current_generated_registrations_match_pinned_inventory(self) -> None:
+        source_file = REPO_ROOT / "src" / "generated_visitor_registrations.inc"
+        pinned_file = REPO_ROOT / "generator" / "registrations.json"
         source = source_file.read_text(encoding="utf-8")
+        pinned = json.loads(pinned_file.read_text(encoding="utf-8"))["registrations"]
         first = parse_registrations(source)
         second = parse_registrations(source)
 
         self.assertEqual(first, second)
-        self.assertGreater(len(first), 700)
+        self.assertEqual(len(first), 864)
+        fields = (
+            "fully_qualified_type",
+            "registration",
+            "handler_kind",
+            "manual",
+            "has_explicit_content",
+        )
+        self.assertEqual(
+            [[entry[field] for field in fields] for entry in first],
+            [[entry[field] for field in fields] for entry in pinned],
+        )
+        self.assertEqual(sum(entry["has_explicit_content"] for entry in first), 81)
+
         entries = {
             (entry["fully_qualified_type"], entry["registration"]): entry for entry in first
         }
@@ -79,10 +98,19 @@ DUMP_ENUM(
             entries[("Fortran::parser::UseStmt::ModuleNature", "DUMP_ENUM")]["handler_kind"],
             "enum",
         )
-        self.assertEqual(
-            entries[("Fortran::format::DerivedTypeDataEditDesc", "DUMP_NODE")]["source_line"],
-            426,
-        )
+        pinned_entries = {
+            (entry["fully_qualified_type"], entry["registration"]): entry
+            for entry in pinned
+        }
+        key = ("Fortran::format::DerivedTypeDataEditDesc", "DUMP_NODE")
+        self.assertEqual(pinned_entries[key]["source_line"], 426)
+        self.assertNotEqual(entries[key]["source_line"], pinned_entries[key]["source_line"])
+
+    def test_inventory_cli_defaults_to_generated_include(self) -> None:
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            self.assertEqual(inventory_main([]), 0)
+        self.assertEqual(len(json.loads(stdout.getvalue())["registrations"]), 864)
 
 
 class GraphComparisonTests(unittest.TestCase):
