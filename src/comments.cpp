@@ -1,9 +1,52 @@
 #include "comments.h"
 
+#include <cctype>
 #include <optional>
+#include <string_view>
 #include <unordered_set>
 
 #include "flang/Parser/parse-tree.h"
+
+namespace {
+
+std::string escapeJsonString(std::string_view text) {
+    static constexpr char HEX_DIGITS[] = "0123456789abcdef";
+
+    std::string escaped;
+    escaped.reserve(text.size());
+
+    for (unsigned char c : text) {
+        switch (c) {
+            case '"':
+                escaped += "\\\"";
+                break;
+            case '\\':
+                escaped += "\\\\";
+                break;
+            case '\n':
+                escaped += "\\n";
+                break;
+            case '\r':
+                escaped += "\\r";
+                break;
+            case '\t':
+                escaped += "\\t";
+                break;
+            default:
+                if (c < 0x20) {
+                    escaped += "\\u00";
+                    escaped += HEX_DIGITS[c >> 4];
+                    escaped += HEX_DIGITS[c & 0x0f];
+                } else {
+                    escaped += static_cast<char>(c);
+                }
+        }
+    }
+
+    return escaped;
+}
+
+}  // namespace
 
 // Extracts a comment from a line, using a state machine
 std::tuple<std::optional<std::string>, size_t> extractCommentFromLine(std::string_view line) {
@@ -20,11 +63,6 @@ std::tuple<std::optional<std::string>, size_t> extractCommentFromLine(std::strin
 
     for (char c: line) {
         if (inComment) {
-            // Escape JSON special characters
-            if (c == '"' || c == '\\') {
-                comment += '\\';
-                uppercaseComment += '\\';
-            }
             comment += c;
             uppercaseComment += static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
 
@@ -84,8 +122,8 @@ Comment processComment(const RawComment &rawComment, const std::string &stmtId, 
 }
 
 std::string toString(const Comment &comment) {
-    return "{\"text\": \"" + comment.text +
-           "\", \"stmtId\": \"" + comment.stmtId +
+    return "{\"text\": \"" + escapeJsonString(comment.text) +
+           "\", \"stmtId\": \"" + escapeJsonString(comment.stmtId) +
            "\", \"trailing\": " + (comment.trailing ? "true" : "false") +
            "}";
 }
