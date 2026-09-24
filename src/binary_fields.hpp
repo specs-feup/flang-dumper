@@ -4,10 +4,8 @@
 #include <cstdint>
 #include <cstring>
 #include <list>
-#include <limits>
 #include <memory>
 #include <optional>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -141,12 +139,7 @@ public:
   }
 
   void Dump(std::uint64_t value, const char* key) {
-    if (value > static_cast<std::uint64_t>(
-                    std::numeric_limits<std::int64_t>::max())) {
-      throw std::overflow_error(
-          "uint64_t AST attribute exceeds the protocol integer range");
-    }
-    context_.AddInteger(key, static_cast<std::int64_t>(value));
+    context_.AddUnsigned(key, value);
   }
 
   void Dump(const Fortran::parser::CharBlock& value, const char* key) {

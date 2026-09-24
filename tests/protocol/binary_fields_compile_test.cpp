@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <list>
+#include <limits>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -18,6 +19,10 @@ using Fortran::parser::UnlabeledStatement;
 using TestIndirection = Fortran::common::Indirection<Name>;
 using TestVariant = std::variant<Name, ContinueStmt>;
 using TestTuple = std::tuple<CharBlock, std::optional<Name>>;
+constexpr std::uint64_t kMaximumUnsigned =
+    std::numeric_limits<std::uint64_t>::max();
+static_assert(kMaximumUnsigned == UINT64_MAX,
+              "uint64_t encoder test must cover the full unsigned range");
 
 // This function is intentionally never executed. Its body forces the
 // FieldEncoder templates used by the binary visitor through the compiler.
@@ -55,6 +60,7 @@ void InstantiateFieldEncoder(flang_dumper::protocol::BinaryContext& context,
   encoder.Dump(integer, "integer");
   encoder.Dump(signed_integer, "signed_integer");
   encoder.Dump(unsigned_integer, "unsigned_integer");
+  encoder.Dump(kMaximumUnsigned, "maximum_unsigned");
   encoder.Dump(char_block, "char_block");
   encoder.Dump(optional, "optional");
   encoder.Dump(list, "items");
