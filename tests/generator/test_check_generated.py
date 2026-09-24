@@ -20,17 +20,18 @@ SPEC.loader.exec_module(CHECK)
 
 class CheckGeneratedTest(unittest.TestCase):
     def test_runs_expected_commands_from_repo_root(self):
-        results = [SimpleNamespace(returncode=0, stdout="", stderr="")] * 5
+        results = [SimpleNamespace(returncode=0, stdout="", stderr="")] * 6
         with patch.object(CHECK.subprocess, "run", side_effect=results) as run:
             stdout = io.StringIO()
             with contextlib.redirect_stdout(stdout):
                 status = CHECK.main()
 
         self.assertEqual(status, 0)
-        self.assertEqual(run.call_count, 5)
+        self.assertEqual(run.call_count, 6)
         expected_commands = [
             [sys.executable, "generator/generate_kind_header.py", "--check"],
             [sys.executable, "generator/generate_visitor_registrations.py", "--check"],
+            [sys.executable, "generator/generate_enum_catalogs.py", "--check"],
             [sys.executable, "generator/check_registered_coverage.py"],
             [sys.executable, "-m", "unittest", "discover", "-s", "tests/generator"],
             [sys.executable, "-m", "unittest", "discover", "-s", "tests/baseline"],
@@ -47,6 +48,7 @@ class CheckGeneratedTest(unittest.TestCase):
     def test_reports_nonzero_status_and_runs_remaining_checks(self):
         results = [
             SimpleNamespace(returncode=0, stdout="", stderr=""),
+            SimpleNamespace(returncode=0, stdout="", stderr=""),
             SimpleNamespace(returncode=7, stdout="generator diagnostic", stderr=""),
             SimpleNamespace(returncode=0, stdout="", stderr=""),
             SimpleNamespace(returncode=0, stdout="", stderr=""),
@@ -58,11 +60,11 @@ class CheckGeneratedTest(unittest.TestCase):
                 status = CHECK.main()
 
         self.assertEqual(status, 1)
-        self.assertEqual(run.call_count, 5)
+        self.assertEqual(run.call_count, 6)
         output = stdout.getvalue()
-        self.assertIn("[FAIL] Visitor registrations freshness (exit 7)", output)
+        self.assertIn("[FAIL] Binary enum catalog freshness (exit 7)", output)
         self.assertIn("generator diagnostic", output)
-        self.assertIn("Generated checks failed: 1/5", output)
+        self.assertIn("Generated checks failed: 1/6", output)
 
 
 if __name__ == "__main__":

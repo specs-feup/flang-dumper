@@ -29,6 +29,10 @@ def checks() -> tuple[tuple[str, list[str]], ...]:
             [python, "generator/generate_visitor_registrations.py", "--check"],
         ),
         (
+            "Binary enum catalog freshness",
+            [python, "generator/generate_enum_catalogs.py", "--check"],
+        ),
+        (
             "Registered coverage",
             [python, "generator/check_registered_coverage.py"],
         ),
