@@ -10,6 +10,7 @@
 #include <string_view>
 #include <tuple>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <variant>
 #include <vector>
@@ -112,8 +113,25 @@ public:
   explicit FieldEncoder(protocol::BinaryContext& context) : context_{context} {}
 
   template <typename T>
+  const void* GetIdentity(const T& value) {
+    const void* address = IdentityOf(value);
+    if (address == nullptr) {
+      return nullptr;
+    }
+
+    // JSON identities combine the address and effective node name. Wrapper
+    // members and variant arms can alias their containing object's address.
+    // Stable heap tokens preserve that distinction for pointer-keyed GraphIds.
+    auto& token = identityTokens_[address][NodeName(value)];
+    if (!token) {
+      token = std::make_unique<char>();
+    }
+    return token.get();
+  }
+
+  template <typename T>
   void Dump(const T& value, const char* key) {
-    context_.AddReference(key, IdentityOf(value));
+    context_.AddReference(key, GetIdentity(value));
   }
 
   void Dump(const char* value, const char* key) {
@@ -164,7 +182,7 @@ public:
     std::vector<const void*> identities;
     identities.reserve(value.size());
     for (const auto& item : value) {
-      identities.push_back(IdentityOf(item));
+      identities.push_back(GetIdentity(item));
     }
     context_.AddReferenceList(key, identities);
   }
@@ -212,27 +230,27 @@ public:
   template <typename T>
   void Dump(const Fortran::parser::Statement<T>& value, const char* key) {
     context_.AddReference(StatementKey(key, NodeName(value.statement)),
-                          IdentityOf(value));
+                          GetIdentity(value));
   }
 
   template <typename T>
   void Dump(const Fortran::parser::Statement<T>& value) {
     context_.AddReference(StatementKey(NodeName(value), NodeName(value.statement)),
-                          IdentityOf(value));
+                          GetIdentity(value));
   }
 
   template <typename T>
   void Dump(const Fortran::parser::UnlabeledStatement<T>& value,
             const char* key) {
     context_.AddReference(StatementKey(key, NodeName(value.statement)),
-                          IdentityOf(value));
+                          GetIdentity(value));
   }
 
   template <typename T>
   void Dump(const Fortran::parser::UnlabeledStatement<T>& value) {
     context_.AddReference(
         StatementKey(NodeName(value), NodeName(value.statement)),
-        IdentityOf(value));
+        GetIdentity(value));
   }
 
   template <typename... T>
@@ -286,6 +304,9 @@ private:
   }
 
   protocol::BinaryContext& context_;
+  std::unordered_map<const void*,
+                     std::unordered_map<std::string, std::unique_ptr<char>>>
+      identityTokens_;
 };
 
 } // namespace flang_dumper::binary
