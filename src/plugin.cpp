@@ -452,7 +452,9 @@ public:
   DUMP_NODE(Fortran::parser::ActualArg, {})
   DUMP_NODE(Fortran::parser::ActualArg::PercentRef, {})
   DUMP_NODE(Fortran::parser::ActualArg::PercentVal, {})
-  DUMP_NODE(Fortran::parser::ActualArgSpec, {})
+  DUMP_NODE(Fortran::parser::ActualArgSpec, {
+    dump(std::get<1>(v.t).u, "ActualArg");
+  })
   DUMP_NODE(Fortran::parser::AcValue::Triplet, {})
   DUMP_NODE(Fortran::parser::AllocOpt, {})
   DUMP_NODE(Fortran::parser::AllocOpt::Mold, {})
