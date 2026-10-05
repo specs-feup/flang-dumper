@@ -72,6 +72,8 @@ template <typename T>
 void dump(const Fortran::parser::DefaultChar<T> &v, const char *property_name);
 void dump(const Fortran::parser::Sign &v, const char *property_name);
 void dump(const char v, const char *property_name);
+template <typename Var, typename Bound>
+void dump(const Fortran::parser::LoopBounds<Var, Bound> &bounds);
 
 template <typename T>
 void dumpWrapper(const T &v)

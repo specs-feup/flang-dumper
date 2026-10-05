@@ -246,7 +246,6 @@ void dump(const Fortran::common::Indirection<T> &v) {
   dump(v.value());
 }
 
-
 void dump(const Fortran::parser::Expr &v) {
   dump(v.u);
 }
@@ -262,6 +261,14 @@ void dump(const std::optional<T> &v, const char *property_name) {
 
 void dump(const Fortran::semantics::Scope &scope, const char *property_name) {
   dump(Fortran::semantics::Scope::EnumToString(scope.kind()), property_name);
+}
+
+template <typename Var, typename Bound>
+void dump(const Fortran::parser::LoopBounds<Var, Bound> &bounds) {
+  dump(bounds.name, "var");
+  dump(bounds.lower, "lower");
+  dump(bounds.upper, "upper");
+  dump(bounds.step, "step");
 }
 
 
@@ -839,14 +846,9 @@ public:
   DUMP_NODE(Fortran::parser::LockStmt, {})
   DUMP_NODE(Fortran::parser::LockStmt::LockStat, {})
   DUMP_NODE(Fortran::parser::LogicalLiteralConstant, {})
-  DUMP_NODE_MANUAL(Fortran::parser::LoopControl::Bounds, {dump(v.name.thing, "var"); dump(v.lower.thing, "lower"); dump(v.upper.thing, "upper"); if(v.step.has_value()) dump(v.step.value().thing, "step");})
-  DUMP_NODE_MANUAL(Fortran::parser::AcImpliedDoControl::Bounds, {
-      dump(v.name.thing, "var");
-      dump(v.lower.thing, "lower");
-      dump(v.upper.thing, "upper");
-      if(v.step.has_value()) dump(v.step.value().thing, "step");
-  })
-  DUMP_NODE(Fortran::parser::DataImpliedDo::Bounds, {})
+  DUMP_NODE_MANUAL(Fortran::parser::LoopControl::Bounds, { dump(v); })
+  DUMP_NODE_MANUAL(Fortran::parser::AcImpliedDoControl::Bounds, { dump(v); })
+  DUMP_NODE_MANUAL(Fortran::parser::DataImpliedDo::Bounds, { dump(v); })
   DUMP_NODE(Fortran::parser::LoopControl, {})
   DUMP_NODE(Fortran::parser::LoopControl::Concurrent, {})
   DUMP_NODE(Fortran::parser::MainProgram, {})
