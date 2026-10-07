@@ -368,6 +368,12 @@
       "body": "dump(\"ORDERED\", \"kind\");"
     },
     {
+      "fully_qualified_type": "Fortran::parser::OmpClause::SeqCst",
+      "registration": "DUMP_NODE_MANUAL",
+      "source_line": 954,
+      "body": "/* SeqCst is an empty marker; emit its reserved node without attributes. */ static_cast<void>(v);"
+    },
+    {
       "fully_qualified_type": "Fortran::parser::OmpClause::Private",
       "registration": "DUMP_NODE",
       "source_line": 949,

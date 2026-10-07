@@ -3842,6 +3842,14 @@
       "has_explicit_content": true
     },
     {
+      "fully_qualified_type": "Fortran::parser::OmpClause::SeqCst",
+      "registration": "DUMP_NODE_MANUAL",
+      "handler_kind": "manual_node",
+      "source_line": 954,
+      "manual": true,
+      "has_explicit_content": true
+    },
+    {
       "fully_qualified_type": "Fortran::parser::OmpClauseList",
       "registration": "DUMP_NODE",
       "handler_kind": "node",

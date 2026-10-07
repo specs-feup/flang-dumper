@@ -63,7 +63,7 @@ DUMP_ENUM(
         second = parse_registrations(source)
 
         self.assertEqual(first, second)
-        self.assertEqual(len(first), 864)
+        self.assertEqual(len(first), 865)
         fields = (
             "fully_qualified_type",
             "registration",
@@ -75,7 +75,7 @@ DUMP_ENUM(
             [[entry[field] for field in fields] for entry in first],
             [[entry[field] for field in fields] for entry in pinned],
         )
-        self.assertEqual(sum(entry["has_explicit_content"] for entry in first), 81)
+        self.assertEqual(sum(entry["has_explicit_content"] for entry in first), 82)
 
         entries = {
             (entry["fully_qualified_type"], entry["registration"]): entry for entry in first
@@ -110,7 +110,7 @@ DUMP_ENUM(
         stdout = io.StringIO()
         with contextlib.redirect_stdout(stdout):
             self.assertEqual(inventory_main([]), 0)
-        self.assertEqual(len(json.loads(stdout.getvalue())["registrations"]), 864)
+        self.assertEqual(len(json.loads(stdout.getvalue())["registrations"]), 865)
 
 
 class GraphComparisonTests(unittest.TestCase):

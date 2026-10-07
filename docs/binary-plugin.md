@@ -54,3 +54,41 @@ stream handling, and deterministic generation also need review. Before any
 cutover, compare representative workloads and report output size, runtime,
 and peak memory. JSON remains the migration oracle until those gates and the
 consumer integration pass.
+
+## Live corpus comparison
+
+Compare both native actions on a directory of Fortran sources:
+
+```sh
+python3 tests/baseline/compare_native_corpus.py \
+  --flang "$(command -v flang-new)" \
+  --json-plugin build/DumpASTPlugin.so \
+  --binary-plugin build/DumpASTProtobufPlugin.so \
+  --protoc "$(command -v protoc)" \
+  /path/to/FortranParser/resources-test
+```
+
+The checker discovers `.f90` files recursively and excludes `.expected.f90`
+outputs. It compares live decoded graphs with pointer IDs normalized, preserving
+duplicate attributes, node order, references, comments, and enum catalogs.
+Its summary separates JSON baseline failures from protobuf failures and graph
+mismatches. A successful exit requires at least one valid baseline and no
+protobuf failures or mismatches. Baseline failures remain excluded from parity
+coverage and must be reviewed separately.
+
+## OpenMP graph corrections
+
+`OmpDirectiveSpecification::Flags` now carries its member names as a scalar
+string under Flang's effective field key. Previously the JSON producer emitted
+a reference to a node that did not exist, and the protobuf producer rejected
+that reference. Empty sets produce an empty string.
+
+The empty `OmpClause::SeqCst` marker now has an emitted node with appended kind
+ID 865. Existing kind IDs remain stable. The deprecated-flush regression checks
+a nonempty `DeprecatedSyntax` Flags value and that every SeqCst reference resolves.
+
+Validation on the Metafor corpus matched all 52 valid JSON baselines; one
+REAL(16) input failed in Flang for the selected target. Metafor's separate
+experimental reader also passed 48 native AST and generated-Fortran comparisons.
+These checks do not establish production cutover, full declaration coverage,
+or performance and memory improvements.

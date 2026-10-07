@@ -134,6 +134,13 @@ void dump(std::string_view v, const char *property_name) {
   DUMP_PROPERTY(property_name, escape_quotes(v));
 }
 
+void dump(const Fortran::parser::OmpDirectiveSpecification::Flags &v,
+          const char *property_name) {
+  dump(Fortran::parser::ParseTreeDumper::GetMemberNames<
+           Fortran::parser::OmpDirectiveSpecification>(v),
+       property_name);
+}
+
 std::string escape_quotes(std::string_view sv) {
     std::string out;
     out.reserve(sv.size());

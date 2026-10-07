@@ -17,7 +17,9 @@ FIXTURES = (
     "loop_trailing_comment",
     "optional_if_else",
     "array_constructor_implied_do",
+    "openmp_flush_deprecated_flags",
 )
+OPENMP_FLAGS_FIXTURE = "openmp_flush_deprecated_flags"
 
 
 def _load_json(text: str, source: str) -> JsonObject:
@@ -46,6 +48,36 @@ def _graph_counts(graph: JsonObject) -> tuple[int, int, int]:
     return len(nodes), len(comments), len(enums.pairs)
 
 
+def assert_openmp_flags_regression_graph(graph: JsonObject) -> None:
+    """Check that the regression graph carries Flags and resolved SeqCst nodes."""
+    nodes = graph.get("nodes")
+    if not isinstance(nodes, list):
+        raise ValueError("graph 'nodes' field must be an array")
+
+    node_ids: set[str] = set()
+    seq_cst_references: list[str] = []
+    has_nonempty_flags = False
+    for node in nodes:
+        if not isinstance(node, JsonObject):
+            raise ValueError("graph nodes must be objects")
+        node_id = node.get("id")
+        if isinstance(node_id, str):
+            node_ids.add(node_id)
+        for key, value in node.pairs:
+            if key.startswith("Flags = {") and value == "DeprecatedSyntax":
+                has_nonempty_flags = True
+            if key == "SeqCst" and isinstance(value, str):
+                seq_cst_references.append(value)
+
+    if not has_nonempty_flags:
+        raise ValueError("graph is missing the nonempty DeprecatedSyntax Flags value")
+    if not seq_cst_references:
+        raise ValueError("graph is missing its SeqCst variant reference")
+    dangling = [reference for reference in seq_cst_references if reference not in node_ids]
+    if dangling:
+        raise ValueError("graph has dangling SeqCst references: " + ", ".join(dangling))
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--flang", required=True, type=Path, help="Flang 22 executable")
@@ -66,6 +98,8 @@ def main(argv: list[str] | None = None) -> int:
             "dump-ast",
             str(fixture),
         ]
+        if name == OPENMP_FLAGS_FIXTURE:
+            command.insert(3, "-fopenmp-version=52")
         try:
             expected = _load_json(snapshot.read_text(encoding="utf-8"), str(snapshot))
         except (OSError, UnicodeError, ValueError) as error:
@@ -86,6 +120,8 @@ def main(argv: list[str] | None = None) -> int:
 
         try:
             actual = _load_json(result.stdout, f"Flang output for {name}")
+            if name == OPENMP_FLAGS_FIXTURE:
+                assert_openmp_flags_regression_graph(actual)
             expected_counts = _graph_counts(expected)
             actual_counts = _graph_counts(actual)
             matches = compare_graphs(expected, actual)

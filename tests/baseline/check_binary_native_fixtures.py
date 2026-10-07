@@ -11,7 +11,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from check_native_fixtures import FIXTURES
+from check_native_fixtures import (
+    FIXTURES,
+    OPENMP_FLAGS_FIXTURE,
+    assert_openmp_flags_regression_graph,
+)
 from compare_graphs import JsonObject, compare_graphs, normalize_graph
 from decode_ast_stream import _load_record_class, decode_stream
 
@@ -101,6 +105,8 @@ def main(argv: list[str] | None = None) -> int:
             "dump-ast-protobuf",
             str(fixture),
         ]
+        if name == OPENMP_FLAGS_FIXTURE:
+            command.insert(3, "-fopenmp-version=52")
         try:
             result = subprocess.run(command, stdout=subprocess.PIPE, check=False)
         except OSError as error:
@@ -115,6 +121,8 @@ def main(argv: list[str] | None = None) -> int:
 
         try:
             actual = decode_stream(result.stdout, record_class)
+            if name == OPENMP_FLAGS_FIXTURE:
+                assert_openmp_flags_regression_graph(actual)
             actual_counts = _graph_counts(actual)
         except Exception as error:
             print(f"{name}: AST stream decode failed: {error}", file=sys.stderr)
@@ -126,6 +134,8 @@ def main(argv: list[str] | None = None) -> int:
         )
 
         try:
+            if name == OPENMP_FLAGS_FIXTURE:
+                assert_openmp_flags_regression_graph(expected)
             expected_counts = _graph_counts(expected)
             matches = compare_graphs(expected, actual)
         except ValueError as error:

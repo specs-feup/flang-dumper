@@ -214,7 +214,7 @@ class GenerateVisitorRegistrationsTest(unittest.TestCase):
         self.assertEqual(GENERATOR._default_inventory(), pinned_document)
         pinned = pinned_document["registrations"]
         generated = INVENTORY.inventory(output_path)["registrations"]
-        self.assertEqual(len(pinned), 864)
+        self.assertEqual(len(pinned), 865)
         self.assertEqual(len(generated), len(pinned))
         fields = (
             "fully_qualified_type",
@@ -229,11 +229,11 @@ class GenerateVisitorRegistrationsTest(unittest.TestCase):
         )
         self.assertEqual(
             sum(item["has_explicit_content"] for item in pinned),
-            81,
+            82,
         )
         self.assertEqual(
             sum(item["has_explicit_content"] for item in generated),
-            81,
+            82,
         )
         self.assertTrue(
             any(

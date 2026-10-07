@@ -40,10 +40,10 @@ class CheckRegisteredCoverageTest(unittest.TestCase):
         summary = json.loads(stdout.getvalue())
         self.assertEqual(status, 0)
         self.assertTrue(summary["ok"])
-        self.assertEqual(summary["registrations"], 864)
-        self.assertEqual(summary["matched"], 860)
+        self.assertEqual(summary["registrations"], 865)
+        self.assertEqual(summary["matched"], 861)
         self.assertEqual(summary["reviewed_aliases"], 4)
-        self.assertEqual(summary["unregistered"], 200)
+        self.assertEqual(summary["unregistered"], 199)
         self.assertEqual(summary["unreviewed_missing"], 0)
 
     def test_unexpected_fifth_missing_registration_fails(self):

@@ -1,6 +1,6 @@
 # Flang generator registration coverage
 
-The registration-only gate checks all 864 dumper registrations against the checked-in Flang 22 declaration model. It finds 860 matching declarations and permits the four reviewed aliases listed below. The CLI command is `python generator/check_registered_coverage.py`.
+The registration-only gate checks all 865 dumper registrations against the checked-in Flang 22 declaration model. It finds 861 matching declarations and permits the four reviewed aliases listed below. The CLI command is `python generator/check_registered_coverage.py`.
 
 The gate fails for an unreviewed missing registration, a duplicate registration, a handler/declaration kind mismatch, an unused exception, or any exception outside the four-name alias set. It reports declarations without registrations, but those declarations do not fail this registration-only gate.
 
@@ -13,7 +13,7 @@ The gate fails for an unreviewed missing registration, a duplicate registration,
 
 These names are aliases absent from the declaration inventory. They are explicit exceptions and do not count as matched or generated coverage.
 
-## Remaining review work: 200 declarations
+## Remaining review work: 199 declarations
 
 The names below are present in the declaration inventory without dumper registrations. They remain review work and are not covered by the registration gate.
 
@@ -66,7 +66,7 @@ The names below are present in the declaration inventory without dumper registra
 - `Fortran::parser::AccClause::Worker`
 - `Fortran::parser::AccClause::Write`
 
-### `include/llvm-22/llvm/Frontend/OpenMP/OMP.inc` (130)
+### `include/llvm-22/llvm/Frontend/OpenMP/OMP.inc` (129)
 
 - `Fortran::parser::OmpClause::Absent`
 - `Fortran::parser::OmpClause::AcqRel`
@@ -173,7 +173,6 @@ The names below are present in the declaration inventory without dumper registra
 - `Fortran::parser::OmpClause::Safesync`
 - `Fortran::parser::OmpClause::Schedule`
 - `Fortran::parser::OmpClause::SelfMaps`
-- `Fortran::parser::OmpClause::SeqCst`
 - `Fortran::parser::OmpClause::Severity`
 - `Fortran::parser::OmpClause::Simd`
 - `Fortran::parser::OmpClause::Simdlen`

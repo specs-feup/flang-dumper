@@ -112,6 +112,14 @@ class FieldEncoder final {
 public:
   explicit FieldEncoder(protocol::BinaryContext& context) : context_{context} {}
 
+  // Keep the dynamic Flang field name while serializing EnumSet members as data.
+  void Dump(const Fortran::parser::OmpDirectiveSpecification::Flags& value,
+            const char* key) {
+    context_.AddString(
+        key, Fortran::parser::ParseTreeDumper::GetMemberNames<
+                 Fortran::parser::OmpDirectiveSpecification>(value));
+  }
+
   template <typename T>
   const void* GetIdentity(const T& value) {
     const void* address = IdentityOf(value);

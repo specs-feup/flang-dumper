@@ -4320,6 +4320,11 @@
       "id": 864,
       "cpp_type": "Fortran::parser::WriteStmt",
       "handler_kind": "manual_node"
+    },
+    {
+      "id": 865,
+      "cpp_type": "Fortran::parser::OmpClause::SeqCst",
+      "handler_kind": "manual_node"
     }
   ]
 }

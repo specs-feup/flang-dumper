@@ -873,6 +873,7 @@ enum class AstKind : std::uint32_t {
   Fortran_parser_WhereConstructStmt = 862U,
   Fortran_parser_WhereStmt = 863U,
   Fortran_parser_WriteStmt = 864U,
+  Fortran_parser_OmpClause_SeqCst = 865U,
 };
 
 struct AstKindInfo {
@@ -1747,6 +1748,7 @@ inline constexpr AstKindInfo kAstKinds[] = {
   {AstKind::Fortran_parser_WhereConstructStmt, 862U, "Fortran::parser::WhereConstructStmt", "node"},
   {AstKind::Fortran_parser_WhereStmt, 863U, "Fortran::parser::WhereStmt", "node"},
   {AstKind::Fortran_parser_WriteStmt, 864U, "Fortran::parser::WriteStmt", "manual_node"},
+  {AstKind::Fortran_parser_OmpClause_SeqCst, 865U, "Fortran::parser::OmpClause::SeqCst", "manual_node"},
 };
 
 inline constexpr std::size_t kAstKindCount =
