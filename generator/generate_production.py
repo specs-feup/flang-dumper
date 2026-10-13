@@ -205,22 +205,27 @@ def _clava_model(
             header = include_dir / relative_header
             if not header.is_file():
                 raise ProductionGenerationError(f"pinned Flang header does not exist: {header}")
+            probe_dir = temporary_dir / f"probe-{index}"
+            probe_dir.mkdir()
+            probe_source = probe_dir / "probe.cpp"
+            probe_include = Path(relative_header).as_posix()
+            probe_source.write_text(f'#include "{probe_include}"\n', encoding="utf-8", newline="\n")
             output_model = temporary_dir / f"inventory-{index}.json"
-            flags = " ".join(
-                f"-I{directory}"
-                for directory in (include_dir, header.parent)
-            )
+            # Keep Flang's quoted includes user-visible; use the system path for angle includes.
+            flags = f"-iquote {include_dir} -isystem {include_dir}"
             invocation = [
                 node,
                 str(clava_entry.resolve()),
                 "classic",
                 str(DRIVER_SCRIPT),
                 "-p",
-                str(header.parent),
+                str(probe_dir),
                 "-std",
                 "c++20",
                 "-fs",
                 flags,
+                "-ist",
+                "0",
                 "-ncg",
             ]
             environment = os.environ.copy()
