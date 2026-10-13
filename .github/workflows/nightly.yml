@@ -16,7 +16,7 @@ jobs:
         name: Build Dumper
         runs-on: ubuntu-latest
         container:
-            image: ubuntu:25.10
+            image: ubuntu:26.04
         steps:
             - name: Install git and gh
               run: |

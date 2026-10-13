@@ -21,7 +21,7 @@ mkdir -p "$build_dir/protocol"
 read -r -a protobuf_libs <<< "$PROTOBUF_LIBS"
 "$CXX" -std=c++17 -Wall -Wextra -Werror -pedantic \
   -I"$repo_root" -I"$build_dir" \
-  -isystem "$FLANG_INCLUDE_DIR" -isystem "$PROTOBUF_INCLUDE_DIR" \
+  -isystem "$FLANG_INCLUDE_DIR" -I"$PROTOBUF_INCLUDE_DIR" \
   "$repo_root/protocol/framing.cpp" \
   "$repo_root/protocol/graph_ids.cpp" \
   "$repo_root/protocol/ast_writer.cpp" \

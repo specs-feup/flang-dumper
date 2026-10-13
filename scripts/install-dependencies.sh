@@ -1,84 +1,50 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # This script installs the LLVM dependencies for Debian-based distros (e.g Ubuntu).
 LLVM_VERSION=22
 
 # Update the package list
-apt update -y
+apt-get update
 
 # Install needed packages
-DEBIAN_FRONTEND=noninteractive apt install -y wget lsb-release gnupg software-properties-common
+DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    wget lsb-release gnupg software-properties-common ca-certificates \
+    python3 python3-protobuf protobuf-compiler libprotobuf-dev
 
 # Run the LLVM installation script
 wget https://apt.llvm.org/llvm.sh -O /tmp/llvm.sh
 chmod +x /tmp/llvm.sh
-/tmp/llvm.sh ${LLVM_VERSION}
-
-# Check if script was successful
-if [ $? -ne 0 ]; then
+if ! /tmp/llvm.sh "${LLVM_VERSION}"; then
     echo "LLVM base installation failed."
     exit 1
 fi
 
-# Required dependencies
-PKG="flang-${LLVM_VERSION} libflang-${LLVM_VERSION}-dev llvm-${LLVM_VERSION}-dev libmlir-${LLVM_VERSION}-dev mlir-${LLVM_VERSION}-tools libclang-${LLVM_VERSION}-dev"
+packages=(
+    "flang-${LLVM_VERSION}"
+    "libflang-${LLVM_VERSION}-dev"
+    "llvm-${LLVM_VERSION}-dev"
+    "llvm-${LLVM_VERSION}-linker-tools"
+    "libmlir-${LLVM_VERSION}-dev"
+    "mlir-${LLVM_VERSION}-tools"
+    "libclang-${LLVM_VERSION}-dev"
+    cmake
+    make
+    g++
+    "clang-${LLVM_VERSION}"
+)
+DEBIAN_FRONTEND=noninteractive apt-get install -y "${packages[@]}"
 
-# Development dependencies
-PKG="$PKG cmake clang-${LLVM_VERSION}"
-
-apt install -y $PKG
-
-
-# Check if the installation was successful
-if [ $? -eq 0 ]; then
-    echo "Dependency installation completed successfully."
-else
-    echo "Dependency installation failed."
+if [ ! -f "/usr/lib/llvm-${LLVM_VERSION}/lib/libLTO.so.22.1" ]; then
+    echo "LLVM ${LLVM_VERSION} development files are missing libLTO.so.22.1; install llvm-${LLVM_VERSION}-linker-tools."
     exit 1
 fi
 
+for tool in "flang-${LLVM_VERSION}" "llvm-config-${LLVM_VERSION}" "mlir-opt-${LLVM_VERSION}"; do
+    if ! command -v "${tool}" >/dev/null 2>&1; then
+        echo "Required LLVM tool is unavailable: ${tool}"
+        exit 1
+    fi
+done
 
-# Check if the LLVM packages are installed
-if dpkg -l | grep -q "flang-${LLVM_VERSION}"; then
-    echo "Flang is installed."
-else
-    echo "Flang is not installed."
-fi
-if dpkg -l | grep -q "libflang-${LLVM_VERSION}-dev"; then
-    echo "libflang-${LLVM_VERSION}-dev is installed."
-else
-    echo "libflang-${LLVM_VERSION}-dev is not installed."
-fi
-if dpkg -l | grep -q "llvm-${LLVM_VERSION}-dev"; then
-    echo "llvm-${LLVM_VERSION}-dev is installed."
-else
-    echo "llvm-${LLVM_VERSION}-dev is not installed."
-fi
-if dpkg -l | grep -q "libmlir-${LLVM_VERSION}-dev"; then
-    echo "libmlir-${LLVM_VERSION}-dev is installed."
-else
-    echo "libmlir-${LLVM_VERSION}-dev is not installed."
-fi
-if dpkg -l | grep -q "mlir-${LLVM_VERSION}-tools"; then
-    echo "mlir-${LLVM_VERSION}-tools is installed."
-else
-    echo "mlir-${LLVM_VERSION}-tools is not installed."
-fi
-
-
-# Check if the LLVM tools are available
-if command -v flang-${LLVM_VERSION} &> /dev/null; then
-    echo "Flang tool is available."
-else
-    echo "Flang tool is not available."
-fi
-if command -v llvm-config-${LLVM_VERSION} &> /dev/null; then
-    echo "LLVM config tool is available."
-else
-    echo "LLVM config tool is not available."
-fi
-if command -v mlir-opt-${LLVM_VERSION} &> /dev/null; then
-    echo "MLIR opt tool is available."
-else
-    echo "MLIR opt tool is not available."
-fi
+echo "LLVM ${LLVM_VERSION}, protobuf, and Python dependencies are installed."

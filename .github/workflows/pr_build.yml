@@ -9,13 +9,21 @@ permissions:
 
 env:
   FLANG_VERSION: 22
+  CXX: clang++-22
+  PROTOC: protoc
+  PROTOBUF_INCLUDE_DIR: /usr/include
+  PROTOBUF_LIB_DIR: /usr/lib/x86_64-linux-gnu
+  PROTOBUF_LIBS: -lprotobuf
+  FLANG_INCLUDE_DIR: /usr/lib/llvm-22/include
+  LLVM_LIB_DIR: /usr/lib/llvm-22/lib
+  LD_LIBRARY_PATH: /usr/lib/llvm-22/lib:/usr/lib/x86_64-linux-gnu
 
 jobs:
   build-dumper:
     name: Build Dumper
     runs-on: ubuntu-latest
     container:
-      image: ubuntu:25.10
+      image: ubuntu:26.04
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -29,13 +37,36 @@ jobs:
 
       - name: Build
         run: |
-          mkdir build
-          cd build
-          cmake ..
-          make
+          cmake -S . -B build -DFLANG_DUMPER_BUILD_PROTOBUF_PLUGIN=ON
+          cmake --build build --parallel 4
+
+      - name: Run generation and Python checks
+        run: python3 scripts/check_generated.py
+
+      - name: Run protocol tests
+        run: |
+          for test_script in tests/protocol/run_*.sh; do
+            "$test_script"
+          done
+          python3 -m unittest discover -s tests/protocol -p 'ast_stream_schema_test.py'
+
+      - name: Check native JSON fixtures
+        run: |
+          python3 tests/baseline/check_native_fixtures.py \
+            --flang flang-22 \
+            --plugin build/DumpASTPlugin.so
+
+      - name: Check native protobuf fixtures
+        run: |
+          python3 tests/baseline/check_binary_native_fixtures.py \
+            --flang flang-22 \
+            --plugin build/DumpASTProtobufPlugin.so \
+            --protoc "$(command -v protoc)"
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
             name: DumpASTPlugin
-            path: build/DumpASTPlugin.so
+            path: |
+              build/DumpASTPlugin.so
+              build/DumpASTProtobufPlugin.so

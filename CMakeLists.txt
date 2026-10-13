@@ -16,8 +16,20 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
+
+# Keep the build-time gate limited to checked-in generated artifacts. The
+# Python unit suites run in CI, not on every incremental native build.
+add_custom_target(check_generated_sources
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/generator/generate_kind_header.py" --check
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/generator/generate_visitor_registrations.py" --check
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/generator/generate_enum_catalogs.py" --check
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    COMMENT "Checking checked-in generated sources"
+    VERBATIM)
+
 if(NOT LLVM_DIR)
-    set(LLVM_DIR "/usr/lib/llvm-${FLANG_VERSION}/cmake")
+    set(LLVM_DIR "/usr/lib/llvm-${FLANG_VERSION}/lib/cmake/llvm")
 endif()
 if(NOT MLIR_DIR)
     set(MLIR_DIR "/usr/lib/llvm-${FLANG_VERSION}/lib/cmake/mlir")
@@ -107,7 +119,8 @@ add_library(DumpASTPlugin MODULE src/comments.cpp src/plugin.cpp)
 
 # Avoid lib prefix so that Flang finds the plugin as `DumpParseTreePlugin.so`, not `libDumpParseTreePlugin.so`
 set_target_properties(DumpASTPlugin PROPERTIES PREFIX "")
-target_compile_features(DumpASTPlugin PRIVATE)
+target_compile_features(DumpASTPlugin PRIVATE cxx_std_17)
+add_dependencies(DumpASTPlugin check_generated_sources)
 
 option(FLANG_DUMPER_BUILD_PROTOBUF_PLUGIN
        "Build the experimental protobuf AST dumper plugin" OFF)
@@ -152,6 +165,7 @@ if(FLANG_DUMPER_BUILD_PROTOBUF_PLUGIN)
         "${CMAKE_CURRENT_BINARY_DIR}")
     target_link_libraries(DumpASTProtobufPlugin PRIVATE protobuf::libprotobuf)
     set_target_properties(DumpASTProtobufPlugin PROPERTIES PREFIX "")
+    add_dependencies(DumpASTProtobufPlugin check_generated_sources)
 endif()
 
 #add_dependencies(plugin flang_enums)

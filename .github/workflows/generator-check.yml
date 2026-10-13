@@ -15,10 +15,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
+      - name: Install protobuf tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler python3-protobuf
 
       - name: Run generated source checks
-        run: python scripts/check_generated.py
+        run: /usr/bin/python3 scripts/check_generated.py
