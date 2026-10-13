@@ -1,0 +1,2240 @@
+{
+  "configuration": {
+    "gzip_compresslevel": 9,
+    "gzip_mtime": 0,
+    "large_source": "fortran/parser/polybench/3mm.f90",
+    "repeats": 5,
+    "small_source": "fortran/parser/hello.f90",
+    "synthetic_assignment_statements": 512,
+    "timing_tool": "/usr/bin/time",
+    "warmups": 1
+  },
+  "finished_utc": "2026-10-13T02:43:02.137530+00:00",
+  "measurement_failures": 0,
+  "measurement_method": {
+    "decoder_scope": "separate Python test-decoder process; excludes Java Metafor and does not represent Java end-to-end memory",
+    "peak_rss": "GNU time %M KiB for each directly timed process",
+    "producer_wall_time": "GNU time %e for each direct producer process plus parent perf_counter wall time for the timed invocation",
+    "stdout_size": "captured stdout byte length; gzip size computed after process exit at fixed mtime 0 and level 9"
+  },
+  "measurements": [
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.03,
+      "gzip_stdout_bytes": 2887,
+      "iteration": 0,
+      "peak_rss_kib": 104804,
+      "raw_stdout_bytes": 12935,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x597ba6e0e518-ExecutionPartConstruct\nNot implemented for 0x597ba6e1a378-Star\nNot implemented for 0x597ba6e0ef00-FormatSpecification\nNot implemented for 0x597ba6e0b780-FormatItem\nNot implemented for 0x597ba6e0b790-IntrinsicTypeDataEditDesc\nNot implemented for 0x597ba6e0b790-Kind\nNot implemented for 0x597ba6e0ee10-FormatItem\nNot implemented for 0x597ba6e0ee20-IntrinsicTypeDataEditDesc\nNot implemented for 0x597ba6e0ee20-Kind",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.03352242801338434,
+      "warmup": true,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.03,
+      "gzip_stdout_bytes": 3707,
+      "iteration": 0,
+      "peak_rss_kib": 96536,
+      "raw_stdout_bytes": 10093,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for ExecutionPartConstruct\nNot implemented for Star\nNot implemented for FormatSpecification\nNot implemented for FormatItem\nNot implemented for IntrinsicTypeDataEditDesc\nNot implemented for Kind\nNot implemented for FormatItem\nNot implemented for IntrinsicTypeDataEditDesc\nNot implemented for Kind",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.03475359734147787,
+      "warmup": true,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/2.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 2738,
+      "input_stream_bytes": 10093,
+      "iteration": 0,
+      "peak_rss_kib": 20464,
+      "raw_stdout_bytes": 10676,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.06120658898726106,
+      "warmup": true,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.03,
+      "gzip_stdout_bytes": 2889,
+      "iteration": 1,
+      "peak_rss_kib": 104420,
+      "raw_stdout_bytes": 12935,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x6376e41fb518-ExecutionPartConstruct\nNot implemented for 0x6376e4207378-Star\nNot implemented for 0x6376e41fbf00-FormatSpecification\nNot implemented for 0x6376e41f8780-FormatItem\nNot implemented for 0x6376e41f8790-IntrinsicTypeDataEditDesc\nNot implemented for 0x6376e41f8790-Kind\nNot implemented for 0x6376e41fbe10-FormatItem\nNot implemented for 0x6376e41fbe20-IntrinsicTypeDataEditDesc\nNot implemented for 0x6376e41fbe20-Kind",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.032944245263934135,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.03,
+      "gzip_stdout_bytes": 3707,
+      "iteration": 1,
+      "peak_rss_kib": 96620,
+      "raw_stdout_bytes": 10093,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for ExecutionPartConstruct\nNot implemented for Star\nNot implemented for FormatSpecification\nNot implemented for FormatItem\nNot implemented for IntrinsicTypeDataEditDesc\nNot implemented for Kind\nNot implemented for FormatItem\nNot implemented for IntrinsicTypeDataEditDesc\nNot implemented for Kind",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.03368078405037522,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/5.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.05,
+      "gzip_stdout_bytes": 2738,
+      "input_stream_bytes": 10093,
+      "iteration": 1,
+      "peak_rss_kib": 20220,
+      "raw_stdout_bytes": 10676,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.05781814409419894,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.03,
+      "gzip_stdout_bytes": 2889,
+      "iteration": 2,
+      "peak_rss_kib": 104936,
+      "raw_stdout_bytes": 12935,
+      "returncode": 0,
+      "sample_index": 1,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x5b339e455518-ExecutionPartConstruct\nNot implemented for 0x5b339e461378-Star\nNot implemented for 0x5b339e455f00-FormatSpecification\nNot implemented for 0x5b339e452780-FormatItem\nNot implemented for 0x5b339e452790-IntrinsicTypeDataEditDesc\nNot implemented for 0x5b339e452790-Kind\nNot implemented for 0x5b339e455e10-FormatItem\nNot implemented for 0x5b339e455e20-IntrinsicTypeDataEditDesc\nNot implemented for 0x5b339e455e20-Kind",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.0332291848026216,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.03,
+      "gzip_stdout_bytes": 3707,
+      "iteration": 2,
+      "peak_rss_kib": 96656,
+      "raw_stdout_bytes": 10093,
+      "returncode": 0,
+      "sample_index": 1,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for ExecutionPartConstruct\nNot implemented for Star\nNot implemented for FormatSpecification\nNot implemented for FormatItem\nNot implemented for IntrinsicTypeDataEditDesc\nNot implemented for Kind\nNot implemented for FormatItem\nNot implemented for IntrinsicTypeDataEditDesc\nNot implemented for Kind",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.03709353832527995,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/8.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 2738,
+      "input_stream_bytes": 10093,
+      "iteration": 2,
+      "peak_rss_kib": 20296,
+      "raw_stdout_bytes": 10676,
+      "returncode": 0,
+      "sample_index": 1,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.06635985290631652,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.03,
+      "gzip_stdout_bytes": 2887,
+      "iteration": 3,
+      "peak_rss_kib": 104272,
+      "raw_stdout_bytes": 12935,
+      "returncode": 0,
+      "sample_index": 2,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x650df8aa4518-ExecutionPartConstruct\nNot implemented for 0x650df8ab0378-Star\nNot implemented for 0x650df8aa4f00-FormatSpecification\nNot implemented for 0x650df8aa1780-FormatItem\nNot implemented for 0x650df8aa1790-IntrinsicTypeDataEditDesc\nNot implemented for 0x650df8aa1790-Kind\nNot implemented for 0x650df8aa4e10-FormatItem\nNot implemented for 0x650df8aa4e20-IntrinsicTypeDataEditDesc\nNot implemented for 0x650df8aa4e20-Kind",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.037775016855448484,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.03,
+      "gzip_stdout_bytes": 3707,
+      "iteration": 3,
+      "peak_rss_kib": 97072,
+      "raw_stdout_bytes": 10093,
+      "returncode": 0,
+      "sample_index": 2,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for ExecutionPartConstruct\nNot implemented for Star\nNot implemented for FormatSpecification\nNot implemented for FormatItem\nNot implemented for IntrinsicTypeDataEditDesc\nNot implemented for Kind\nNot implemented for FormatItem\nNot implemented for IntrinsicTypeDataEditDesc\nNot implemented for Kind",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.03616582881659269,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/11.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 2738,
+      "input_stream_bytes": 10093,
+      "iteration": 3,
+      "peak_rss_kib": 20288,
+      "raw_stdout_bytes": 10676,
+      "returncode": 0,
+      "sample_index": 2,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.06530258059501648,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.03,
+      "gzip_stdout_bytes": 2885,
+      "iteration": 4,
+      "peak_rss_kib": 104872,
+      "raw_stdout_bytes": 12935,
+      "returncode": 0,
+      "sample_index": 3,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x60b76c2ac518-ExecutionPartConstruct\nNot implemented for 0x60b76c2b8378-Star\nNot implemented for 0x60b76c2acf00-FormatSpecification\nNot implemented for 0x60b76c2a9780-FormatItem\nNot implemented for 0x60b76c2a9790-IntrinsicTypeDataEditDesc\nNot implemented for 0x60b76c2a9790-Kind\nNot implemented for 0x60b76c2ace10-FormatItem\nNot implemented for 0x60b76c2ace20-IntrinsicTypeDataEditDesc\nNot implemented for 0x60b76c2ace20-Kind",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.03581479471176863,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.03,
+      "gzip_stdout_bytes": 3707,
+      "iteration": 4,
+      "peak_rss_kib": 96644,
+      "raw_stdout_bytes": 10093,
+      "returncode": 0,
+      "sample_index": 3,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for ExecutionPartConstruct\nNot implemented for Star\nNot implemented for FormatSpecification\nNot implemented for FormatItem\nNot implemented for IntrinsicTypeDataEditDesc\nNot implemented for Kind\nNot implemented for FormatItem\nNot implemented for IntrinsicTypeDataEditDesc\nNot implemented for Kind",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.03658007411286235,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/14.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 2738,
+      "input_stream_bytes": 10093,
+      "iteration": 4,
+      "peak_rss_kib": 20380,
+      "raw_stdout_bytes": 10676,
+      "returncode": 0,
+      "sample_index": 3,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.06346436310559511,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.03,
+      "gzip_stdout_bytes": 2887,
+      "iteration": 5,
+      "peak_rss_kib": 104068,
+      "raw_stdout_bytes": 12935,
+      "returncode": 0,
+      "sample_index": 4,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x5940e98d8518-ExecutionPartConstruct\nNot implemented for 0x5940e98e4378-Star\nNot implemented for 0x5940e98d8f00-FormatSpecification\nNot implemented for 0x5940e98d5780-FormatItem\nNot implemented for 0x5940e98d5790-IntrinsicTypeDataEditDesc\nNot implemented for 0x5940e98d5790-Kind\nNot implemented for 0x5940e98d8e10-FormatItem\nNot implemented for 0x5940e98d8e20-IntrinsicTypeDataEditDesc\nNot implemented for 0x5940e98d8e20-Kind",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.03696713503450155,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.03,
+      "gzip_stdout_bytes": 3707,
+      "iteration": 5,
+      "peak_rss_kib": 96968,
+      "raw_stdout_bytes": 10093,
+      "returncode": 0,
+      "sample_index": 4,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for ExecutionPartConstruct\nNot implemented for Star\nNot implemented for FormatSpecification\nNot implemented for FormatItem\nNot implemented for IntrinsicTypeDataEditDesc\nNot implemented for Kind\nNot implemented for FormatItem\nNot implemented for IntrinsicTypeDataEditDesc\nNot implemented for Kind",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.03637793380767107,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/17.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 2738,
+      "input_stream_bytes": 10093,
+      "iteration": 5,
+      "peak_rss_kib": 20276,
+      "raw_stdout_bytes": 10676,
+      "returncode": 0,
+      "sample_index": 4,
+      "source": {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.06337910471484065,
+      "warmup": false,
+      "workload": "small"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.04,
+      "gzip_stdout_bytes": 24024,
+      "iteration": 0,
+      "peak_rss_kib": 108372,
+      "raw_stdout_bytes": 230986,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x5939d3faf420-DoublePrecision\nNot implemented for 0x5939d3f98100-Allocatable\nNot implemented for 0x5939d3f946b0-DoublePrecision\nNot implemented for 0x5939d3faf480-Allocatable\nNot implemented for 0x5939d3fa1250-DoublePrecision\nNot implemented for 0x5939d3f99eb0-Allocatable\nNot implemented for 0x5939d3f98600-DoublePrecision\nNot implemented for 0x5939d3fa0c70-Allocatable\nNot implemented for 0x5939d3fa30d0-DoublePrecision\nNot implemented for 0x5939d3faea80-Allocatable\nNot implemented for 0x5939d3fa3240-DoublePrecision\nNot implemented for 0x5939d3fa8810-Allocatable\nNot implemented for 0x5939d3fa33b0-DoublePrecision\nNot implemented for 0x5939d3fa8e10-Allocatable\nNot implemented for 0x5939d3fa8a08-ExecutionPartConstruct\nNot implemented for 0x5939d3fa0f60-CallStmt\nNot implemented for 0x5939d3f9a1a0-CallStmt\nNot implemented for 0x5939d3f9e7b0-CallStmt\nNot implemented for 0x5939d3f9f270-CallStmt\nNot implemented for 0x5939d3f95220-CallStmt\nNot implemented for 0x5939d3f95c90-CallStmt\nNot implemented for 0x5939d3f96770-CallStmt\nNot implemented for 0x5939d3f9bb50-CallStmt\nNot implemented for 0x5939d3f9bce0-CallStmt\nNot implemented for 0x5939d3fa9320-CallStmt\nNot implemented ...",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.05017133103683591,
+      "warmup": true,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 23019,
+      "iteration": 0,
+      "peak_rss_kib": 101212,
+      "raw_stdout_bytes": 140538,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for ExecutionPartConstruct\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for ContainsStmt\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for ExecutionPartConstruct\nNot implemented for ExecutionPartConstruct\nNot implemented for ExecutionPartConstruc...",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.07073142565786839,
+      "warmup": true,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/20.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.15,
+      "gzip_stdout_bytes": 21020,
+      "input_stream_bytes": 140538,
+      "iteration": 0,
+      "peak_rss_kib": 31032,
+      "raw_stdout_bytes": 175369,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.15198044199496508,
+      "warmup": true,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.05,
+      "gzip_stdout_bytes": 24090,
+      "iteration": 1,
+      "peak_rss_kib": 107952,
+      "raw_stdout_bytes": 230986,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x63e440300420-DoublePrecision\nNot implemented for 0x63e4402e9100-Allocatable\nNot implemented for 0x63e4402e56b0-DoublePrecision\nNot implemented for 0x63e440300480-Allocatable\nNot implemented for 0x63e4402f2250-DoublePrecision\nNot implemented for 0x63e4402eaeb0-Allocatable\nNot implemented for 0x63e4402e9600-DoublePrecision\nNot implemented for 0x63e4402f1c70-Allocatable\nNot implemented for 0x63e4402f40d0-DoublePrecision\nNot implemented for 0x63e4402ffa80-Allocatable\nNot implemented for 0x63e4402f4240-DoublePrecision\nNot implemented for 0x63e4402f9810-Allocatable\nNot implemented for 0x63e4402f43b0-DoublePrecision\nNot implemented for 0x63e4402f9e10-Allocatable\nNot implemented for 0x63e4402f9a08-ExecutionPartConstruct\nNot implemented for 0x63e4402f1f60-CallStmt\nNot implemented for 0x63e4402eb1a0-CallStmt\nNot implemented for 0x63e4402ef7b0-CallStmt\nNot implemented for 0x63e4402f0270-CallStmt\nNot implemented for 0x63e4402e6220-CallStmt\nNot implemented for 0x63e4402e6c90-CallStmt\nNot implemented for 0x63e4402e7770-CallStmt\nNot implemented for 0x63e4402ecb50-CallStmt\nNot implemented for 0x63e4402ecce0-CallStmt\nNot implemented for 0x63e4402fa320-CallStmt\nNot implemented ...",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.052611112128943205,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 23019,
+      "iteration": 1,
+      "peak_rss_kib": 101164,
+      "raw_stdout_bytes": 140538,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for ExecutionPartConstruct\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for ContainsStmt\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for ExecutionPartConstruct\nNot implemented for ExecutionPartConstruct\nNot implemented for ExecutionPartConstruc...",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.07020898116752505,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/23.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.14,
+      "gzip_stdout_bytes": 21020,
+      "input_stream_bytes": 140538,
+      "iteration": 1,
+      "peak_rss_kib": 31100,
+      "raw_stdout_bytes": 175369,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.14878491824492812,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.04,
+      "gzip_stdout_bytes": 24044,
+      "iteration": 2,
+      "peak_rss_kib": 108852,
+      "raw_stdout_bytes": 230986,
+      "returncode": 0,
+      "sample_index": 1,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x55ab6fbc1420-DoublePrecision\nNot implemented for 0x55ab6fbaa100-Allocatable\nNot implemented for 0x55ab6fba66b0-DoublePrecision\nNot implemented for 0x55ab6fbc1480-Allocatable\nNot implemented for 0x55ab6fbb3250-DoublePrecision\nNot implemented for 0x55ab6fbabeb0-Allocatable\nNot implemented for 0x55ab6fbaa600-DoublePrecision\nNot implemented for 0x55ab6fbb2c70-Allocatable\nNot implemented for 0x55ab6fbb50d0-DoublePrecision\nNot implemented for 0x55ab6fbc0a80-Allocatable\nNot implemented for 0x55ab6fbb5240-DoublePrecision\nNot implemented for 0x55ab6fbba810-Allocatable\nNot implemented for 0x55ab6fbb53b0-DoublePrecision\nNot implemented for 0x55ab6fbbae10-Allocatable\nNot implemented for 0x55ab6fbbaa08-ExecutionPartConstruct\nNot implemented for 0x55ab6fbb2f60-CallStmt\nNot implemented for 0x55ab6fbac1a0-CallStmt\nNot implemented for 0x55ab6fbb07b0-CallStmt\nNot implemented for 0x55ab6fbb1270-CallStmt\nNot implemented for 0x55ab6fba7220-CallStmt\nNot implemented for 0x55ab6fba7c90-CallStmt\nNot implemented for 0x55ab6fba8770-CallStmt\nNot implemented for 0x55ab6fbadb50-CallStmt\nNot implemented for 0x55ab6fbadce0-CallStmt\nNot implemented for 0x55ab6fbbb320-CallStmt\nNot implemented ...",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.05022907489910722,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 23019,
+      "iteration": 2,
+      "peak_rss_kib": 101980,
+      "raw_stdout_bytes": 140538,
+      "returncode": 0,
+      "sample_index": 1,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for ExecutionPartConstruct\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for ContainsStmt\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for ExecutionPartConstruct\nNot implemented for ExecutionPartConstruct\nNot implemented for ExecutionPartConstruc...",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.06810911605134606,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/26.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.13,
+      "gzip_stdout_bytes": 21020,
+      "input_stream_bytes": 140538,
+      "iteration": 2,
+      "peak_rss_kib": 30984,
+      "raw_stdout_bytes": 175369,
+      "returncode": 0,
+      "sample_index": 1,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.1381148281507194,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.04,
+      "gzip_stdout_bytes": 24090,
+      "iteration": 3,
+      "peak_rss_kib": 108648,
+      "raw_stdout_bytes": 230986,
+      "returncode": 0,
+      "sample_index": 2,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x576864d00420-DoublePrecision\nNot implemented for 0x576864ce9100-Allocatable\nNot implemented for 0x576864ce56b0-DoublePrecision\nNot implemented for 0x576864d00480-Allocatable\nNot implemented for 0x576864cf2250-DoublePrecision\nNot implemented for 0x576864ceaeb0-Allocatable\nNot implemented for 0x576864ce9600-DoublePrecision\nNot implemented for 0x576864cf1c70-Allocatable\nNot implemented for 0x576864cf40d0-DoublePrecision\nNot implemented for 0x576864cffa80-Allocatable\nNot implemented for 0x576864cf4240-DoublePrecision\nNot implemented for 0x576864cf9810-Allocatable\nNot implemented for 0x576864cf43b0-DoublePrecision\nNot implemented for 0x576864cf9e10-Allocatable\nNot implemented for 0x576864cf9a08-ExecutionPartConstruct\nNot implemented for 0x576864cf1f60-CallStmt\nNot implemented for 0x576864ceb1a0-CallStmt\nNot implemented for 0x576864cef7b0-CallStmt\nNot implemented for 0x576864cf0270-CallStmt\nNot implemented for 0x576864ce6220-CallStmt\nNot implemented for 0x576864ce6c90-CallStmt\nNot implemented for 0x576864ce7770-CallStmt\nNot implemented for 0x576864cecb50-CallStmt\nNot implemented for 0x576864cecce0-CallStmt\nNot implemented for 0x576864cfa320-CallStmt\nNot implemented ...",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.046441343147307634,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 23019,
+      "iteration": 3,
+      "peak_rss_kib": 101512,
+      "raw_stdout_bytes": 140538,
+      "returncode": 0,
+      "sample_index": 2,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for ExecutionPartConstruct\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for ContainsStmt\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for ExecutionPartConstruct\nNot implemented for ExecutionPartConstruct\nNot implemented for ExecutionPartConstruc...",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.06692404020577669,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/29.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.13,
+      "gzip_stdout_bytes": 21020,
+      "input_stream_bytes": 140538,
+      "iteration": 3,
+      "peak_rss_kib": 31104,
+      "raw_stdout_bytes": 175369,
+      "returncode": 0,
+      "sample_index": 2,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.13420513505116105,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.04,
+      "gzip_stdout_bytes": 24061,
+      "iteration": 4,
+      "peak_rss_kib": 108796,
+      "raw_stdout_bytes": 230986,
+      "returncode": 0,
+      "sample_index": 3,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x604a87721420-DoublePrecision\nNot implemented for 0x604a8770a100-Allocatable\nNot implemented for 0x604a877066b0-DoublePrecision\nNot implemented for 0x604a87721480-Allocatable\nNot implemented for 0x604a87713250-DoublePrecision\nNot implemented for 0x604a8770beb0-Allocatable\nNot implemented for 0x604a8770a600-DoublePrecision\nNot implemented for 0x604a87712c70-Allocatable\nNot implemented for 0x604a877150d0-DoublePrecision\nNot implemented for 0x604a87720a80-Allocatable\nNot implemented for 0x604a87715240-DoublePrecision\nNot implemented for 0x604a8771a810-Allocatable\nNot implemented for 0x604a877153b0-DoublePrecision\nNot implemented for 0x604a8771ae10-Allocatable\nNot implemented for 0x604a8771aa08-ExecutionPartConstruct\nNot implemented for 0x604a87712f60-CallStmt\nNot implemented for 0x604a8770c1a0-CallStmt\nNot implemented for 0x604a877107b0-CallStmt\nNot implemented for 0x604a87711270-CallStmt\nNot implemented for 0x604a87707220-CallStmt\nNot implemented for 0x604a87707c90-CallStmt\nNot implemented for 0x604a87708770-CallStmt\nNot implemented for 0x604a8770db50-CallStmt\nNot implemented for 0x604a8770dce0-CallStmt\nNot implemented for 0x604a8771b320-CallStmt\nNot implemented ...",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.04788615508005023,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 23019,
+      "iteration": 4,
+      "peak_rss_kib": 101436,
+      "raw_stdout_bytes": 140538,
+      "returncode": 0,
+      "sample_index": 3,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for ExecutionPartConstruct\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for ContainsStmt\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for ExecutionPartConstruct\nNot implemented for ExecutionPartConstruct\nNot implemented for ExecutionPartConstruc...",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.06806067563593388,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/32.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.14,
+      "gzip_stdout_bytes": 21020,
+      "input_stream_bytes": 140538,
+      "iteration": 4,
+      "peak_rss_kib": 31108,
+      "raw_stdout_bytes": 175369,
+      "returncode": 0,
+      "sample_index": 3,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.14475352270528674,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.04,
+      "gzip_stdout_bytes": 24004,
+      "iteration": 5,
+      "peak_rss_kib": 108692,
+      "raw_stdout_bytes": 230986,
+      "returncode": 0,
+      "sample_index": 4,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x578e3c848420-DoublePrecision\nNot implemented for 0x578e3c831100-Allocatable\nNot implemented for 0x578e3c82d6b0-DoublePrecision\nNot implemented for 0x578e3c848480-Allocatable\nNot implemented for 0x578e3c83a250-DoublePrecision\nNot implemented for 0x578e3c832eb0-Allocatable\nNot implemented for 0x578e3c831600-DoublePrecision\nNot implemented for 0x578e3c839c70-Allocatable\nNot implemented for 0x578e3c83c0d0-DoublePrecision\nNot implemented for 0x578e3c847a80-Allocatable\nNot implemented for 0x578e3c83c240-DoublePrecision\nNot implemented for 0x578e3c841810-Allocatable\nNot implemented for 0x578e3c83c3b0-DoublePrecision\nNot implemented for 0x578e3c841e10-Allocatable\nNot implemented for 0x578e3c841a08-ExecutionPartConstruct\nNot implemented for 0x578e3c839f60-CallStmt\nNot implemented for 0x578e3c8331a0-CallStmt\nNot implemented for 0x578e3c8377b0-CallStmt\nNot implemented for 0x578e3c838270-CallStmt\nNot implemented for 0x578e3c82e220-CallStmt\nNot implemented for 0x578e3c82ec90-CallStmt\nNot implemented for 0x578e3c82f770-CallStmt\nNot implemented for 0x578e3c834b50-CallStmt\nNot implemented for 0x578e3c834ce0-CallStmt\nNot implemented for 0x578e3c842320-CallStmt\nNot implemented ...",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.048878664150834084,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.07,
+      "gzip_stdout_bytes": 23019,
+      "iteration": 5,
+      "peak_rss_kib": 101272,
+      "raw_stdout_bytes": 140538,
+      "returncode": 0,
+      "sample_index": 4,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for DoublePrecision\nNot implemented for Allocatable\nNot implemented for ExecutionPartConstruct\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for CallStmt\nNot implemented for ContainsStmt\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for DoublePrecision\nNot implemented for ExecutionPartConstruct\nNot implemented for ExecutionPartConstruct\nNot implemented for ExecutionPartConstruc...",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.07174499798566103,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/35.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.14,
+      "gzip_stdout_bytes": 21020,
+      "input_stream_bytes": 140538,
+      "iteration": 5,
+      "peak_rss_kib": 31040,
+      "raw_stdout_bytes": 175369,
+      "returncode": 0,
+      "sample_index": 4,
+      "source": {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.145564379170537,
+      "warmup": false,
+      "workload": "large"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/tmp/native-protocol-benchmark-j_43k2zf/synthetic-assignment-512.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 78099,
+      "iteration": 0,
+      "peak_rss_kib": 106564,
+      "raw_stdout_bytes": 994786,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x5afe78e0f728-ExecutionPartConstruct",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.06612298404797912,
+      "warmup": true,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/tmp/native-protocol-benchmark-j_43k2zf/synthetic-assignment-512.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.14,
+      "gzip_stdout_bytes": 65682,
+      "iteration": 0,
+      "peak_rss_kib": 100556,
+      "raw_stdout_bytes": 609643,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for ExecutionPartConstruct",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.14194229058921337,
+      "warmup": true,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/38.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.42,
+      "gzip_stdout_bytes": 68669,
+      "input_stream_bytes": 609643,
+      "iteration": 0,
+      "peak_rss_kib": 69500,
+      "raw_stdout_bytes": 763068,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.4259308520704508,
+      "warmup": true,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/tmp/native-protocol-benchmark-j_43k2zf/synthetic-assignment-512.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 78050,
+      "iteration": 1,
+      "peak_rss_kib": 105912,
+      "raw_stdout_bytes": 994786,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x62a649d5d728-ExecutionPartConstruct",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.065046067815274,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/tmp/native-protocol-benchmark-j_43k2zf/synthetic-assignment-512.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.13,
+      "gzip_stdout_bytes": 65682,
+      "iteration": 1,
+      "peak_rss_kib": 100684,
+      "raw_stdout_bytes": 609643,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for ExecutionPartConstruct",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.13817180087789893,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/41.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.42,
+      "gzip_stdout_bytes": 68669,
+      "input_stream_bytes": 609643,
+      "iteration": 1,
+      "peak_rss_kib": 69500,
+      "raw_stdout_bytes": 763068,
+      "returncode": 0,
+      "sample_index": 0,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.4284419738687575,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/tmp/native-protocol-benchmark-j_43k2zf/synthetic-assignment-512.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 78002,
+      "iteration": 2,
+      "peak_rss_kib": 106384,
+      "raw_stdout_bytes": 994786,
+      "returncode": 0,
+      "sample_index": 1,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x6250dabf6728-ExecutionPartConstruct",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.0677856751717627,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/tmp/native-protocol-benchmark-j_43k2zf/synthetic-assignment-512.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.14,
+      "gzip_stdout_bytes": 65682,
+      "iteration": 2,
+      "peak_rss_kib": 101184,
+      "raw_stdout_bytes": 609643,
+      "returncode": 0,
+      "sample_index": 1,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for ExecutionPartConstruct",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.15036025503650308,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/44.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.42,
+      "gzip_stdout_bytes": 68669,
+      "input_stream_bytes": 609643,
+      "iteration": 2,
+      "peak_rss_kib": 69504,
+      "raw_stdout_bytes": 763068,
+      "returncode": 0,
+      "sample_index": 1,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.42399749998003244,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/tmp/native-protocol-benchmark-j_43k2zf/synthetic-assignment-512.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 78056,
+      "iteration": 3,
+      "peak_rss_kib": 106784,
+      "raw_stdout_bytes": 994786,
+      "returncode": 0,
+      "sample_index": 2,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x57996d0d0728-ExecutionPartConstruct",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.06640440877526999,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/tmp/native-protocol-benchmark-j_43k2zf/synthetic-assignment-512.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.14,
+      "gzip_stdout_bytes": 65682,
+      "iteration": 3,
+      "peak_rss_kib": 100672,
+      "raw_stdout_bytes": 609643,
+      "returncode": 0,
+      "sample_index": 2,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for ExecutionPartConstruct",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.1431553578004241,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/47.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.44,
+      "gzip_stdout_bytes": 68669,
+      "input_stream_bytes": 609643,
+      "iteration": 3,
+      "peak_rss_kib": 69408,
+      "raw_stdout_bytes": 763068,
+      "returncode": 0,
+      "sample_index": 2,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.4432804440148175,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/tmp/native-protocol-benchmark-j_43k2zf/synthetic-assignment-512.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 78121,
+      "iteration": 4,
+      "peak_rss_kib": 106572,
+      "raw_stdout_bytes": 994786,
+      "returncode": 0,
+      "sample_index": 3,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x5f1806880728-ExecutionPartConstruct",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.06596264895051718,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/tmp/native-protocol-benchmark-j_43k2zf/synthetic-assignment-512.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.14,
+      "gzip_stdout_bytes": 65682,
+      "iteration": 4,
+      "peak_rss_kib": 100452,
+      "raw_stdout_bytes": 609643,
+      "returncode": 0,
+      "sample_index": 3,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for ExecutionPartConstruct",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.14741103583946824,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/50.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.43,
+      "gzip_stdout_bytes": 68669,
+      "input_stream_bytes": 609643,
+      "iteration": 4,
+      "peak_rss_kib": 69492,
+      "raw_stdout_bytes": 763068,
+      "returncode": 0,
+      "sample_index": 3,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.43798454804345965,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast",
+        "/tmp/native-protocol-benchmark-j_43k2zf/synthetic-assignment-512.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.06,
+      "gzip_stdout_bytes": 78021,
+      "iteration": 5,
+      "peak_rss_kib": 106276,
+      "raw_stdout_bytes": 994786,
+      "returncode": 0,
+      "sample_index": 4,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "json_producer",
+      "stderr": "Not implemented for 0x64c0fab85728-ExecutionPartConstruct",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.06576350657269359,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "-fc1",
+        "-fopenmp",
+        "-load",
+        "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "-plugin",
+        "dump-ast-protobuf",
+        "/tmp/native-protocol-benchmark-j_43k2zf/synthetic-assignment-512.f90"
+      ],
+      "gnu_time_elapsed_seconds": 0.14,
+      "gzip_stdout_bytes": 65682,
+      "iteration": 5,
+      "peak_rss_kib": 101076,
+      "raw_stdout_bytes": 609643,
+      "returncode": 0,
+      "sample_index": 4,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "protobuf_producer",
+      "stderr": "Not implemented for ExecutionPartConstruct",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.14351660618558526,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "-c",
+        "\nimport sys\nfrom pathlib import Path\nfrom ast_stream_pb2 import StreamRecord\nfrom decode_ast_stream import _json_text, decode_stream\n\ngraph = decode_stream(Path(sys.argv[1]).read_bytes(), StreamRecord)\nsys.stdout.write(_json_text(graph) + \"\\n\")\n",
+        "/tmp/native-protocol-benchmark-j_43k2zf/53.astpb"
+      ],
+      "gnu_time_elapsed_seconds": 0.43,
+      "gzip_stdout_bytes": 68669,
+      "input_stream_bytes": 609643,
+      "iteration": 5,
+      "peak_rss_kib": 69456,
+      "raw_stdout_bytes": 763068,
+      "returncode": 0,
+      "sample_index": 4,
+      "source": {
+        "label": "synthetic/assignment-chain-512",
+        "path": "generated:synthetic-assignment-source",
+        "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+        "source_bytes": 10823
+      },
+      "stage": "python_test_decoder",
+      "stderr": "",
+      "timed_command_exit_code": 0,
+      "wall_seconds": 0.43615393480286,
+      "warmup": false,
+      "workload": "synthetic/assignment-chain-512"
+    }
+  ],
+  "medians": [
+    {
+      "measured_repeats": 5,
+      "median_gnu_time_elapsed_seconds": 0.04,
+      "median_gzip_stdout_bytes": 24061,
+      "median_peak_rss_kib": 108692,
+      "median_raw_stdout_bytes": 230986,
+      "median_wall_seconds": 0.048878664150834084,
+      "stage": "json_producer",
+      "workload": "large"
+    },
+    {
+      "measured_repeats": 5,
+      "median_gnu_time_elapsed_seconds": 0.06,
+      "median_gzip_stdout_bytes": 23019,
+      "median_peak_rss_kib": 101436,
+      "median_raw_stdout_bytes": 140538,
+      "median_wall_seconds": 0.06810911605134606,
+      "stage": "protobuf_producer",
+      "workload": "large"
+    },
+    {
+      "measured_repeats": 5,
+      "median_gnu_time_elapsed_seconds": 0.14,
+      "median_gzip_stdout_bytes": 21020,
+      "median_peak_rss_kib": 31100,
+      "median_raw_stdout_bytes": 175369,
+      "median_wall_seconds": 0.14475352270528674,
+      "stage": "python_test_decoder",
+      "workload": "large"
+    },
+    {
+      "measured_repeats": 5,
+      "median_gnu_time_elapsed_seconds": 0.03,
+      "median_gzip_stdout_bytes": 2887,
+      "median_peak_rss_kib": 104420,
+      "median_raw_stdout_bytes": 12935,
+      "median_wall_seconds": 0.03581479471176863,
+      "stage": "json_producer",
+      "workload": "small"
+    },
+    {
+      "measured_repeats": 5,
+      "median_gnu_time_elapsed_seconds": 0.03,
+      "median_gzip_stdout_bytes": 3707,
+      "median_peak_rss_kib": 96656,
+      "median_raw_stdout_bytes": 10093,
+      "median_wall_seconds": 0.03637793380767107,
+      "stage": "protobuf_producer",
+      "workload": "small"
+    },
+    {
+      "measured_repeats": 5,
+      "median_gnu_time_elapsed_seconds": 0.06,
+      "median_gzip_stdout_bytes": 2738,
+      "median_peak_rss_kib": 20288,
+      "median_raw_stdout_bytes": 10676,
+      "median_wall_seconds": 0.06346436310559511,
+      "stage": "python_test_decoder",
+      "workload": "small"
+    },
+    {
+      "measured_repeats": 5,
+      "median_gnu_time_elapsed_seconds": 0.06,
+      "median_gzip_stdout_bytes": 78050,
+      "median_peak_rss_kib": 106384,
+      "median_raw_stdout_bytes": 994786,
+      "median_wall_seconds": 0.06596264895051718,
+      "stage": "json_producer",
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "measured_repeats": 5,
+      "median_gnu_time_elapsed_seconds": 0.14,
+      "median_gzip_stdout_bytes": 65682,
+      "median_peak_rss_kib": 100684,
+      "median_raw_stdout_bytes": 609643,
+      "median_wall_seconds": 0.14351660618558526,
+      "stage": "protobuf_producer",
+      "workload": "synthetic/assignment-chain-512"
+    },
+    {
+      "measured_repeats": 5,
+      "median_gnu_time_elapsed_seconds": 0.43,
+      "median_gzip_stdout_bytes": 68669,
+      "median_peak_rss_kib": 69492,
+      "median_raw_stdout_bytes": 763068,
+      "median_wall_seconds": 0.43615393480286,
+      "stage": "python_test_decoder",
+      "workload": "synthetic/assignment-chain-512"
+    }
+  ],
+  "parity_preflight": {
+    "baseline_failure": 1,
+    "baseline_failures_do_not_count_as_protobuf_mismatches": true,
+    "benchmark_gate": "pass",
+    "matched": 52,
+    "mismatch": 0,
+    "outcomes": [
+      {
+        "label": "fortran/parser/arrays/array_declaration.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/arrays/array_declaration.f90",
+        "sha256": "6b6aef14334a19c97246077750d9e97b1113657ec283cfb21fad14ede119c9d6",
+        "source_bytes": 413,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/arrays/array_implied_do.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/arrays/array_implied_do.f90",
+        "sha256": "04d75ff7c6c57ced107c28484fbac8d332a302696efaeb375de3ef5e0d9a3c91",
+        "source_bytes": 664,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/arrays/element_access.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/arrays/element_access.f90",
+        "sha256": "aed78ed1b95cc7796afd5a7597825a2c5b5fcf93107d28631179989f0e435cbb",
+        "source_bytes": 229,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/binary_operator.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/binary_operator.f90",
+        "sha256": "bc43f7c2fa06e1a281a300b5bb8694fb8dda12a49837ab1481b691ff3c18cd86",
+        "source_bytes": 240,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/comment.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/comment.f90",
+        "sha256": "89624230b747ba01ff793cb4a014945839b60f84a8e7c93f9f4b7efb038ae645",
+        "source_bytes": 250,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/concurrent.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/concurrent.f90",
+        "sha256": "67121971ccc4e885ca64f9af24fb2e05e4f33835ecffb233e8ffc7e94c6cc5a4",
+        "source_bytes": 154,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/conditionalstmt/chained_if.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/conditionalstmt/chained_if.f90",
+        "sha256": "e5cffe3e1378e4a60ef32faaf69bcda04ac479f2f11cae4610e99bd81a0c6cd8",
+        "source_bytes": 243,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/conditionalstmt/if_then.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/conditionalstmt/if_then.f90",
+        "sha256": "05a456dda5cb5fce16809fecad309926d06fa17d5d1b02bf73f8d3487241c746",
+        "source_bytes": 115,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/conditionalstmt/if_then_else.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/conditionalstmt/if_then_else.f90",
+        "sha256": "a59fb7dc74fcedd1ac802c36b94d8a75586c1fec1882370c97628a85afb4ed7b",
+        "source_bytes": 151,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/conditionalstmt/logical_if.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/conditionalstmt/logical_if.f90",
+        "sha256": "184ab890c67ce2d86bce2b6faa90fd2c19e440e6183f32a724a8cb630a98ab0b",
+        "source_bytes": 144,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/conditionalstmt/named_chained_if.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/conditionalstmt/named_chained_if.f90",
+        "sha256": "abac9016e8ab8651b8fe7a5c467b3943da282bf5b9b5b3f9dd86f178e00cbfa5",
+        "source_bytes": 262,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/conditionalstmt/named_select_case.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/conditionalstmt/named_select_case.f90",
+        "sha256": "2e864b11a791a5cfcca997e56c1bee94fa527fba42ba879df0bb7fb2f82ae502",
+        "source_bytes": 326,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/conditionalstmt/select_case.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/conditionalstmt/select_case.f90",
+        "sha256": "59b1715e634396c2d3c25fc6968e4726631402e95b51afe755f41841517a7574",
+        "source_bytes": 287,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/conditionalstmt/select_case_list.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/conditionalstmt/select_case_list.f90",
+        "sha256": "189a16c4b35f20233e006b8cc37da1971f4aa47edc4014bbd515144e05b2ea0d",
+        "source_bytes": 276,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/conditionalstmt/select_case_range.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/conditionalstmt/select_case_range.f90",
+        "sha256": "02b4590322b4acd292b405ecc88c0ab51c68e7a7fb8f9b33a37afa08e2f07723",
+        "source_bytes": 303,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/decl/kind_selector.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/decl/kind_selector.f90",
+        "sha256": "002ba3abcd67d38c31d1ec8c900d630b8c9c635dfdf5dbe7906164eae7b0f655",
+        "source_bytes": 117,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/decl/legacy_kind_selector.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/decl/legacy_kind_selector.f90",
+        "sha256": "a3cca0746b3049f7f6b08e3dbd5750b2d628d004c078299a1e38d074f01acb09",
+        "source_bytes": 129,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/declaration.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/declaration.f90",
+        "sha256": "9d4f8137369d77a0ecc63a233e9019c84fd15e4b5ceda186a2dbf25047e17c37",
+        "source_bytes": 115,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/directive.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/directive.f90",
+        "sha256": "9083b7b274e91b90a7209ad0d52f8a836b9eb9cdc14be996d719c0ddcfb7dacb",
+        "source_bytes": 125,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/do.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/do.f90",
+        "sha256": "aa65f2b6e9b675779c2e852121dc4581b35680af140e6f3ee2825579614d0725",
+        "source_bytes": 306,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/expr/negate.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/expr/negate.f90",
+        "sha256": "e642b4630f900b64bde6360036d615d4ba4711123c2d97c8dc610c15943ee5a0",
+        "source_bytes": 56,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/expr/not.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/expr/not.f90",
+        "sha256": "3b2a5545448e08b670d0c980411a6ea733ffef4edf0345c258ffff8b6d3c8df3",
+        "source_bytes": 59,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/expr/parentheses.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/expr/parentheses.f90",
+        "sha256": "94f91dd5db34dc7d6b522de97487cbf3cf9bae6752f4ec3cb1d9dd71bdb27c78",
+        "source_bytes": 67,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/expr/subscript_triplet.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/expr/subscript_triplet.f90",
+        "sha256": "e07a865e2331e24041fd549b48f97fd635d8110a3bc5b7b74d9cd1cf5cf1b719",
+        "source_bytes": 235,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/expr/unary_plus.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/expr/unary_plus.f90",
+        "sha256": "152be52f509f778ed0610fbe8de4846153714d79a3b802d1783fe4a5b090eefa",
+        "source_bytes": 64,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/fujitsu/0000/0000_0000.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0000.f90",
+        "sha256": "4b658ad59c09db12beded5d572d84c4e83ead1f4c8ebb5d7bbe93300c233a52f",
+        "source_bytes": 220,
+        "status": "matched"
+      },
+      {
+        "detail": "JSON producer exited 1: error: Semantic errors in /home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0001.f90\n/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0001.f90:2:1: error: REAL(KIND=16) is not an enabled type for this target\n  real*16   b1, b2\n  ^^^^^^^^^^^^^^^^\n/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0001.f90:8:6: warning: Default real literal in REAL(16) context might need a kind suffix, as its rounded value 1.10000002384185791015625_4 is inexact [-Wreal-constant-widening]\n  b1 = 1.1\n       ^^^",
+        "label": "fortran/parser/fujitsu/0000/0000_0001.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0001.f90",
+        "sha256": "95d0324830ff344e5e34abff094cce84591daddb38f205e18e087555b2e2be73",
+        "source_bytes": 344,
+        "status": "baseline_failure"
+      },
+      {
+        "label": "fortran/parser/fujitsu/0000/0000_0002.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0002.f90",
+        "sha256": "fc07040222c85a719a73a604399113ef935991fb5c9884a58f2b4cbe0fa07aaf",
+        "source_bytes": 331,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/fujitsu/0000/0000_0003.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0003.f90",
+        "sha256": "50b4196f02dcac1c65ead8f342846ee33318654122d56bbe0809fd60f44bae22",
+        "source_bytes": 338,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/fujitsu/0000/0000_0004.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0004.f90",
+        "sha256": "8a2066c4c6aa5c046a0d46c6ac814fb79c0b4bcf66875ed2058d82e8a50c1ca1",
+        "source_bytes": 343,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/fujitsu/0000/0000_0007.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0007.f90",
+        "sha256": "b924301b98555700ac0e7fb5a08d65da909f6b1bee21bf57cdb2057c33f01dea",
+        "source_bytes": 351,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/fujitsu/0000/0000_0019.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0019.f90",
+        "sha256": "f978fb16383f70f7535fcce6b3e2e1d40f92dc6701332d2640690fc97f37c540",
+        "source_bytes": 375,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/fujitsu/0000/0000_0023.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0023.f90",
+        "sha256": "45738c97df9c55114fe9728404858c4bd55388f797acbc602f35fd79a6813f3f",
+        "source_bytes": 2901,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/fujitsu/0000/0000_0024.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0024.f90",
+        "sha256": "35861b358e52ff2595bff9b108fd4265986417fe9958cf9ca1ddb67c1bda3e2f",
+        "source_bytes": 162,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/fujitsu/0000/0000_0029.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0029.f90",
+        "sha256": "61389013081e29e6fe36f42c6e9e7ad151f17f15323ac677a38c1a048e3cad90",
+        "source_bytes": 241,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/fujitsu/0000/0000_0030.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0030.f90",
+        "sha256": "fc2618296046f83ce323fe0d6dc5cd33048d93259f9e57388d6b25c479080852",
+        "source_bytes": 234,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/fujitsu/0000/0000_0033.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/fujitsu/0000/0000_0033.f90",
+        "sha256": "f606babf2fc8843a8af8b846f504415fb9787c975cef87210010ebede158fd27",
+        "source_bytes": 819,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/hello.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/hello.f90",
+        "sha256": "193728445b05d50bfa5c103018529d232e2f93905b6e83b7120852708f853f02",
+        "source_bytes": 216,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/literals.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/literals.f90",
+        "sha256": "8827314d720d5b5a63109f1e7d088c57a63e7cff2aab0759e719e125421d6ca1",
+        "source_bytes": 981,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/logical_expression.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/logical_expression.f90",
+        "sha256": "487d9c16ba38feadf41e871347e65f2ee5033b7806658bb09cf7a8ed620e751c",
+        "source_bytes": 146,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/omp/omp_basic.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/omp/omp_basic.f90",
+        "sha256": "f42d28499c779074c7cf259e036bae7a8aeb55e35434779f866b81d2423a51db",
+        "source_bytes": 163,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/omp/omp_clause.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/omp/omp_clause.f90",
+        "sha256": "6249a8fe4e603626024a0b1bf28f5d5a144645c5ad8d4e7e9eab38a8a9d72d8f",
+        "source_bytes": 337,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/omp/omp_do.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/omp/omp_do.f90",
+        "sha256": "902126ea6fed1e13262103d1d714836e772e32016aa8cf375ecaeabc095263bf",
+        "source_bytes": 397,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/omp/omp_reduction.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/omp/omp_reduction.f90",
+        "sha256": "a562650fa0b029cc5d836419a5079c33063e746f02008d561f86218922ac92f9",
+        "source_bytes": 280,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/parameter.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/parameter.f90",
+        "sha256": "ab6554ad57866b43b5b17cb73223b472c1385b4965bcc2a0e9c9db9ebc0c0751",
+        "source_bytes": 202,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/parenexpr.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/parenexpr.f90",
+        "sha256": "84f6c915a9772717569fa284d7f7943fc378aeec55784f01905fc5c4a0fcf43c",
+        "source_bytes": 100,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/polybench/3mm.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/polybench/3mm.f90",
+        "sha256": "2c82759e6ce3123d34e1a678bf2cd842b57ff57207056bbe20aa59f3403f9de0",
+        "source_bytes": 4327,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/program/no_program_stmt.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/program/no_program_stmt.f90",
+        "sha256": "e42e56351349f142db6b8b11061e2b8e6eee3bbc1a175475c7f647549b1e9cc4",
+        "source_bytes": 27,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/stmt/common_stmt.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/stmt/common_stmt.f90",
+        "sha256": "065de03b15d4aa324a1545743384f52234f3e8fadd6f0abaad5c9ab68bd6e417",
+        "source_bytes": 134,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/stmt/data_stmt.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/stmt/data_stmt.f90",
+        "sha256": "9df420f40a5126b3e653d6877ebf0f8d7e8ea47a9b3b4641993fb6c2e3492d5e",
+        "source_bytes": 68,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/stmt/goto.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/stmt/goto.f90",
+        "sha256": "b06dddfccaae503a233ef357ab63d65cc740fd662f24db58b3d986a52d630abc",
+        "source_bytes": 73,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/stmt/stop.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/stmt/stop.f90",
+        "sha256": "600a53cfeb6bf90a21622662a55782ae2cb2912df2b423fad8ce85bdb9143a5b",
+        "source_bytes": 426,
+        "status": "matched"
+      },
+      {
+        "label": "fortran/parser/subroutine.f90",
+        "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test/fortran/parser/subroutine.f90",
+        "sha256": "3b17929ebc4f3b1397ad307305a53f5be8903ef2b484845aba8944773cd4fc34",
+        "source_bytes": 365,
+        "status": "matched"
+      }
+    ],
+    "protobuf_failure": 0,
+    "synthetic": {
+      "label": "synthetic/assignment-chain-512",
+      "path": "generated:synthetic-assignment-source",
+      "sha256": "f78cfb075508355f53a84cfa4140116bf12cd7ed74deb4743896d3bfbe1bf262",
+      "source_bytes": 10823,
+      "status": "matched"
+    },
+    "total": 53
+  },
+  "provenance": {
+    "artifacts": {
+      "flang": {
+        "path": "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+        "sha256": "b9db3466cfae7ad4feb3f710f60b36e6baa6e6df58bccdd46140754ee5d1b735"
+      },
+      "json_plugin": {
+        "path": "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTPlugin.seqcst.so",
+        "sha256": "8a89f63be33b5f6091edad1a8357af7537fa57bcaec408c6ac31cb279aa1fb36"
+      },
+      "plugin_compilation_objects": {
+        "json": {
+          "elf_comment_compiler_markers": {
+            "markers": [
+              "Ubuntu clang version 21.1.8 (6ubuntu1)"
+            ]
+          },
+          "path": "/tmp/flang22-libflang.woWtRQ/seqcst-fix/json-plugin.o",
+          "sha256": "b5f858637df415a67ee92da0300b9a3c3c75c09c4e46a6e119c8d5057ff8e815"
+        },
+        "protobuf": {
+          "elf_comment_compiler_markers": {
+            "markers": [
+              "Ubuntu clang version 21.1.8 (6ubuntu1)"
+            ]
+          },
+          "path": "/tmp/flang22-libflang.woWtRQ/seqcst-fix/binary-plugin.o",
+          "sha256": "9e3e0640c014566632e3f9ff191814db959860eb259849a579727ef93c98c7fb"
+        }
+      },
+      "protobuf_plugin": {
+        "path": "/tmp/flang22-libflang.woWtRQ/seqcst-fix/DumpASTProtobufPlugin.seqcst.so",
+        "sha256": "955070d98486f80b86650974da151632884d74f9568bcc0582276dd1985ee437"
+      },
+      "protoc": {
+        "path": "/tmp/flang-protoc-probe/root/usr/bin/protoc",
+        "sha256": "332fe6d2b4f49388f0fe37a19395b96898e68da1418fec267cd6a37eca25f77a"
+      }
+    },
+    "fixture_checkout": {
+      "git_tree": "ee3e6d7c297be7a1a7c9e701ecfb8a5b3e2293f3",
+      "head": "5672273876efcb906dcfab498750d7b1486a2f4d",
+      "path": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/resources-test",
+      "tracked_file_count_hashed": 158,
+      "tracked_worktree_content_sha256": "54cdce68a7f063ef8aceb7e05cef5478c4c037c075d9223669c6aefef0e718cc",
+      "tracked_worktree_dirty": false
+    },
+    "producer_checkout": {
+      "git_tree": "890be86483c91c4fcfe9e7968329359a48c6f7b2",
+      "head": "67d912b67e58ead286fc2e08c17072cd2ac93739",
+      "path": "/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40",
+      "tracked_file_count_hashed": 114,
+      "tracked_worktree_content_sha256": "2d98a0f22feea8d2a5521bd71493d868522bb43c8b3b692aa687b0ae9254e513",
+      "tracked_worktree_dirty": true
+    },
+    "runtime": {
+      "flang_version": {
+        "command": [
+          "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+          "--version"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Ubuntu flang version 22.1.2 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin"
+      },
+      "gnu_time_version": {
+        "command": [
+          "/usr/bin/time",
+          "--version"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "time (GNU Time) UNKNOWN\nCopyright (C) 2018 Free Software Foundation, Inc.\nLicense GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.\n\nWritten by David Keppel, David MacKenzie, and Assaf Gordon."
+      },
+      "platform": "Linux-7.0.0-28-generic-x86_64-with-glibc2.43",
+      "protoc_version": {
+        "command": [
+          "/tmp/flang-protoc-probe/root/usr/bin/protoc",
+          "--version"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "libprotoc 3.21.12"
+      },
+      "python": "3.14.4 (main, Jun 18 2026, 14:25:02) [GCC 15.2.0]"
+    },
+    "source_files": {
+      "benchmark_harness": {
+        "path": "/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/scripts/benchmark_native_protocol.py",
+        "sha256": "0c7aa816de4978e261686b738d3a8437e233976d1329c4d809380fda1b5ea04a"
+      },
+      "corpus_preflight": {
+        "path": "/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/tests/baseline/compare_native_corpus.py",
+        "sha256": "7d7f3a842264644d23017c8c31fa24a440a71fab820918a5b519bcf81bd2a104"
+      },
+      "generated_python_protobuf_module": {
+        "path": "/tmp/native-protocol-benchmark-j_43k2zf/decoder/ast_stream_pb2.py",
+        "sha256": "818821298fea1842cb1b66dd10f5f940a29968de613fd5ee3d48d65f3e713a46"
+      },
+      "graph_comparator": {
+        "path": "/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/tests/baseline/compare_graphs.py",
+        "sha256": "476f1b5cb17917d65569e5ca41d706763e76501e3c8c9460ebc77bb459f81c5a"
+      },
+      "protocol_schema": {
+        "path": "/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/protocol/ast_stream.proto",
+        "sha256": "a533c631c18b6550ff3956cd038dfcd1c335348ca71fc033e30f10b8bf5bf39b"
+      },
+      "python_test_decoder": {
+        "path": "/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/tests/baseline/decode_ast_stream.py",
+        "sha256": "6335bb6b802f004b2ea582f4c0715ada8dfa2b95acf5b38c20abd6e9dbb2e272"
+      }
+    }
+  },
+  "schema_version": 1,
+  "started_utc": "2026-10-13T02:42:49.248798+00:00",
+  "status": "complete"
+}
