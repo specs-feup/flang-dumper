@@ -4,52 +4,58 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage: bash clava_driver/run.sh \
-  --clava <Clava-JS/code/index.ts> \
-  --query-module <Lara-JS/api/weaver/Query.ts> \
-  --header <C++ header> \
-  --header-root <include and source root> \
-  --metadata <reviewed generator metadata.json> \
+  --analyzer clava|clang|snapshot \
+  --header-root <extracted/usr> \
+  --include-dir <extracted/usr/lib/llvm-22/include> \
   --output-dir <generated output directory> \
   --protoc <protoc executable> \
-  [--python <python3 executable>]
+  [--clava-entry <Clava-JS/code/index.ts> --query-module <Lara-JS/api/weaver/Query.ts>] \
+  [--clang-command <compiler command>] [--inventory <saved model>] [--java]
 
-The driver aspect runs inside Clava's classic CLI process. It imports
-generator/analyze.js against that process's AST, invokes generator/generate.py
-with the resulting model, then runs protoc. The CLAVA path is the Clava 4
-JavaScript entry file; this runner starts it with node.
+The production command analyzes the pinned Flang 22 headers, checks the result
+against generator/flang22-declarations.json and reviewed manifests, emits the
+visitor/kind/enum artifacts and generic protocol schema, and invokes protoc.
+Select exactly one analyzer; Clang is an explicit fallback. Snapshot mode
+validates an existing model and all pinned source hashes without reparsing.
 EOF
 }
 
 die() {
-  printf 'clava driver error: %s\n' "$1" >&2
+  printf 'production driver error: %s\n' "$1" >&2
   exit 2
 }
 
-clava_entry=
-query_module=
-header=
+analyzer=
 header_root=
-metadata=
+include_dir=
 output_dir=
 protoc_path=
+clava_entry=
+query_module=
+clang_command=
+inventory=
 python_command=python3
+generate_java=false
 
 while (($#)); do
   case "$1" in
     -h|--help) usage; exit 0 ;;
+    --java) generate_java=true; shift; continue ;;
   esac
   if (($# < 2)); then
     usage >&2
     die "missing value after $1"
   fi
   case "$1" in
-    --clava) clava_entry=$2 ;;
-    --query-module) query_module=$2 ;;
-    --header) header=$2 ;;
+    --analyzer) analyzer=$2 ;;
     --header-root) header_root=$2 ;;
-    --metadata) metadata=$2 ;;
+    --include-dir) include_dir=$2 ;;
     --output-dir) output_dir=$2 ;;
     --protoc) protoc_path=$2 ;;
+    --clava-entry) clava_entry=$2 ;;
+    --query-module) query_module=$2 ;;
+    --clang-command) clang_command=$2 ;;
+    --inventory) inventory=$2 ;;
     --python) python_command=$2 ;;
     *) usage >&2; die "unknown argument $1" ;;
   esac
@@ -57,11 +63,9 @@ while (($#)); do
 done
 
 for pair in \
-  "--clava:$clava_entry" \
-  "--query-module:$query_module" \
-  "--header:$header" \
+  "--analyzer:$analyzer" \
   "--header-root:$header_root" \
-  "--metadata:$metadata" \
+  "--include-dir:$include_dir" \
   "--output-dir:$output_dir" \
   "--protoc:$protoc_path"; do
   value=${pair#*:}
@@ -69,45 +73,17 @@ for pair in \
 done
 
 repo_root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)
-driver_file="$repo_root/clava_driver/driver.mjs"
-clava_entry=$(realpath -e -- "$clava_entry") || die "Clava entry does not exist"
-query_module=$(realpath -e -- "$query_module") || die "Query module does not exist"
-header=$(realpath -e -- "$header") || die "header does not exist"
-header_root=$(realpath -e -- "$header_root") || die "header root does not exist"
-metadata=$(realpath -e -- "$metadata") || die "metadata does not exist"
-protoc_path=$(realpath -e -- "$protoc_path") || die "protoc does not exist"
+driver_args=("$python_command" "$repo_root/generator/generate_production.py"
+  --analyzer "$analyzer"
+  --header-root "$header_root"
+  --include-dir "$include_dir"
+  --output-dir "$output_dir"
+  --protoc "$protoc_path")
+[[ -n "$clang_command" ]] && driver_args+=(--clang-command "$clang_command")
+[[ -n "$inventory" ]] && driver_args+=(--inventory "$inventory")
+[[ -n "$clava_entry" ]] && driver_args+=(--clava-entry "$clava_entry")
+[[ -n "$query_module" ]] && driver_args+=(--query-module "$query_module")
+[[ "$generate_java" == true ]] && driver_args+=(--java)
 
-[[ -f "$clava_entry" ]] || die "Clava entry is not a file"
-[[ -f "$query_module" ]] || die "Query module is not a file"
-[[ -f "$header" ]] || die "header is not a file"
-[[ -d "$header_root" ]] || die "header root is not a directory"
-[[ -f "$metadata" ]] || die "metadata is not a file"
-[[ -f "$protoc_path" && -x "$protoc_path" ]] || die "protoc is not an executable file"
-case "$header" in
-  "$header_root"/*) ;;
-  *) die "header must be beneath header root" ;;
-esac
 command -v "$python_command" >/dev/null 2>&1 || die "Python command is not executable: $python_command"
-
-mkdir -p -- "$output_dir"
-output_dir=$(realpath -e -- "$output_dir") || die "cannot resolve output directory"
-header_parent=$(dirname "$header")
-model_path="$output_dir/declarations.json"
-
-export FLANG_DRIVER_REPO_ROOT="$repo_root"
-export FLANG_DRIVER_CLAVA_ENTRY="$clava_entry"
-export FLANG_DRIVER_METADATA="$metadata"
-export FLANG_DRIVER_OUTPUT_DIR="$output_dir"
-export FLANG_DRIVER_PROTOC="$protoc_path"
-export FLANG_DRIVER_PYTHON="$python_command"
-export FLANG_DRIVER_MODEL="$model_path"
-export FLANG_GENERATOR_HEADER="$header"
-export FLANG_GENERATOR_HEADER_ROOT="$header_root"
-export FLANG_GENERATOR_MODEL_OUT="$model_path"
-export FLANG_GENERATOR_QUERY_MODULE="$query_module"
-
-node "$clava_entry" classic "$driver_file" \
-  -p "$header_parent" \
-  -std c++20 \
-  -fs "-I$header_root -I$header_parent" \
-  -ncg
+exec "${driver_args[@]}"

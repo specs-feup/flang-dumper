@@ -7,6 +7,7 @@ const headerPath = path.resolve(process.env.FLANG_GENERATOR_HEADER ?? "");
 const headerRoot = path.resolve(process.env.FLANG_GENERATOR_HEADER_ROOT ?? "");
 const modelPath = path.resolve(process.env.FLANG_GENERATOR_MODEL_OUT ?? "");
 const queryModule = process.env.FLANG_GENERATOR_QUERY_MODULE;
+const qualifiedPrefix = process.env.FLANG_GENERATOR_QUALIFIED_PREFIX;
 
 if (!process.env.FLANG_GENERATOR_HEADER || !process.env.FLANG_GENERATOR_HEADER_ROOT || !process.env.FLANG_GENERATOR_MODEL_OUT || !queryModule) {
   throw new Error("Set FLANG_GENERATOR_HEADER, FLANG_GENERATOR_HEADER_ROOT, FLANG_GENERATOR_MODEL_OUT, and FLANG_GENERATOR_QUERY_MODULE");
@@ -51,25 +52,57 @@ function normalizeType(type) {
   return String(type.code).trim().replace(/\s+/g, " ");
 }
 
+function isInRoot(file) {
+  const relative = path.relative(headerRoot, file);
+  return relative !== "" && !relative.startsWith(`..${path.sep}`) && relative !== ".." && !path.isAbsolute(relative);
+}
+
+function sourceHash(file) {
+  const absolute = path.resolve(file);
+  if (!isInRoot(absolute)) throw new Error(`Source file is outside the analyzed header root: ${file}`);
+  const relative = path.relative(headerRoot, absolute).split(path.sep).join("/");
+  const digest = crypto.createHash("sha256").update(fs.readFileSync(absolute)).digest("hex");
+  return { file: relative, sha256: digest };
+}
+
+function matchesPrefix(qualifiedName) {
+  return !qualifiedPrefix || qualifiedName === qualifiedPrefix || qualifiedName.startsWith(`${qualifiedPrefix}::`);
+}
+
 const targetHeader = path.resolve(headerPath);
 const declarations = [];
 const seen = new Set();
+const sourceFiles = new Map();
+
+function rememberLocation(location) {
+  const absolute = path.resolve(headerRoot, location.file);
+  const item = sourceHash(absolute);
+  sourceFiles.set(item.file, item.sha256);
+}
 
 for (const record of Query.search("record")) {
   if (!record.isImplementation || path.resolve(record.filepath ?? "") !== targetHeader) continue;
   const qualifiedName = String(record.qualifiedName ?? "");
   if (!qualifiedName) throw new Error(`Record at ${record.location} has no qualified name`);
+  if (!matchesPrefix(qualifiedName)) continue;
   if (seen.has(qualifiedName)) throw new Error(`Duplicate record declaration: ${qualifiedName}`);
   seen.add(qualifiedName);
+  const location = sourceLocation(record);
+  rememberLocation(location);
+  const members = record.fields.map((field) => {
+    const fieldLocation = sourceLocation(field);
+    rememberLocation(fieldLocation);
+    return {
+      name: String(field.name),
+      type: normalizeType(field.type),
+      location: fieldLocation,
+    };
+  });
   declarations.push({
     kind: "record",
     qualified_name: qualifiedName,
-    location: sourceLocation(record),
-    members: record.fields.map((field) => ({
-      name: String(field.name),
-      type: normalizeType(field.type),
-      location: sourceLocation(field),
-    })),
+    location,
+    members,
   });
 }
 
@@ -77,17 +110,25 @@ for (const enumDecl of Query.search("enumDecl")) {
   if (path.resolve(enumDecl.filepath ?? "") !== targetHeader) continue;
   const qualifiedName = String(enumDecl.qualifiedName ?? "");
   if (!qualifiedName) throw new Error(`Enum at ${enumDecl.location} has no qualified name`);
+  if (!matchesPrefix(qualifiedName)) continue;
   if (seen.has(qualifiedName)) throw new Error(`Duplicate declaration: ${qualifiedName}`);
   seen.add(qualifiedName);
+  const location = sourceLocation(enumDecl);
+  rememberLocation(location);
+  const constants = enumDecl.enumerators.map((enumerator) => {
+    const constantLocation = sourceLocation(enumerator);
+    rememberLocation(constantLocation);
+    return {
+      name: String(enumerator.name),
+      source: String(enumerator.code ?? enumerator.name).trim(),
+      location: constantLocation,
+    };
+  });
   declarations.push({
     kind: "enum",
     qualified_name: qualifiedName,
-    location: sourceLocation(enumDecl),
-    constants: enumDecl.enumerators.map((enumerator) => ({
-      name: String(enumerator.name),
-      source: String(enumerator.code ?? enumerator.name).trim(),
-      location: sourceLocation(enumerator),
-    })),
+    location,
+    constants,
   });
 }
 
@@ -95,12 +136,17 @@ declarations.sort((left, right) => left.qualified_name < right.qualified_name ? 
 if (declarations.length === 0) throw new Error(`No record or enum declarations found in ${targetHeader}`);
 
 const headerBytes = fs.readFileSync(targetHeader);
+const headerSource = sourceHash(targetHeader);
+sourceFiles.set(headerSource.file, headerSource.sha256);
 const model = {
   format: "clava-declaration-inventory/v1",
   source_header: {
     file: path.relative(headerRoot, targetHeader).split(path.sep).join("/"),
     sha256: crypto.createHash("sha256").update(headerBytes).digest("hex"),
   },
+  source_files: [...sourceFiles.entries()]
+    .sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
+    .map(([file, sha256]) => ({ file, sha256 })),
   declarations,
 };
 
