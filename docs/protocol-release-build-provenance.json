@@ -1,0 +1,163 @@
+{
+  "benchmark_reports": {
+    "metafor_java_end_to_end": "/home/lmsousa/.t3/worktrees/metafor/flang-protobuf-reader/FortranParser/docs/native-end-to-end-release-benchmark-report.json",
+    "native_protocol": "/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/docs/protocol-release-benchmark-report.json"
+  },
+  "cmake_configuration": {
+    "CMAKE_BUILD_TYPE": "Release",
+    "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+    "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG",
+    "CMAKE_GENERATOR": "Unix Makefiles",
+    "CMAKE_HOME_DIRECTORY": "/tmp/flang-workload-adoption-20261013/cmake",
+    "CMAKE_MAKE_PROGRAM": "/usr/bin/gmake",
+    "cmake_version": {
+      "command": [
+        "/snap/cmake/1572/bin/cmake",
+        "--version"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "cmake version 4.4.4\n\nCMake suite maintained and supported by Kitware (kitware.com/cmake)."
+    },
+    "compiler": {
+      "command": [
+        "/usr/bin/clang++",
+        "--version"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Ubuntu clang version 21.1.8 (6ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /usr/lib/llvm-21/bin"
+    },
+    "compiler_id_from_configure_log": "Clang 21.1.8",
+    "configure_command": "cmake -S /tmp/flang-workload-adoption-20261013/cmake -B /tmp/flang-workload-adoption-20261013/build-release -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_BUILD_TYPE=Release",
+    "flang_sdk_include_roots": [
+      "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/include",
+      "/tmp/flang22-libflang.woWtRQ/extracted/usr/include/llvm-22"
+    ],
+    "protobuf_include_root": "/tmp/flang-protoc-probe/root/usr/include",
+    "protobuf_link_library": {
+      "dynamic_dependencies": "plugin ldd resolves libprotobuf.so.32 to /usr/lib/x86_64-linux-gnu/libprotobuf.so.32",
+      "path": "/usr/lib/x86_64-linux-gnu/libprotobuf.so.32.0.12",
+      "sha256": "09a7b17e8f42aac853a4833b37191439442db92fce9da28f690bfa7a34c7ef9f"
+    },
+    "release_target_flags": "-O3 -DNDEBUG -std=gnu++17 -fPIC -Wsuggest-override"
+  },
+  "created_utc": "2026-10-13T07:18:49.208281+00:00",
+  "flang_and_protoc": {
+    "flang": {
+      "path": "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+      "sha256": "b9db3466cfae7ad4feb3f710f60b36e6baa6e6df58bccdd46140754ee5d1b735",
+      "version": {
+        "command": [
+          "/tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin/flang-22",
+          "--version"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "Ubuntu flang version 22.1.2 (1ubuntu1)\nTarget: x86_64-pc-linux-gnu\nThread model: posix\nInstalledDir: /tmp/flang22-libflang.woWtRQ/extracted/usr/lib/llvm-22/bin"
+      }
+    },
+    "protoc": {
+      "path": "/tmp/flang-protoc-probe/root/usr/bin/protoc",
+      "required_LD_LIBRARY_PATH": "/tmp/flang-protoc-probe/root/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu",
+      "sha256": "332fe6d2b4f49388f0fe37a19395b96898e68da1418fec267cd6a37eca25f77a",
+      "version": {
+        "command": [
+          "/tmp/flang-protoc-probe/root/usr/bin/protoc",
+          "--version"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "libprotoc 3.21.12"
+      }
+    }
+  },
+  "host": "Linux-7.0.0-28-generic-x86_64-with-glibc2.43",
+  "object_files": [
+    {
+      "path": "/tmp/flang-workload-adoption-20261013/build-release/CMakeFiles/DumpASTPlugin.dir/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/src/comments.cpp.o",
+      "sha256": "108e3a53e8518d5a6d51d0c646ec4ac74921963413eb323336bb9180405a9da6",
+      "size_bytes": 29448,
+      "target": "DumpASTPlugin"
+    },
+    {
+      "path": "/tmp/flang-workload-adoption-20261013/build-release/CMakeFiles/DumpASTPlugin.dir/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/src/plugin.cpp.o",
+      "sha256": "15cf222796650673aa3681e626aeb9b73589e528c77d7fe256e6b7e5c441212e",
+      "size_bytes": 13410328,
+      "target": "DumpASTPlugin"
+    },
+    {
+      "path": "/tmp/flang-workload-adoption-20261013/build-release/CMakeFiles/DumpASTProtobufPlugin.dir/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/protocol/ast_writer.cpp.o",
+      "sha256": "399040968c771ec5c8a230b9fa6dfb62d52f3819873c75d24164f12686afcc75",
+      "size_bytes": 29408,
+      "target": "DumpASTProtobufPlugin"
+    },
+    {
+      "path": "/tmp/flang-workload-adoption-20261013/build-release/CMakeFiles/DumpASTProtobufPlugin.dir/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/protocol/binary_context.cpp.o",
+      "sha256": "aa4fbe2626f996bfa50db7e50c1b94a2f92d965d5aa2792ad2610e7bb99a6386",
+      "size_bytes": 28144,
+      "target": "DumpASTProtobufPlugin"
+    },
+    {
+      "path": "/tmp/flang-workload-adoption-20261013/build-release/CMakeFiles/DumpASTProtobufPlugin.dir/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/protocol/framing.cpp.o",
+      "sha256": "5defda45df44dc298942825b0c2d19fd642e5b5109da46d6d61f1ee7ecec8fd3",
+      "size_bytes": 15200,
+      "target": "DumpASTProtobufPlugin"
+    },
+    {
+      "path": "/tmp/flang-workload-adoption-20261013/build-release/CMakeFiles/DumpASTProtobufPlugin.dir/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/protocol/graph_ids.cpp.o",
+      "sha256": "a7e9be2dc389788c06bd56ea6cd106b52d56d0e6bf1c90f563f7ba27a2486b12",
+      "size_bytes": 10840,
+      "target": "DumpASTProtobufPlugin"
+    },
+    {
+      "path": "/tmp/flang-workload-adoption-20261013/build-release/CMakeFiles/DumpASTProtobufPlugin.dir/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/src/binary_plugin.cpp.o",
+      "sha256": "feaf0e1fd15845cf7f72c5d08752bb26b9d0a6cfed08f984b4774cedcf9c9841",
+      "size_bytes": 5476744,
+      "target": "DumpASTProtobufPlugin"
+    },
+    {
+      "path": "/tmp/flang-workload-adoption-20261013/build-release/CMakeFiles/DumpASTProtobufPlugin.dir/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40/src/comments.cpp.o",
+      "sha256": "108e3a53e8518d5a6d51d0c646ec4ac74921963413eb323336bb9180405a9da6",
+      "size_bytes": 29448,
+      "target": "DumpASTProtobufPlugin"
+    },
+    {
+      "path": "/tmp/flang-workload-adoption-20261013/build-release/CMakeFiles/DumpASTProtobufPlugin.dir/protocol/ast_stream.pb.cc.o",
+      "sha256": "48df677d59d6523d4776b078da292b31d05a6c3720258e52296c42ad6c91c5de",
+      "size_bytes": 120856,
+      "target": "DumpASTProtobufPlugin"
+    }
+  ],
+  "producer_source": {
+    "current_branch": "t3code/automate-project-maintenance",
+    "head": "6e51165a2544eacdc159d4dbc541692f11b1a3f0",
+    "repository": "/home/lmsousa/.t3/worktrees/flang-dumper/t3code-4bdd3a40",
+    "tracked_worktree_changes": [],
+    "tree": "18ac54f0839535405eee18b0c4310ea5202cb259",
+    "working_tree_was_tracked_clean_before_benchmarks": true
+  },
+  "successful_build_commands": {
+    "configure": "cmake -S /tmp/flang-workload-adoption-20261013/cmake -B /tmp/flang-workload-adoption-20261013/build-release -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCMAKE_BUILD_TYPE=Release",
+    "failed_attempt_context": "The prior all-target retry stopped after invoking binary_plugin.cpp compile and left no protobuf object. The resumed targeted build compiled and linked only DumpASTProtobufPlugin, preserving the JSON artifact.",
+    "json_plugin": {
+      "command": "cmake --build /tmp/flang-workload-adoption-20261013/build-release --parallel 1 --verbose",
+      "log": "/tmp/flang-workload-adoption-20261013/build.log",
+      "plugin": {
+        "path": "/tmp/flang-workload-adoption-20261013/build-release/DumpASTPlugin.so",
+        "sha256": "4d58de77ce1aac4d6f58af17069f70a46d86ec5ee0ccf31a1b2ae775aa10e0a8"
+      },
+      "result": "DumpASTPlugin.so built successfully in the shared Release build directory before the first protoc runtime failure stopped the all-target build",
+      "target_flags_file": "/tmp/flang-workload-adoption-20261013/build-release/CMakeFiles/DumpASTPlugin.dir/flags.make"
+    },
+    "protobuf_plugin": {
+      "command": "export LD_LIBRARY_PATH=/tmp/flang-protoc-probe/root/usr/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu; /snap/cmake/1572/bin/cmake --build /tmp/flang-workload-adoption-20261013/build-release --target DumpASTProtobufPlugin --parallel 1 --verbose",
+      "log": "/tmp/flang-workload-adoption-20261013/build-protobuf-optimized.log",
+      "plugin": {
+        "path": "/tmp/flang-workload-adoption-20261013/build-release/DumpASTProtobufPlugin.so",
+        "sha256": "a1166762bea59a0565119d28b3acd65d972116bc06ead88004f17e7062740fc3"
+      },
+      "target_flags_file": "/tmp/flang-workload-adoption-20261013/build-release/CMakeFiles/DumpASTProtobufPlugin.dir/flags.make"
+    }
+  }
+}
