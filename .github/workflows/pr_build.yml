@@ -23,19 +23,18 @@ jobs:
           fetch-depth: 0  # needed if you plan to create/move tags in the runner
           persist-credentials: true
 
-
       - name: Install dependencies
         run: ./scripts/install-dependencies.sh
 
       - name: Build
-        run: |
-          mkdir build
-          cd build
-          cmake ..
-          make
+        run: ./scripts/build.sh --no-copy
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-            name: DumpASTPlugin
-            path: build/DumpASTPlugin.so
+      - name: Smoke test
+        run: |
+          cat > /tmp/test.f90 <<'EOF'
+          program hello
+            print *, "hello"
+          end program hello
+          EOF
+          flang-22 -fc1 -load ./build/DumpASTPlugin.so -plugin dump-ast /tmp/test.f90 > /tmp/ast.json
+          test -s /tmp/ast.json
