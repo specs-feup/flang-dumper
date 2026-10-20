@@ -1,0 +1,55 @@
+
+name: RISC-V Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build-riscv64:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable RISC-V emulation
+        uses: docker/setup-qemu-action@v4
+        with:
+          platforms: riscv64
+
+      - name: Build for RISC-V
+        run: |
+          docker run --rm \
+            --platform linux/riscv64 \
+            -v "$PWD:/src" \
+            -w /src \
+            ubuntu:26.04 \
+            bash -euc '
+              test "$(dpkg --print-architecture)" = riscv64
+
+              apt-get update
+              apt-get install -y \
+                software-properties-common
+              add-apt-repository -y universe
+              apt-get update
+
+              apt-get install -y \
+                cmake make \
+                clang-22 flang-22 \
+                libflang-22-dev \
+                llvm-22-dev \
+                libmlir-22-dev \
+                mlir-22-tools \
+                libclang-22-dev
+
+              cmake -S . -B build-riscv64
+              cmake --build build-riscv64 -j 2
+            '
+
+      - name: Upload RISC-V artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DumpASTPlugin-linux-riscv64
+          path: build-riscv64/DumpASTPlugin.so
+          if-no-files-found: error
