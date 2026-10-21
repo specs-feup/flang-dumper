@@ -13,7 +13,7 @@ if(NOT DEFINED CMAKE_C_COMPILER AND NOT DEFINED ENV{CC})
   endif()
 endif()
 if(NOT DEFINED CMAKE_CXX_COMPILER AND NOT DEFINED ENV{CXX})
-  find_program(_FLANG_DEFAULT_CXX_COMPILER NAMES clang++-${FLANG_VERSION} clang++)
+  find_program(_FLANG_DEFAULT_CXX_COMPILER NAMES clang-${FLANG_VERSION} clang++)
   if(_FLANG_DEFAULT_CXX_COMPILER)
     set(CMAKE_CXX_COMPILER "${_FLANG_DEFAULT_CXX_COMPILER}")
   endif()
@@ -32,7 +32,7 @@ if(CMAKE_CXX_COMPILER_VERSION)
     message(FATAL_ERROR
       "This plugin requires a C++ compiler from LLVM ${FLANG_VERSION}, but "
       "${CMAKE_CXX_COMPILER} reports ${CMAKE_CXX_COMPILER_VERSION}. "
-      "Pass -DCMAKE_CXX_COMPILER=/path/to/clang++-${FLANG_VERSION} to override.")
+      "Pass -DCMAKE_CXX_COMPILER=/path/to/clang-${FLANG_VERSION} to override.")
   endif()
 endif()
 
