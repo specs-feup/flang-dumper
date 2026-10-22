@@ -22,7 +22,7 @@
         nativeBuildInputs = with pkgs; [ cmake buildScript ];
 
         shellHook = ''
-          export LLVM_HOME="$(realpath ../llvm/build)"
+          export LLVM_HOME="$(realpath ../llvm/install)"
           export PATH="$LLVM_HOME/bin:$PATH"
           export LD_LIBRARY_PATH="$LLVM_HOME/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
