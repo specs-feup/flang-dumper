@@ -4,18 +4,18 @@ Dumper of Flang's AST into a JSON format.
 
 ## Requirements
 
-- LLVM/Flang **22** (the plugin is version-locked to the Flang 22 API)
-- Clang/Clang++ 22
+- LLVM/Flang **23** (the plugin is version-locked to the Flang 23 API)
+- Clang/Clang++ 23
 - CMake 3.20 or newer
 - A C++17 compiler
 
-The build defaults to `clang-22`/`clang++-22` when they are available and
+The build defaults to `clang-23` when they are available and
 falls back to `clang`/`clang++`. You can always override the compiler:
 
 ```sh
 cmake -B build \
-  -DCMAKE_C_COMPILER=/path/to/clang-22 \
-  -DCMAKE_CXX_COMPILER=/path/to/clang++-22
+  -DCMAKE_C_COMPILER=/path/to/clang-23 \
+  -DCMAKE_CXX_COMPILER=/path/to/clang-23
 ```
 
 ## Installing dependencies
@@ -32,17 +32,17 @@ Use `--dry-run` to print the package-manager commands without executing them:
 ./scripts/install-dependencies.sh --dry-run
 ```
 
-The script installs LLVM/Flang 22 and checks that the expected packages and
+The script installs LLVM/Flang 23 and checks that the expected packages and
 tools are available.
 
-For Fedora, CentOS Stream/RHEL, and openSUSE, install or build LLVM/Flang 22
+For Fedora, CentOS Stream/RHEL, and openSUSE, install or build LLVM/Flang 23
 manually. Fedora and CentOS Stream currently do not package the Flang C++
 headers needed to build a plugin, so a self-built LLVM is usually required
 there.
 
 ### Arch Linux
 
-Flang 22 is provided through the AUR. Install the LLVM/Flang 22 packages from
+Flang 23 is provided through the AUR. Install the LLVM/Flang 23 packages from
 the AUR manually, then build with CMake as described below. The dependency
 script intentionally does not automate Arch.
 ```
@@ -118,12 +118,12 @@ cmake -B build -DFLANG_INCLUDE_DIR=/path/to/flang/include
 ## Running the plugin
 
 ```sh
-flang-22 -fc1 -load ./build/DumpASTPlugin.so -plugin dump-ast file.f90
+flang-23 -fc1 -load ./build/DumpASTPlugin.so -plugin dump-ast file.f90
 ```
 
 ## WSL support
 
-The Ubuntu package path uses the LLVM 22 packages from apt.llvm.org. If a
+The Ubuntu package path uses the LLVM 23 packages from apt.llvm.org. If a
 recent enough Ubuntu distribution is not available in WSL, you can follow these
 steps:
 

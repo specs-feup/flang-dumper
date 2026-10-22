@@ -8,52 +8,52 @@
   "configurePresets": [
     {
       "name": "ubuntu",
-      "displayName": "Ubuntu/Debian (LLVM 22 packages)",
+      "displayName": "Ubuntu/Debian (LLVM 23 packages)",
       "generator": "Unix Makefiles",
       "binaryDir": "${sourceDir}/build/ubuntu",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "CMAKE_CXX_COMPILER": "clang-22",
-        "LLVM_DIR": "/usr/lib/llvm-22/cmake",
-        "MLIR_DIR": "/usr/lib/llvm-22/lib/cmake/mlir",
-        "Clang_DIR": "/usr/lib/llvm-22/lib/cmake/clang",
-        "Flang_DIR": "/usr/lib/llvm-22/lib/cmake/flang"
+        "CMAKE_CXX_COMPILER": "clang-23",
+        "LLVM_DIR": "/usr/lib/llvm-23/cmake",
+        "MLIR_DIR": "/usr/lib/llvm-23/lib/cmake/mlir",
+        "Clang_DIR": "/usr/lib/llvm-23/lib/cmake/clang",
+        "Flang_DIR": "/usr/lib/llvm-23/lib/cmake/flang"
       }
     },
     {
       "name": "fedora",
-      "displayName": "Fedora (LLVM 22 packages)",
+      "displayName": "Fedora (LLVM 23 packages)",
       "generator": "Unix Makefiles",
       "binaryDir": "${sourceDir}/build/fedora",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "CMAKE_PREFIX_PATH": "/usr/lib64/llvm22;/usr/lib64;/usr",
-        "CMAKE_CXX_COMPILER": "clang-22"
+        "CMAKE_PREFIX_PATH": "/usr/lib64/llvm23;/usr/lib64;/usr",
+        "CMAKE_CXX_COMPILER": "clang-23"
       }
     },
     {
       "name": "centos",
-      "displayName": "CentOS Stream / RHEL (LLVM 22 packages)",
+      "displayName": "CentOS Stream / RHEL (LLVM 23 packages)",
       "generator": "Unix Makefiles",
       "binaryDir": "${sourceDir}/build/centos",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "CMAKE_PREFIX_PATH": "/usr/lib64/llvm22;/usr/lib64;/usr",
-        "CMAKE_CXX_COMPILER": "clang-22"
+        "CMAKE_PREFIX_PATH": "/usr/lib64/llvm23;/usr/lib64;/usr",
+        "CMAKE_CXX_COMPILER": "clang-23"
       }
     },
     {
       "name": "custom-llvm",
-      "displayName": "Custom LLVM 22 build/install",
+      "displayName": "Custom LLVM 23 build/install",
       "generator": "Unix Makefiles",
       "binaryDir": "${sourceDir}/build/custom-llvm",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "CMAKE_CXX_COMPILER": "clang-22",
+        "CMAKE_CXX_COMPILER": "clang-23",
         "LLVM_DIR": "$env{LLVM_DIR}",
         "MLIR_DIR": "$env{MLIR_DIR}",
         "Clang_DIR": "$env{Clang_DIR}",

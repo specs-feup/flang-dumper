@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # This script installs the LLVM dependencies for Debian-based distros (e.g. Ubuntu).
-LLVM_VERSION=22
+LLVM_VERSION=23
 DRY_RUN=0
 
 usage() {

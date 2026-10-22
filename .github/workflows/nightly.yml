@@ -9,7 +9,7 @@ permissions:
     contents: write   # needed to push tags + create/edit releases
 
 env:
-    FLANG_VERSION: 22
+    FLANG_VERSION: 23
 
 jobs:
     build-dumper:

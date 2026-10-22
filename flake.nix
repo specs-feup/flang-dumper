@@ -31,8 +31,8 @@
           export MLIR_DIR="$LLVM_HOME/lib/cmake/mlir"
           export Clang_DIR="$LLVM_HOME/lib/cmake/clang"
           export Flang_DIR="$LLVM_HOME/lib/cmake/flang"
-          export CC=clang-22
-          export CXX=clang-22
+          export CC=clang-23
+          export CXX=clang-23
         '';
       };
     };

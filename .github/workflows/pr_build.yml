@@ -8,7 +8,7 @@ permissions:
   checks: write
 
 env:
-  FLANG_VERSION: 22
+  FLANG_VERSION: 23
 
 jobs:
   build-dumper:
@@ -36,5 +36,5 @@ jobs:
             print *, "hello"
           end program hello
           EOF
-          flang-22 -fc1 -load ./build/DumpASTPlugin.so -plugin dump-ast /tmp/test.f90 > /tmp/ast.json
+          flang-23 -fc1 -load ./build/DumpASTPlugin.so -plugin dump-ast /tmp/test.f90 > /tmp/ast.json
           test -s /tmp/ast.json

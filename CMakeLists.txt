@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 
-# The plugin is tightly coupled to the Flang 22 AST/API. Keep this version
+# The plugin is tightly coupled to the Flang 23 AST/API. Keep this version
 # pinned so a mismatched LLVM/Flang installation fails early and clearly.
-set(FLANG_VERSION 22)
+set(FLANG_VERSION 23)
 
-# Default to Clang 22, but let users override the compiler through the usual
+# Default to Clang 23, but let users override the compiler through the usual
 # CMake cache variables or the CC/CXX environment variables.
 if(NOT DEFINED CMAKE_C_COMPILER AND NOT DEFINED ENV{CC})
   find_program(_FLANG_DEFAULT_C_COMPILER NAMES clang-${FLANG_VERSION} clang)
@@ -67,9 +67,9 @@ if(NOT _FLANG_LLVM_MAJOR STREQUAL "${FLANG_VERSION}")
 endif()
 
 # LLVM installs its CMake packages in different layouts:
-#   Ubuntu:  /usr/lib/llvm-22/lib/cmake/{llvm,mlir,clang,flang}
+#   Ubuntu:  /usr/lib/llvm-23/lib/cmake/{llvm,mlir,clang,flang}
 #   Fedora:  /usr/lib64/cmake/{llvm,mlir,clang,flang}
-#   Ubuntu (legacy): /usr/lib/llvm-22/cmake/LLVMConfig.cmake
+#   Ubuntu (legacy): /usr/lib/llvm-23/cmake/LLVMConfig.cmake
 # Derive the sibling package directory from the discovered LLVM_DIR so users
 # only need to override LLVM_DIR when pointing at a custom build tree.
 get_filename_component(_LLVM_CMAKE_PARENT "${LLVM_DIR}" DIRECTORY)
