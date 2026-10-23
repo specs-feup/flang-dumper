@@ -562,7 +562,7 @@ public:
   DUMP_NODE(Fortran::parser::CompilerDirective::VectorAlways, {})
   DUMP_ENUM(Fortran::parser::CompilerDirective::VectorLength, Kind)
   DUMP_NODE(Fortran::parser::CompilerDirective::VectorLength, {})
-  DUMP_NODE(Fortran::parser::CompilerDirective::Unroll, {})
+  DUMP_NODE_MANUAL(Fortran::parser::CompilerDirective::Unroll, { dump(v.count, "uint64_t"); })
   DUMP_NODE(Fortran::parser::CompilerDirective::UnrollAndJam, {})
   DUMP_NODE(Fortran::parser::CompilerDirective::NoVector, {})
   DUMP_NODE(Fortran::parser::CompilerDirective::NoUnroll, {})
