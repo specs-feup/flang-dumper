@@ -1,42 +1,55 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-parts.url = "github:hercules-ci/flake-parts";
+    llvm-nix = {
+      url = "github:Process-ing/llvm-nix";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        llvm-project.url = "github:llvm/llvm-project/release/22.x";
+      };
+    };
   };
 
-  outputs = inputs@{ flake-parts, ... }: flake-parts.lib.mkFlake { inherit inputs; } {
-    perSystem = { pkgs, ... }: {
-      devShells.default = let
+  outputs = { self, nixpkgs, llvm-nix }: let
+    systems = [ "x86_64-linux" "aarch64-linux" ];
+    forAllSystems = f: nixpkgs.lib.genAttrs systems f;
+  in {
+    devShells = forAllSystems (system: let
+      pkgs = nixpkgs.legacyPackages.${system};
+      lib = pkgs.lib;
+    in {
+      default = let
+        llvmCmakeDir = "${llvm-nix.packages.${system}.default}/lib/cmake";
+
         buildScript = pkgs.writeShellApplication {
           name = "build";
           text = ''
             ./scripts/build.sh -- \
-              -DLLVM_DIR="$LLVM_HOME/lib/cmake/llvm" \
-              -DMLIR_DIR="$LLVM_HOME/lib/cmake/mlir" \
-              -DClang_DIR="$LLVM_HOME/lib/cmake/clang" \
-              -DFlang_DIR="$LLVM_HOME/lib/cmake/flang"
+              -DLLVM_DIR="${llvmCmakeDir}/llvm" \
+              -DMLIR_DIR="${llvmCmakeDir}/mlir" \
+              -DClang_DIR="${llvmCmakeDir}/clang" \
+              -DFlang_DIR="${llvmCmakeDir}/flang"
           '';
         };
-        
       in pkgs.mkShell {
-        nativeBuildInputs = with pkgs; [ cmake buildScript ];
+        nativeBuildInputs = with pkgs; [
+          llvm-nix.packages.${system}.default
+          cmake
+          buildScript
+        ];
+
+        # CMake environment variables
+        LLVM_DIR = "${llvmCmakeDir}/llvm";
+        MLIR_DIR = "${llvmCmakeDir}/mlir";
+        Clang_DIR = "${llvmCmakeDir}/clang";
+        Flang_DIR = "${llvmCmakeDir}/flang";
 
         shellHook = ''
-          export LLVM_HOME="$(realpath ../llvm/install)"
-          export PATH="$LLVM_HOME/bin:$PATH"
-          export LD_LIBRARY_PATH="$LLVM_HOME/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-
-          # CMake environment variables
-          export LLVM_DIR="$LLVM_HOME/lib/cmake/llvm"
-          export MLIR_DIR="$LLVM_HOME/lib/cmake/mlir"
-          export Clang_DIR="$LLVM_HOME/lib/cmake/clang"
-          export Flang_DIR="$LLVM_HOME/lib/cmake/flang"
-          export CC=clang-22
-          export CXX=clang-22
+          # Enforce Clang as C/C++ compiler
+          CC=clang-22
+          CXX=clang-22
         '';
       };
-    };
-
-    systems = [ "x86_64-linux" "aarch64-linux" "aarch64-darwin" ];
+    });
   };
 }
