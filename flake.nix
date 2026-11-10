@@ -16,7 +16,6 @@
   in {
     devShells = forAllSystems (system: let
       pkgs = nixpkgs.legacyPackages.${system};
-      lib = pkgs.lib;
     in {
       default = let
         llvmCmakeDir = "${llvm-nix.packages.${system}.default}/lib/cmake";
