@@ -51,15 +51,6 @@ template <>
 void dump(const std::nullopt_t &v, const char *property_name);
 template <typename T>
 void dump(const std::list<T> &v, const char *property_name);
-template <typename T>
-void dump(const Fortran::parser::Statement<T> &v, const char *property_name);
-template <typename T>
-void dump(const Fortran::parser::Statement<T> &v);
-template <typename T>
-void dump(const Fortran::parser::UnlabeledStatement<T> &v,
-          const char *property_name);
-template <typename T>
-void dump(const Fortran::parser::UnlabeledStatement<T> &v);
 template <typename... T>
 void dump(const std::variant<T...> &v, const char *property_name = "value");
 template <typename T>
@@ -82,7 +73,9 @@ void dump(const Fortran::parser::Constant<T> &v, const char *property_name);
 template <typename T>
 void dump(const Fortran::parser::DefaultChar<T> &v, const char *property_name);
 void dump(const Fortran::parser::Sign &v, const char *property_name);
-
+void dump(const char v, const char *property_name);
+template <typename Var, typename Bound>
+void dump(const Fortran::parser::LoopBounds<Var, Bound> &bounds);
 
 template <typename T>
 void dumpWrapper(const T &v)
@@ -138,7 +131,7 @@ void dumpConstraint(const T &v) { dump(v.thing); }
       {                                                             \
         dumpConstraint(v);                                          \
       }                                                             \
-      else                                                          \
+      else if constexpr (!EmptyTrait<CLASS>)                        \
       {                                                             \
         llvm::errs() << "Not implemented for " << getId(v) << "\n"; \
       }                                                             \
@@ -147,7 +140,7 @@ void dumpConstraint(const T &v) { dump(v.thing); }
     })                                                              \
   }
 
-#define DUMP_NODE_MANUAL(CLASS, CONTENTS)                                  \
+#define DUMP_NODE_MANUAL(CLASS, CONTENTS)                           \
   bool Pre(const CLASS &v)                                          \
   {                                                                 \
     DUMP_BARE_NODE({                                                \

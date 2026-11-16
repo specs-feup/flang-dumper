@@ -19,7 +19,7 @@ struct Comment {
     bool trailing;
 };
 
-std::vector<RawComment> extractComments(const Fortran::parser::SourceFile &file);
+std::vector<RawComment> extractComments(const Fortran::parser::SourceFile &file, const std::string &extension);
 Comment processComment(const RawComment &rawComment, const std::string &stmtId, std::size_t stmtLine);
 std::string toString(const Comment& comment);
 

@@ -31,33 +31,36 @@ struct is_indirection<Fortran::common::Indirection<T, COPY>> : std::true_type {
 
 template <typename T> const char *getNodeName(const T &v) {
   if constexpr (is_specialization<T, Fortran::parser::Statement>::value) {
-    return "Statement";
+    static std::string name = "Statement<" + std::string(getNodeName(v.statement)) + ">";
+    return name.c_str();
+
   } else if constexpr (is_specialization<
                            T, Fortran::parser::UnlabeledStatement>::value) {
-    return "UnlabeledStatement";
+    static std::string name = "UnlabeledStatement<" + std::string(getNodeName(v.statement)) + ">";
+    return name.c_str();
+
   } else if constexpr (is_specialization<T, Fortran::parser::Scalar>::value
                     || is_specialization<T, Fortran::parser::Constant>::value
                     || is_specialization<T, Fortran::parser::Integer>::value
-                    || is_specialization<T, Fortran::parser::Logical>::value) {
-    return "Expr";
-  } else if constexpr (is_specialization<T,
-                                         Fortran::parser::DefaultChar>::value) {
-    return "DefaultChar";
+                    || is_specialization<T, Fortran::parser::Logical>::value
+                    || is_specialization<T, Fortran::parser::DefaultChar>::value) {
+    return getNodeName(v.thing);
   } else if constexpr (std::is_same_v<T, Fortran::parser::CharBlock>) {
     return "CharBlock";
   } else if constexpr (std::is_same_v<T, Fortran::parser::CommonStmt::Block>) {
     return "CommonStmtBlock";  // To prevent name conflicts with the other AST Block nodes
   } else {
-    if constexpr (std::is_same_v<
-                      decltype(Fortran::parser::ParseTreeDumper::GetNodeName(
-                          v)),
-                      std::string>) {
-      static std::string name =
-          Fortran::parser::ParseTreeDumper::GetNodeName(v);
-      return name.c_str();
-    } else {
-      return Fortran::parser::ParseTreeDumper::GetNodeName(v);
+    static std::string name = Fortran::parser::ParseTreeDumper::GetNodeName(v);
+
+    // The following step is needed for correctly processing enum types, which
+    // are returned as "EnumType = EnumValue" by GetNodeName(), so that their name
+    // appears as "EnumType" in the dump output.
+    std::size_t spacePos = name.find(' ');
+    if (spacePos != std::string::npos) {
+      name = name.substr(0, spacePos);
     }
+
+    return name.c_str();
   }
 }
 
@@ -127,7 +130,11 @@ void dump(const char *v, const char *property_name) {
 }
 
 void dump(const bool v, const char *property_name) {
-    DUMP_PROPERTY(property_name, v);
+  DUMP_PROPERTY(property_name, v);
+}
+
+void dump(const char v, const char *property_name) {
+  DUMP_PROPERTY(property_name, v);
 }
 
 void dump(std::string_view v, const char *property_name) {
@@ -175,10 +182,10 @@ void dump(const Fortran::parser::DefaultChar<T> &v, const char *property_name) {
 void dump(const Fortran::parser::Sign &v, const char *property_name) {
     switch(v) {
         case Fortran::parser::Sign::Positive:
-            dump("positive", property_name);
+            dump("+", property_name);
             break;
         case Fortran::parser::Sign::Negative:
-            dump("negative", property_name);
+            dump("-", property_name);
             break;
     }
 }
@@ -227,30 +234,6 @@ void dump(const std::list<T> &v, const char *property_name) {
   llvm::outs() << "]";
 }
 
-template <typename T>
-void dump(const Fortran::parser::Statement<T> &v, const char *property_name) {
-  DUMP_PROPERTY(property_name << "<" << getNodeName(v.statement) << ">",
-                getId(v));
-}
-
-template <typename T> void dump(const Fortran::parser::Statement<T> &v) {
-  DUMP_PROPERTY(getNodeName(v) << "<" << getNodeName(v.statement) << ">",
-                getId(v));
-}
-
-template <typename T>
-void dump(const Fortran::parser::UnlabeledStatement<T> &v,
-          const char *property_name) {
-  DUMP_PROPERTY(property_name << "<" << getNodeName(v.statement) << ">",
-                getId(v));
-}
-
-template <typename T>
-void dump(const Fortran::parser::UnlabeledStatement<T> &v) {
-  DUMP_PROPERTY(getNodeName(v) << "<" << getNodeName(v.statement) << ">",
-                getId(v));
-}
-
 template <typename... T>
 void dump(const std::variant<T...> &v, const char *property_name) {
   std::visit(variant_visitor{}, v);
@@ -267,7 +250,6 @@ void dump(const Fortran::common::Indirection<T> &v) {
   dump(v.value());
 }
 
-
 void dump(const Fortran::parser::Expr &v) {
   dump(v.u);
 }
@@ -283,6 +265,14 @@ void dump(const std::optional<T> &v, const char *property_name) {
 
 void dump(const Fortran::semantics::Scope &scope, const char *property_name) {
   dump(Fortran::semantics::Scope::EnumToString(scope.kind()), property_name);
+}
+
+template <typename Var, typename Bound>
+void dump(const Fortran::parser::LoopBounds<Var, Bound> &bounds) {
+  dump(bounds.name, "var");
+  dump(bounds.lower, "lower");
+  dump(bounds.upper, "upper");
+  dump(bounds.step, "step");
 }
 
 
@@ -498,7 +488,9 @@ public:
   DUMP_NODE(Fortran::parser::ActualArg, {})
   DUMP_NODE(Fortran::parser::ActualArg::PercentRef, {})
   DUMP_NODE(Fortran::parser::ActualArg::PercentVal, {})
-  DUMP_NODE(Fortran::parser::ActualArgSpec, {})
+  DUMP_NODE(Fortran::parser::ActualArgSpec, {
+    dump(std::get<1>(v.t).u, "ActualArg");
+  })
   DUMP_NODE(Fortran::parser::AcValue::Triplet, {})
   DUMP_NODE(Fortran::parser::AllocOpt, {})
   DUMP_NODE(Fortran::parser::AllocOpt::Mold, {})
@@ -521,7 +513,7 @@ public:
   DUMP_NODE(Fortran::parser::AltReturnSpec, {})
   DUMP_NODE(Fortran::parser::ArithmeticIfStmt, {})
   DUMP_NODE(Fortran::parser::ArrayConstructor, {})
-  DUMP_NODE(Fortran::parser::ArrayElement, { dump(v.base, "base"); dump(v.subscripts, "subscripts"); })
+  DUMP_NODE_MANUAL(Fortran::parser::ArrayElement, { dump(v.base, "base"); dump(v.subscripts, "subscripts"); })
   DUMP_NODE(Fortran::parser::ArraySpec, {})
   DUMP_NODE(Fortran::parser::AssignStmt, {})
   DUMP_NODE(Fortran::parser::AssignedGotoStmt, {})
@@ -552,7 +544,10 @@ public:
   DUMP_NODE(Fortran::parser::BlockDataStmt, {})
   DUMP_NODE(Fortran::parser::BlockSpecificationPart, {})
   DUMP_NODE(Fortran::parser::BlockStmt, {})
-  DUMP_NODE(Fortran::parser::BoundsRemapping, {})
+  DUMP_NODE_MANUAL(Fortran::parser::BoundsRemapping, {
+    dump(std::get<0>(v.t), "lower");
+    dump(std::get<1>(v.t), "upper");
+  })
   DUMP_NODE(Fortran::parser::BoundsSpec, {})
   DUMP_NODE(Fortran::parser::Call, {})
   DUMP_NODE(Fortran::parser::CallStmt, {dump(v.call, "call");})
@@ -664,7 +659,11 @@ public:
   DUMP_ENUM(Fortran::parser::DefinedOperator, IntrinsicOperator)
   DUMP_NODE(Fortran::parser::DerivedTypeDef, {})
   DUMP_NODE(Fortran::parser::DerivedTypeSpec, {})
-  DUMP_NODE(Fortran::parser::DerivedTypeStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::DerivedTypeStmt, {
+    dump(std::get<0>(v.t), "TypeAttrSpec");
+    dump(std::get<1>(v.t), "TypeName");
+    dump(std::get<2>(v.t), "ParamNames");
+  })
   DUMP_NODE(Fortran::parser::Designator, {})
   DUMP_NODE(Fortran::parser::DimensionStmt, {})
   DUMP_NODE(Fortran::parser::DimensionStmt::Declaration, {})
@@ -727,22 +726,22 @@ public:
   DUMP_NODE(Fortran::parser::Expr::NOT, { dump("NOT", "op"); })
   DUMP_NODE(Fortran::parser::Expr::PercentLoc, {})
   DUMP_NODE(Fortran::parser::Expr::DefinedUnary, {})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::Power, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("POWER", "op");})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::Multiply, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("MULTIPLY", "op");})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::Divide, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("DIVIDE", "op");})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::Add, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("ADD", "op");})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::Subtract, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("SUBTRACT", "op");})
-  DUMP_NODE(Fortran::parser::Expr::Concat, {})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::LT, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("LT", "op");})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::LE, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("LE", "op");})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::EQ, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("EQ", "op");})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::NE, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("NE", "op");})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::GE, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("GE", "op");})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::GT, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("GT", "op");})
-  DUMP_NODE_MANUAL(Fortran::parser::Expr::AND, {dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("AND", "op");})
-  DUMP_NODE(Fortran::parser::Expr::OR, {})
-  DUMP_NODE(Fortran::parser::Expr::EQV, {})
-  DUMP_NODE(Fortran::parser::Expr::NEQV, {})
+  DUMP_NODE(Fortran::parser::Expr::Power, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("POWER", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::Multiply, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("MULTIPLY", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::Divide, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("DIVIDE", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::Add, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("ADD", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::Subtract, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("SUBTRACT", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::Concat, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("CONCAT", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::LT, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("LT", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::LE, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("LE", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::EQ, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("EQ", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::NE, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("NE", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::GE, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("GE", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::GT, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("GT", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::AND, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("AND", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::OR, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("OR", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::EQV, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("EQV", "op"); })
+  DUMP_NODE_MANUAL(Fortran::parser::Expr::NEQV, { dump(std::get<0>(v.t), "left"); dump(std::get<1>(v.t), "right"); dump("NEQV", "op"); })
   DUMP_NODE(Fortran::parser::Expr::DefinedBinary, {})
   DUMP_NODE(Fortran::parser::Expr::ComplexConstructor, {})
   DUMP_NODE(Fortran::parser::External, { dump("External", "keyword"); })
@@ -762,12 +761,10 @@ public:
   DUMP_NODE(Fortran::parser::FormatStmt, {})
   DUMP_NODE(Fortran::parser::FunctionReference, {})
   DUMP_NODE_MANUAL(Fortran::parser::FunctionStmt, {
-    dump(std::get<0>(v.t), "PrefixSpec");
-    dump(std::get<1>(v.t), "Name");
-    dump(std::get<2>(v.t), "FunctionArgumentDecl");
-    if (std::get<3>(v.t).has_value()) {
-      dump(std::get<3>(v.t).value(), "Suffix");
-    }
+    dump(std::get<0>(v.t), "prefix");
+    dump(std::get<1>(v.t), "functionName");
+    dump(std::get<2>(v.t), "paramNames");
+    dump(std::get<3>(v.t), "suffix");
   })
   DUMP_NODE(Fortran::parser::FunctionSubprogram, {})
   DUMP_NODE(Fortran::parser::GenericSpec, {})
@@ -795,7 +792,15 @@ public:
   DUMP_NODE(Fortran::parser::ImplicitPart, {})
   DUMP_NODE(Fortran::parser::ImplicitPartStmt, {})
   DUMP_NODE(Fortran::parser::ImplicitSpec, {})
-  DUMP_NODE(Fortran::parser::ImplicitStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::ImplicitStmt, {
+    if (v.u.index() == 0) {
+      dump("ImplicitSpec", "variantKey");
+      dump(std::get<0>(v.u), "ImplicitSpec");
+    } else {
+      dump("ImplicitNoneNameSpec", "variantKey");
+      dump(std::get<1>(v.u), "ImplicitNoneNameSpec");
+    }
+  })
   DUMP_ENUM(Fortran::parser::ImplicitStmt, ImplicitNoneNameSpec)
   DUMP_NODE(Fortran::parser::ImpliedShapeSpec, {})
   DUMP_NODE(Fortran::parser::ImportStmt, {})
@@ -820,7 +825,18 @@ public:
   DUMP_NODE(Fortran::parser::InterfaceBody::Function, {})
   DUMP_NODE(Fortran::parser::InterfaceBody::Subroutine, {})
   DUMP_NODE(Fortran::parser::InterfaceSpecification, {})
-  DUMP_NODE(Fortran::parser::InterfaceStmt, {})
+  DUMP_NODE_MANUAL(Fortran::parser::InterfaceStmt, {
+    switch (v.u.index()) {
+      case 0:
+        dump("GenericSpec", "variantKey");
+        dump(std::get<0>(v.u), "GenericSpec");
+        break;
+      case 1:
+        dump("Abstract", "variantKey");
+        dump(std::get<1>(v.u), "Abstract");
+        break;
+    };
+  })
   DUMP_NODE(Fortran::parser::InternalSubprogram, {})
   DUMP_NODE(Fortran::parser::InternalSubprogramPart, {})
   DUMP_NODE(Fortran::parser::Intrinsic, { dump("Intrinsic", "keyword"); })
@@ -834,7 +850,7 @@ public:
   DUMP_NODE(Fortran::parser::IntrinsicTypeSpec::Real, { dump(v.v, "KindSelector"); })
   DUMP_NODE(Fortran::parser::IoControlSpec, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::Asynchronous, {})
-  DUMP_NODE(Fortran::parser::IoControlSpec::CharExpr, {dump(Fortran::parser::IoControlSpec::CharExpr::EnumToString(std::get<0>(v.t)), "kind");})
+  DUMP_NODE(Fortran::parser::IoControlSpec::CharExpr, {})
   DUMP_ENUM(Fortran::parser::IoControlSpec::CharExpr, Kind)
   DUMP_NODE(Fortran::parser::IoControlSpec::Pos, {})
   DUMP_NODE(Fortran::parser::IoControlSpec::Rec, {})
@@ -847,7 +863,14 @@ public:
   DUMP_NODE(Fortran::parser::LabelDoStmt, {})
   DUMP_NODE(Fortran::parser::LanguageBindingSpec, {})
   DUMP_NODE(Fortran::parser::LengthSelector, {})
-  DUMP_NODE(Fortran::parser::LetterSpec, {})
+  DUMP_NODE_MANUAL(Fortran::parser::LetterSpec, {
+    // Letters are stored as "const char *" pointers, so we need to dereference
+    // them to avoid interpreting them as c-strings.
+    dump(*std::get<0>(v.t), "firstLetter");
+    if (std::get<1>(v.t).has_value()) {
+      dump(**std::get<1>(v.t), "lastLetter");
+    }
+  })
   DUMP_NODE(Fortran::parser::LiteralConstant, {})
   DUMP_NODE(Fortran::parser::IntLiteralConstant, {})
   DUMP_NODE(Fortran::parser::ReductionOperator, {})
@@ -860,20 +883,10 @@ public:
   DUMP_NODE(Fortran::parser::LocalitySpec::Shared, {})
   DUMP_NODE(Fortran::parser::LockStmt, {})
   DUMP_NODE(Fortran::parser::LockStmt::LockStat, {})
-  DUMP_NODE(Fortran::parser::LogicalLiteralConstant, {
-      // TODO: This has not been tested yet
-      if(std::get<1>(v.t).has_value()){
-          dump(std::get<1>(v.t).value(), "kind");
-      }
-  })
-  DUMP_NODE_MANUAL(Fortran::parser::LoopControl::Bounds, {dump(v.name.thing, "var"); dump(v.lower.thing, "lower"); dump(v.upper.thing, "upper"); if(v.step.has_value()) dump(v.step.value().thing, "step");})
-  DUMP_NODE_MANUAL(Fortran::parser::AcImpliedDoControl::Bounds, {
-      dump(v.name.thing, "var");
-      dump(v.lower.thing, "lower");
-      dump(v.upper.thing, "upper");
-      if(v.step.has_value()) dump(v.step.value().thing, "step");
-  })
-  DUMP_NODE(Fortran::parser::DataImpliedDo::Bounds, {})
+  DUMP_NODE(Fortran::parser::LogicalLiteralConstant, {})
+  DUMP_NODE_MANUAL(Fortran::parser::LoopControl::Bounds, { dump(v); })
+  DUMP_NODE_MANUAL(Fortran::parser::AcImpliedDoControl::Bounds, { dump(v); })
+  DUMP_NODE_MANUAL(Fortran::parser::DataImpliedDo::Bounds, { dump(v); })
   DUMP_NODE(Fortran::parser::LoopControl, {})
   DUMP_NODE(Fortran::parser::LoopControl::Concurrent, {})
   DUMP_NODE(Fortran::parser::MainProgram, {})
@@ -895,7 +908,10 @@ public:
   DUMP_NODE(Fortran::parser::NamedConstant, {})
   DUMP_NODE(Fortran::parser::NamedConstantDef, {})
   DUMP_NODE(Fortran::parser::NamelistStmt, {})
-  DUMP_NODE(Fortran::parser::NamelistStmt::Group, {})
+  DUMP_NODE_MANUAL(Fortran::parser::NamelistStmt::Group, {
+    dump(std::get<0>(v.t), "groupName");
+    dump(std::get<1>(v.t), "objectNames");
+  })
   DUMP_NODE(Fortran::parser::NonLabelDoStmt, {})
   DUMP_NODE(Fortran::parser::NoPass, {})
   DUMP_NODE(Fortran::parser::NotifyWaitStmt, {})
@@ -1199,7 +1215,17 @@ public:
   DUMP_NODE(Fortran::parser::Pass, {})
   DUMP_NODE(Fortran::parser::PauseStmt, {})
   DUMP_NODE(Fortran::parser::Pointer, { dump("Pointer", "keyword"); })
-  DUMP_NODE(Fortran::parser::PointerAssignmentStmt, {})
+  DUMP_NODE(Fortran::parser::PointerAssignmentStmt, {
+    const Fortran::parser::PointerAssignmentStmt::Bounds &bounds = std::get<1>(v.t);
+
+    if (bounds.u.index() == 0) {
+      dump("BoundsRemapping", "variantKey");
+      dump(std::get<0>(bounds.u), "BoundsRemapping");
+    } else {
+      dump("BoundsSpec", "variantKey");
+      dump(std::get<1>(bounds.u), "BoundsSpec");
+    }
+  })
   DUMP_NODE(Fortran::parser::PointerAssignmentStmt::Bounds, {})
   DUMP_NODE(Fortran::parser::PointerDecl, {})
   DUMP_NODE(Fortran::parser::PointerObject, {})
@@ -1236,18 +1262,28 @@ public:
   DUMP_NODE(Fortran::parser::ProgramUnit, {})
   DUMP_NODE(Fortran::parser::Protected, { dump("Protected", "keyword"); })
   DUMP_NODE(Fortran::parser::ProtectedStmt, {})
-  DUMP_NODE(Fortran::parser::ReadStmt, {})
-  DUMP_NODE(Fortran::parser::RealLiteralConstant, {
-      dump(v.real, "real");
-      // TODO: This has not been tested yet
-      if(v.kind.has_value()){
-          dump(v.kind.value(), "kind");
-      }
+  DUMP_NODE_MANUAL(Fortran::parser::ReadStmt, {
+    dump(v.iounit, "iounit");
+    dump(v.format, "format");
+    dump(v.controls, "controls");
+    dump(v.items, "items");
   })
-  DUMP_NODE(Fortran::parser::RealLiteralConstant::Real, {dump(v.source, "source");})
+  DUMP_NODE_MANUAL(Fortran::parser::RealLiteralConstant, {
+    dump(v.real, "real");
+    dump(v.kind, "kind");
+  })
+  DUMP_NODE_MANUAL(Fortran::parser::RealLiteralConstant::Real, {
+    dump(v.source, "source");
+  })
   DUMP_NODE(Fortran::parser::Rename, {})
-  DUMP_NODE(Fortran::parser::Rename::Names, {})
-  DUMP_NODE(Fortran::parser::Rename::Operators, {})
+  DUMP_NODE_MANUAL(Fortran::parser::Rename::Names, {
+    dump(std::get<0>(v.t), "local");
+    dump(std::get<1>(v.t), "global");
+  })
+  DUMP_NODE_MANUAL(Fortran::parser::Rename::Operators, {
+    dump(std::get<0>(v.t), "local");
+    dump(std::get<1>(v.t), "global");
+  })
   DUMP_NODE(Fortran::parser::ReturnStmt, {})
   DUMP_NODE(Fortran::parser::RewindStmt, {})
   DUMP_NODE(Fortran::parser::Save, { dump("Save", "keyword"); })
@@ -1267,9 +1303,10 @@ public:
   DUMP_NODE(Fortran::parser::Selector, {})
   DUMP_NODE(Fortran::parser::SeparateModuleSubprogram, {})
   DUMP_NODE(Fortran::parser::SequenceStmt, {})
-  DUMP_NODE(Fortran::parser::Sign, {})
   DUMP_NODE(Fortran::parser::SignedComplexLiteralConstant, {})
-  DUMP_NODE(Fortran::parser::SignedIntLiteralConstant, {})
+  DUMP_NODE(Fortran::parser::SignedIntLiteralConstant, {
+    dump(v.source, "source");
+  })
   DUMP_NODE(Fortran::parser::SignedRealLiteralConstant, {})
   DUMP_NODE(Fortran::parser::SpecificationConstruct, {})
   DUMP_NODE(Fortran::parser::SpecificationExpr, {})
@@ -1286,7 +1323,10 @@ public:
     dump(std::get<2>(v.t), "quiet");
   })
   DUMP_ENUM(Fortran::parser::StopStmt, Kind)
-  DUMP_NODE(Fortran::parser::StructureComponent, {})
+  DUMP_NODE_MANUAL(Fortran::parser::StructureComponent, {
+    dump(v.base, "base");
+    dump(v.component, "component");
+  })
   DUMP_NODE(Fortran::parser::StructureConstructor, {})
   DUMP_NODE(Fortran::parser::StructureDef, {})
   DUMP_NODE(Fortran::parser::StructureDef::EndStructureStmt, {})
@@ -1303,8 +1343,14 @@ public:
   })
   DUMP_NODE(Fortran::parser::Substring, {})
   DUMP_NODE(Fortran::parser::SubstringInquiry, {})
-  DUMP_NODE(Fortran::parser::SubstringRange, {})
-  DUMP_NODE(Fortran::parser::Suffix, {})
+  DUMP_NODE_MANUAL(Fortran::parser::SubstringRange, {
+    dump(std::get<0>(v.t), "lower");
+    dump(std::get<1>(v.t), "upper");
+  })
+  DUMP_NODE_MANUAL(Fortran::parser::Suffix, {
+    dump(v.binding, "binding");
+    dump(v.resultName, "resultName");
+  })
   DUMP_NODE(Fortran::parser::SyncAllStmt, {})
   DUMP_NODE(Fortran::parser::SyncImagesStmt, {})
   DUMP_NODE(Fortran::parser::SyncImagesStmt::ImageSet, {})
@@ -1338,7 +1384,18 @@ public:
   DUMP_NODE(Fortran::parser::UnlockStmt, {})
   DUMP_NODE(Fortran::parser::UnsignedLiteralConstant, {})
   DUMP_NODE(Fortran::parser::UnsignedTypeSpec, {})
-  DUMP_NODE(Fortran::parser::UseStmt, { dump(v.moduleName, "moduleName"); })
+  DUMP_NODE_MANUAL(Fortran::parser::UseStmt, {
+    dump(v.nature, "nature");
+    dump(v.moduleName, "moduleName");
+
+    if (v.u.index() == 0) {
+      dump("Rename", "variantKey");
+      dump(std::get<0>(v.u), "Rename");
+    } else if (v.u.index() == 1) {
+      dump("Only", "variantKey");
+      dump(std::get<1>(v.u), "Only");
+    }
+  })
   DUMP_ENUM(Fortran::parser::UseStmt, ModuleNature)
   DUMP_NODE(Fortran::parser::Value, { dump("Value", "keyword"); })
   DUMP_NODE(Fortran::parser::ValueStmt, {})
@@ -1377,20 +1434,29 @@ private:
 };
 
 class DumpAST : public Fortran::frontend::PluginParseTreeAction {
+  static std::string getExtension(const std::string& path) {
+    size_t dotPos = path.rfind('.');
+    return dotPos != std::string::npos ? path.substr(dotPos + 1) : "";
+  }
 
   void executeAction() override {
     const Fortran::parser::AllCookedSources &allCooked = getParsing().allCooked();
     const Fortran::parser::AllSources &allSources = allCooked.allSources();
 
     // Extract comments
+    std::string fileExtension = "f90";  // Default file extension
     std::vector<RawComment> rawComments;
+
     if (auto maybeFirst = allSources.GetFirstFileProvenance()) {
       if (const auto *sourceFile = allSources.GetSourceFile(maybeFirst->start())) {
-        rawComments = extractComments(*sourceFile);
+        fileExtension = getExtension(sourceFile->path());
+        rawComments = extractComments(*sourceFile, fileExtension);
       }
     }
 
-    llvm::outs() << "{\"nodes\": [\n";
+    llvm::outs() << "{\"fileExtension\": \"" << fileExtension << "\",\n";
+
+    llvm::outs() << "\"nodes\": [\n";
     ParseTreeVisitor visitor(allSources, allCooked, std::move(rawComments));
     Fortran::parser::Walk(getParsing().parseTree(), visitor);
     visitor.flushComments();

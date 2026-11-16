@@ -1,0 +1,66 @@
+{
+  "nodes": {
+    "llvm-nix": {
+      "inputs": {
+        "llvm-project": "llvm-project",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1793266952,
+        "narHash": "sha256-UubpmUZMDuM93zgyyRmK6S7znvhf5MCoEH1alO7U7lM=",
+        "owner": "Process-ing",
+        "repo": "llvm-nix",
+        "rev": "de986e7331dc51e54542e02dc2997742db085857",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Process-ing",
+        "repo": "llvm-nix",
+        "type": "github"
+      }
+    },
+    "llvm-project": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1781562833,
+        "narHash": "sha256-SF7wFuh4kXZTytpdgX7vUZItKtRobnVICm+ixze4iG0=",
+        "owner": "llvm",
+        "repo": "llvm-project",
+        "rev": "ca7933e47d3a3451d81e72ac174dcb5aa28b59d1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "llvm",
+        "ref": "release/22.x",
+        "repo": "llvm-project",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1793110635,
+        "narHash": "sha256-dhoW6VgFWlaodSY5jrBn+CF2FLmaUvDVgM7+C7T2+NM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "31ecbaca1bdefa45dffc409f0250bd8039ea0010",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "llvm-nix": "llvm-nix",
+        "nixpkgs": "nixpkgs"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
