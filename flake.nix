@@ -13,28 +13,40 @@
   outputs = { self, nixpkgs, llvm-nix }: let
     systems = [ "x86_64-linux" "aarch64-linux" ];
     forAllSystems = f: nixpkgs.lib.genAttrs systems f;
+
+    mkBuildScript = system: let
+      pkgs = nixpkgs.legacyPackages.${system};
+      llvmCmakeDir = "${llvm-nix.packages.${system}.default}/lib/cmake";
+    in pkgs.writeShellApplication {
+        name = "build";
+        runtimeInputs = [
+          llvm-nix.packages.${system}.default
+          pkgs.cmake
+        ];
+        text = ''
+          ./scripts/build.sh -- \
+            -DLLVM_DIR="${llvmCmakeDir}/llvm" \
+            -DMLIR_DIR="${llvmCmakeDir}/mlir" \
+            -DClang_DIR="${llvmCmakeDir}/clang" \
+            -DFlang_DIR="${llvmCmakeDir}/flang" \
+            -DCMAKE_C_COMPILER=clang-22 \
+            -DCMAKE_CXX_COMPILER=clang-22
+        '';
+      };
   in {
+    packages = forAllSystems (system: {
+      build = mkBuildScript system;
+    });
+
     devShells = forAllSystems (system: let
       pkgs = nixpkgs.legacyPackages.${system};
+      llvmCmakeDir = "${llvm-nix.packages.${system}.default}/lib/cmake";
     in {
-      default = let
-        llvmCmakeDir = "${llvm-nix.packages.${system}.default}/lib/cmake";
-
-        buildScript = pkgs.writeShellApplication {
-          name = "build";
-          text = ''
-            ./scripts/build.sh -- \
-              -DLLVM_DIR="${llvmCmakeDir}/llvm" \
-              -DMLIR_DIR="${llvmCmakeDir}/mlir" \
-              -DClang_DIR="${llvmCmakeDir}/clang" \
-              -DFlang_DIR="${llvmCmakeDir}/flang"
-          '';
-        };
-      in pkgs.mkShell {
+      default = pkgs.mkShell {
         nativeBuildInputs = with pkgs; [
           llvm-nix.packages.${system}.default
           cmake
-          buildScript
+          (mkBuildScript system)
         ];
 
         # CMake environment variables
